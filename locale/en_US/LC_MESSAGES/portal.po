@@ -1,0 +1,35 @@
+# English (United States) translations for debutizer.
+# Copyright (C) 2021 Tyler Compton <xaviosx@gmail.com>
+# This file is distributed under the same license as the debutizer project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: debutizer VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2021-09-19 22:40-0700\n"
+"PO-Revision-Date: 2021-09-19 22:06-0700\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en_US\n"
+"Language-Team: en_US <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+msgid "introduction"
+msgstr ""
+"Debutizer is a tool for managing APT packages.\n"
+"\n"
+"To get started, try running 'debutizer --help'."
+
+msgid "unknown-command"
+msgstr "Unknown command: {command}"
+
+msgid "description"
+msgstr "A tool for managing APT packages"
+
+msgid "command-help"
+msgstr "The command to run"
+

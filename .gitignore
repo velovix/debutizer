@@ -1,0 +1,9 @@
+# Editors
+/.idea/
+
+# Python
+__pycache__/
+.mypy_cache/
+
+# GNU gettext
+*.mo
