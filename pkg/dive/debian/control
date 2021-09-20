@@ -1,9 +1,0 @@
-Source: dive
-Section: libs
-Priority: optional
-Maintainer: Tyler Compton <xaviosx@gmail.com>
-Build-Depends: golang-go
-
-Package: dive
-Architecture: amd64
-Description: A tool for exploring each layer in a Docker image
