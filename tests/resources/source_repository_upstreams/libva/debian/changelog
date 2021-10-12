@@ -1,0 +1,733 @@
+libva (2.7.0-2) unstable; urgency=medium
+
+  * debian/patches: Apply upstream patch to map iris driver to i965 or iHD
+    (Closes: #955585)
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Wed, 15 Apr 2020 09:55:55 +0200
+
+libva (2.7.0-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Thu, 02 Apr 2020 13:22:15 +0200
+
+libva (2.7.0~pre1-1) unstable; urgency=medium
+
+  * New upstream pre-release
+    - Fix NULL vtable when querying devices without drivers (Closes: #951778)
+  * debian/control:
+    - Bump Standards-Version
+    - Add provides for new driver ABI
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Tue, 17 Mar 2020 11:45:44 +0100
+
+libva (2.6.1-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Mon, 20 Jan 2020 22:15:15 +0100
+
+libva (2.6.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * debian/control: Add provides for new driver ABI
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Tue, 31 Dec 2019 11:23:30 +0100
+
+libva (2.5.0-2) unstable; urgency=medium
+
+  [ Ondřej Nový ]
+  * Bump Standards-Version to 4.4.1
+
+  [ Sebastian Ramacher ]
+  * debian/control: Provide dh-sequence-libva
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Mon, 18 Nov 2019 21:33:30 +0100
+
+libva (2.5.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * debian/libva2.symbols: Add new symbols.
+  * debian/control: Add provides for new driver ABI.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sun, 07 Jul 2019 09:36:24 +0200
+
+libva (2.4.1-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Fri, 05 Jul 2019 18:36:34 +0200
+
+libva (2.4.1-1) experimental; urgency=medium
+
+  * New upstream release.
+  * debian/: Bump debhelper compat to 12.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Wed, 10 Apr 2019 20:10:20 +0200
+
+libva (2.4.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * debian/control:
+    - Bump Standards-Version.
+    - Add intel-media-driver to va-driver-all.
+    - Set Rules-Requires-Root: no.
+    - Add provides for new driver ABI.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Mon, 28 Jan 2019 21:47:15 +0100
+
+libva (2.3.0-2) unstable; urgency=medium
+
+  * watch: Updated.
+  * control: Add Provides for new ABI version.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 02 Oct 2018 13:10:11 +0300
+
+libva (2.3.0-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 02 Oct 2018 12:23:34 +0300
+
+libva (2.2.0-1) unstable; urgency=medium
+
+  [ Felipe Sateler ]
+  * Change maintainer address to debian-multimedia@lists.debian.org
+
+  [ Matteo F. Vescovi ]
+  * debian/control: drop myself from Uploaders
+
+  [ Sebastian Ramacher ]
+  * New upstream release.
+  * debian/control:
+    - Bump Standards-Version.
+    - Add Provides for new ABI version.
+    - Remove old Pre-Depends.
+  * debian/: Update upstream URL.
+  * debian/libva2.symbols: Bump symbol versions for new profiles.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Mon, 16 Jul 2018 20:40:41 +0200
+
+libva (2.1.0-3) unstable; urgency=medium
+
+  * debian/control:
+    - Fix architectures of i965-va-driver.
+    - Drop suggests on removed libfglrx-amdxvba1.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Tue, 03 Apr 2018 09:09:21 +0200
+
+libva (2.1.0-2) unstable; urgency=medium
+
+  * debian/control:
+    - Add alternative depends on non-free i965 driver.
+    - No longer depend on old vdpau-based driver.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Tue, 20 Mar 2018 21:27:17 +0100
+
+libva (2.1.0-1) unstable; urgency=medium
+
+  [ Ondřej Nový ]
+  * d/copyright: Use https protocol in Format field
+  * d/control: Set Vcs-* to salsa.debian.org
+
+  [ Sebastian Ramacher ]
+  * New upstream release.
+  * debian/control:
+    - Bump Standards-Version.
+    - Add new driver ABI provides.
+  * debian/: Bump debhelper compat to 11.
+  * debian/patches: Drop patch, included upstream.
+  * debian/libva2.symbols:
+    - Add new symbols.
+    - Bump versions of some symbols where related structs have been extended.
+  * debian/copyright: Update copyright years
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Wed, 21 Feb 2018 20:59:20 +0100
+
+libva (2.0.0-2) unstable; urgency=medium
+
+  * debian/patches: dlopen correct version of libva-x11. (Closes: #881521)
+  * debian/rules: Fix debian/shlibs.local generation.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sun, 12 Nov 2017 19:10:16 +0100
+
+libva (2.0.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Upload to unstable.
+  * debian/*.symbols: Bump symbol versions.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Fri, 03 Nov 2017 14:54:08 -0500
+
+libva (2.0.0~pre3-1) experimental; urgency=medium
+
+  * New upstream release.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Mon, 16 Oct 2017 18:35:50 +0200
+
+libva (2.0.0~pre2-1) experimental; urgency=medium
+
+  * New upstream release.
+  * SONAME bump libva*1 -> libva*2.
+  * debian/control:
+    - Update Provides.
+    - Bump Standards-Version.
+  * debian/rules: Drop unused flags.
+  * debian/clean: Re-build source files built by wayland-scanner.
+  * debian/patches: Removed.
+  * debian/copyright: Update copyright years.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sun, 01 Oct 2017 23:36:37 +0200
+
+libva (1.8.3-2) unstable; urgency=medium
+
+  * debian/{control,rules}: Remove libva-egl1. va-egl is going to be removed
+    for libva 2.0 upstream. Since there are no reverse dependencies in the
+    archive, we drop it early.
+  * debian/control: Bump Standards-Version.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sun, 24 Sep 2017 23:45:11 +0200
+
+libva (1.8.3-1) unstable; urgency=medium
+
+  * New upstream release.
+  * debian/patches: Refresh patches.
+  * debian/rules: Remove obsolete options.
+  * debian/contol: Bump Standards-Version.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Thu, 29 Jun 2017 20:33:59 +0200
+
+libva (1.8.2-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sun, 18 Jun 2017 10:27:27 +0200
+
+libva (1.8.2-1) experimental; urgency=medium
+
+  * New upstream release.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Mon, 12 Jun 2017 21:38:25 +0200
+
+libva (1.8.1-1) experimental; urgency=medium
+
+  * New upstream release.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sat, 15 Apr 2017 19:54:11 +0200
+
+libva (1.8.0-1) experimental; urgency=medium
+
+  * New upstream release.
+  * debian/{control,watch,copyright}: Update upstream location. (Closes:
+    #853270) (LP: #1660496)
+  * debian/copyright: Update copyright info.
+  * debian/patches: Refresh and drop now unneeded patch.
+  * debian/control:
+    - Add Provides for new version.
+    - Remove vainfo package.
+  * debian/libva1.symbols: Add new symbols.
+  * debian/libva1.install: Drop static libraries as they are not built by
+    default.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sat, 01 Apr 2017 18:51:39 +0200
+
+libva (1.7.3-2) unstable; urgency=medium
+
+  [ Helmut Grohne ]
+  * debian/control: Annotate Build-Depens: perl with :any. (Closes: #841118)
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Wed, 16 Nov 2016 20:20:29 +0100
+
+libva (1.7.3-1) unstable; urgency=medium
+
+  * New upstream release.
+  * debian/{control,rules,compat}: Bump to debhelper compat 10.
+  * debian/libva1.symbols: Update symbols for new config values.
+  * debian/libva1.install: No longer install dummy driver.
+  * debian/copyright: Update copyright years.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Thu, 10 Nov 2016 10:39:59 +0100
+
+libva (1.7.2-1) unstable; urgency=medium
+
+  * New upstream release.
+  * debian/libva1.symbols: Update symbols for new config values.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Mon, 05 Sep 2016 09:46:04 +0200
+
+libva (1.7.1-2) unstable; urgency=medium
+
+  [ Sebastian Ramacher ]
+  * debian/patches/ignore-debian.upstream.patch:
+    - Do not touch debian.upstream during build.
+    - No longer clean files in debian.upstream.
+  * debian/clean: Remove obsolete files.
+  * debian/*.symbols: Add Build-Depends-Package everywhere.
+  * debian/libva1.symbols: Update symbols for new enum values from 1.7.0 and
+    1.7.1.
+  * debian/rules: Ensure that binary packages depend on the same libva
+    upstream version.
+
+  [ Nicholas D Steeves ]
+  * debian/patches/ignore-debian.upstream.patch: prevent "make all" from
+    traversing debian.upstream
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sun, 24 Jul 2016 16:18:15 +0200
+
+libva (1.7.1-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Wed, 22 Jun 2016 08:51:26 +0200
+
+libva (1.7.0-2) unstable; urgency=medium
+
+  * debian/control:
+    - Add mesa-va-drivers as alternative to Depends of va-driver-all.
+    - Bump Standards-Versions.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Wed, 11 May 2016 17:32:06 +0200
+
+libva (1.7.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * debian/control:
+    - Add new driver ABI to Provides.
+    - Drop obsolete Breaks.
+    - Bump Standards Version.
+    - Update Vcs-*.
+  * debian/copyright: Fix a path.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Wed, 16 Mar 2016 00:31:21 +0100
+
+libva (1.6.2-2) unstable; urgency=medium
+
+  * debian/control: Update Suggests on AMD VA driver.
+  * debian/dh:
+    - Do not skip symlinks.
+    - Run after dh_link.
+  * debian/copyright: Update copyright years.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Mon, 22 Feb 2016 19:25:18 +0100
+
+libva (1.6.2-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Thu, 17 Dec 2015 11:06:23 +0100
+
+libva (1.6.1-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Thu, 10 Sep 2015 22:39:23 +0200
+
+libva (1.6.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Upload to unstable.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Wed, 01 Jul 2015 21:25:09 +0200
+
+libva (1.6.0~pre1-1) experimental; urgency=medium
+
+  * New upstream release.
+  * debian/libva1.symbols: Add new symbols.
+  * debian/copyright: Update copyright years.
+  * debian/dh/dh_libva: Sort driver ABI versions in reversed order.
+  * debian/control: Add Provides for new driver ABI version.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Thu, 04 Jun 2015 12:20:11 +0200
+
+libva (1.5.1-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sat, 25 Apr 2015 10:33:58 +0200
+
+libva (1.5.1-1) experimental; urgency=medium
+
+  * New upstream release.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Fri, 20 Mar 2015 17:24:02 +0100
+
+libva (1.5.0-1) experimental; urgency=medium
+
+  * New upstream release.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Mon, 29 Dec 2014 22:04:11 +0100
+
+libva (1.5.0~pre1-1) experimental; urgency=medium
+
+  [ Matteo F. Vescovi ]
+  * debian/control: Uploader e-mail address updated
+
+  [ Sebastian Ramacher ]
+  * New upstream release.
+  * debian/patches: Refresh patches.
+  * Add support for driver ABI tracking. (LP: #1384100)
+    - debian/control: Add Provides: libva-driver-abi-* to libva1 to track the
+      supported driver ABI.
+    - debian/dh/*: Add dh_libva and a dh sequence so driver packages can
+      generate dependencies automatically.
+  * debian/rules: Build with -Wl,--as-needed.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Mon, 15 Dec 2014 19:56:10 +0100
+
+libva (1.4.1-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Fri, 24 Oct 2014 13:42:06 +0200
+
+libva (1.4.0-3) unstable; urgency=medium
+
+  * debian/control: Depend on libwayland-client to satisfy Requires from
+    libva-wayland.pc.
+  * Install static libraries. (Closes: #763915)
+    debian/rules: Build with --enable-static.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Tue, 07 Oct 2014 00:36:11 +0200
+
+libva (1.4.0-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Wed, 01 Oct 2014 13:56:37 +0200
+
+libva (1.4.0-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Use symbol files:
+    - debian/libva*.symbols: Add symbol files.
+    - debian/rules: Remove dh_makeshlibs override.
+    - debian/patches/hide-internal-symbols.patch: Hide internal symbols.
+  * debian/control:
+    - Bump Standards version. No changes required.
+    - Add xvba-driver to va-driver-all's Suggests.
+  * debian/use-after-free.patch: Removed, no longer needed.
+  * debian/copyright: Update copyright years.
+  * debian/rules: Install NEWS as upstream changelog.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Tue, 30 Sep 2014 16:14:39 +0200
+
+libva (1.3.1-3) unstable; urgency=medium
+
+  * debian/use-after-free.patch: Fix use after free error in vaTerminate
+    (upstream patch). (Closes: #750429) (LP: #1325873)
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Tue, 03 Jun 2014 22:43:21 +0200
+
+libva (1.3.1-2) unstable; urgency=medium
+
+  * debian/control:
+    - Add automake (>= 1:1.3.2) to Build-Depends. Running autoreconf fails
+      otherwise due to a bug that has been fixed in automake 1.3.2. (Closes:
+      #749649)
+    - Add va-driver-all metapackage and add va-driver-all | va-driver to
+      libva1's Recommends similar to xserver-xorg-video-all. This will pull in
+      drivers per default but one can still get rid of them if no VA API
+      capable GPU is present. (Closes: #703544, LP: #1301415)
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sat, 31 May 2014 17:20:35 +0200
+
+libva (1.3.1-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Fix black video output with i965 driver and certain versions of X.org.
+      (Closes: #743701)
+  * debian/rules: Install upstream changelog.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sat, 10 May 2014 16:15:54 +0200
+
+libva (1.3.0-2) unstable; urgency=medium
+
+  [ Matteo F. Vescovi ]
+  * debian/copyright: completely re-worked.
+     - to comply DEP-5
+     - to fix license issues (Closes: #743485)
+  * debian/control: Uploaders list updated. (Closes: #743549)
+    Thanks to Andres Mejia (amejia) for his efforts on this package.
+
+  [ Sebastian Ramacher ]
+  * debian/control:
+    - Add myself to Uploaders.
+    - Add libwayland-dev (>= 1.0.0) to Build-Depends.
+  * Build with wayland support only on linux-any:
+    - debian/control: Change Architecture of libva-wayland1 to linux-any.
+    - debian/rules: Build with --disable-wayland on !linux-any.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sun, 06 Apr 2014 16:30:57 +0200
+
+libva (1.3.0-1) unstable; urgency=medium
+
+  * New upstream release (Closes: #742336)
+    - debian/rules: shlibs bump 1.2.0 => 1.3.0
+    - debian/: wayland support added (Closes: #743069)
+  * debian/control: Uploader e-mail address updated
+  * debian/control: S-V bump 3.9.4 => 3.9.5 (no changes needed)
+
+ -- Matteo F. Vescovi <mfvescovi@gmail.com>  Mon, 31 Mar 2014 14:42:14 +0200
+
+libva (1.2.1-2) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Matteo F. Vescovi <mfv.debian@gmail.com>  Thu, 07 Nov 2013 17:57:57 +0100
+
+libva (1.2.1-1) experimental; urgency=low
+
+  [ Matteo F. Vescovi ]
+  * New upstream release
+    - debian/patches/: patchset dropped completely
+      - 0001-FTBFS_on_GNU-kFreeBSD.patch became useless
+      - 0002-Remove_unneeded_dependencies.patch applied upstream
+    - debian/rules: dh_makeshlibs bump 1.1.0~ => 1.2.0~
+  * debian/control: Vcs-Git URL updated
+
+  [ Sebastian Ramacher ]
+  * debian/copyright: Update copyright years. (Closes: #719602)
+  * debian/control: Remove unnecessary ${shlib:Depends} from libva-dev's
+    Depends.
+  * debian/clean: Make sure that libva builds twice in a row.
+
+ -- Matteo F. Vescovi <mfv.debian@gmail.com>  Thu, 05 Sep 2013 20:57:43 +0200
+
+libva (1.1.1-3) unstable; urgency=low
+
+  * debian/control: libva-drm1 added to libva-dev "Depends" field
+    (Closes: #710061)
+
+ -- Matteo F. Vescovi <mfv.debian@gmail.com>  Tue, 28 May 2013 09:04:12 +0200
+
+libva (1.1.1-2) unstable; urgency=low
+
+  * Upload to unstable
+
+ -- Reinhard Tartler <siretart@tauware.de>  Thu, 23 May 2013 07:30:54 +0200
+
+libva (1.1.1-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Matteo F. Vescovi <mfv.debian@gmail.com>  Thu, 28 Mar 2013 17:13:39 +0100
+
+libva (1.1.0-1) experimental; urgency=low
+
+  [ Andres Mejia ]
+  * Rewrite README.Debian with relavant info
+    about the package names for drivers.
+
+  [ Matteo F. Vescovi ]
+  * Imported Upstream version 1.1.0
+    - debian/patches/: re-worked against v1.1.0
+  * debian/: new libva-drm package added
+  * debian/control: libegl1-mesa-dev b-dep added
+  * debian/control: obsolete DMUA flag dropped
+  * debian/control: S-V 3.9.3 => 3.9.4 (no changes needed)
+  * debian/watch: uscan path updated.
+    Thanks to Bart Martens (bartm) for the hint.
+
+  [ Reinhard Tartler ]
+  * Bump shlibs
+
+ -- Reinhard Tartler <siretart@tauware.de>  Thu, 17 Jan 2013 08:04:12 +0100
+
+libva (1.0.15-4) unstable; urgency=low
+
+  * Change section of vainfo to utils.
+
+ -- Andres Mejia <amejia@debian.org>  Sun, 18 Mar 2012 14:08:35 -0400
+
+libva (1.0.15-3) unstable; urgency=low
+
+  * Allow dev package to be multi-arch installable.
+
+ -- Andres Mejia <amejia@debian.org>  Fri, 16 Mar 2012 11:56:24 -0400
+
+libva (1.0.15-2) unstable; urgency=low
+
+  [ Matteo F. Vescovi ]
+  * debian/control: vainfo's "Section:" field defined (Closes: #631970)
+  * debian/control: libva-dev's arch from "all" to "any"
+  * debian/control: libva-dev dependencies cleaned
+  * debian/control: Standards-Version bumped to 3.9.3
+  * debian/rules: configure parameters added for M-A
+  * debian/: Multi-Arch support added
+
+  [ Andres Mejia ]
+  * Include dpkg-source options in generated debian tarball.
+  * Don't include Multi-Arch field for packages which are not shared libraries.
+  * Use dh_auto_configure to pass in default+extra configure options.
+  * Support parallel builds.
+  * Remove test/demo programs from installation. This removes the libva-utils
+    package.
+  * Refreshed patches.
+
+ -- Andres Mejia <amejia@debian.org>  Fri, 16 Mar 2012 11:10:01 -0400
+
+libva (1.0.15-1) experimental; urgency=low
+
+  [ Reinhard Tartler ]
+  * Imported Upstream version 1.0.15 (Closes: #654567)
+  * Bump shlibs for API 'fixes' mentioned in upstream NEWS file
+
+  [ Brandon Snider ]
+  * The intel i965 driver has been moved to its own package
+    - Removed i965-va-driver package from debian/control and replaced it
+      with libva-egl1 package
+  * refreshed debian/patches/remove-unneeded-dep2.patch
+  * refreshed debian/patches/remove-unneeded-dep.patch
+  * Added depends on libva-egl1 to debian/control
+  * Added libva-utils package to debian/control
+  * Added egl.so file to debian/libva-dev.install
+  * Created debian/libva-utils.install
+
+  [ Matteo F. Vescovi ]
+  * debian/control: bump Standards-Version to 3.9.2
+  * debian/clean: clean upstream after build
+  * debian/control: "Section:" field re-positioned
+  * debian/control: adding myself to "Uploaders:" field
+  * debian/control: VCS-browser link updated
+
+ -- Reinhard Tartler <siretart@tauware.de>  Wed, 04 Jan 2012 20:42:33 +0100
+
+libva (1.0.14-1) unstable; urgency=low
+
+  [ Andres Mejia ]
+  * Updated to my @debian.org email.
+
+  [ Reinhard Tartler ]
+  * New Upstream version: 1.0.14, Closes: #639893
+  * Bump shlibs for changes in va/va.h
+  * debian/patches/remove-unneeded-dep.patch: add Dep-5 Headers
+  * refresh patches
+  * remove debian/patches/fix-warnings.patch, applied upstream
+
+ -- Reinhard Tartler <siretart@tauware.de>  Mon, 31 Oct 2011 20:11:38 +0100
+
+libva (1.0.12-2) unstable; urgency=low
+
+  * Revert "remove debian/patches/kfreebsd-fixes.patch, applied upstream"
+    (Closes: #621759)
+
+ -- Reinhard Tartler <siretart@tauware.de>  Sun, 17 Apr 2011 09:16:27 +0200
+
+libva (1.0.12-1) unstable; urgency=low
+
+  * New upstream release.
+  * bump shlibs to tightend dependencies of i965-va-driver (Closes: #613332)
+
+ -- Reinhard Tartler <siretart@tauware.de>  Sun, 03 Apr 2011 21:16:01 +0200
+
+libva (1.0.8-3) unstable; urgency=low
+
+  [ Artur Rona ]
+  * Update library dependencies to fix FTBFS properly.
+
+  [ Reinhard Tartler ]
+  * Disable i965 driver on hurd-i386, Closes: #613102
+
+ -- Reinhard Tartler <siretart@tauware.de>  Sun, 13 Feb 2011 19:01:16 +0100
+
+libva (1.0.8-2) unstable; urgency=low
+
+  [ Petr Salinger ]
+  * Fix FTBFS on kFreeBSD, Closes: #612480, #612438
+
+  [ Reinhard Tartler ]
+  * upload to unstable.
+  * Ease building with Source Format 3.0 (quilt).
+
+ -- Reinhard Tartler <siretart@tauware.de>  Tue, 08 Feb 2011 19:53:07 +0100
+
+libva (1.0.8-1) experimental; urgency=low
+
+  * New upstream version.
+
+ -- Andres Mejia <mcitadel@gmail.com>  Sun, 30 Jan 2011 11:31:02 -0500
+
+libva (1.0.7-1) experimental; urgency=low
+
+  * New upstream version (Closes: #601665)
+  * Fixes crashes (Closes: #589367, #599329)
+  * add myself as uploader
+  * replace autoreconf.patch with dh-autoreconf
+  * update library dependencies for test programs, fixes FTBFS
+  * fix watchfile
+  * tighten dependency on libdrm-dev
+  * Force upgrade of vlc to avoid errors while loading libva
+    (Closes: #603612)
+  * Switch to Format 3.0 (quilt)
+
+ -- Reinhard Tartler <siretart@tauware.de>  Sun, 09 Jan 2011 16:46:57 +0100
+
+libva (1.0.4-1) experimental; urgency=low
+
+  * New upstream release.
+  * Fix bad names for library packages.
+  * Update Standards-Version to 3.9.1. No changes needed.
+  * Include TPI and GLX libraries. (Closes: #592070)
+  * Have dev package also depend on new TPI and GLX library packages.
+
+ -- Andres Mejia <mcitadel@gmail.com>  Fri, 10 Sep 2010 13:52:00 -0400
+
+libva (1.0.1-3) unstable; urgency=low
+
+  * Don't build i965 driver on non-i386 or non-amd64 architectures.
+  * Fix warnings produced during build.
+  * Remove useless dependency for dummy driver, fixing circular
+    dependency. (Closes: #583884)
+  * Remove unnecessary dependency on libva for libva-x11.
+  * Refresh all patches.
+
+ -- Andres Mejia <mcitadel@gmail.com>  Wed, 02 Jun 2010 19:02:50 -0400
+
+libva (1.0.1-2) unstable; urgency=low
+
+  * Fix copyright issues.
+  * Added 'DM-Upload-Allowed: yes' entry.
+
+ -- Andres Mejia <mcitadel@gmail.com>  Sat, 29 May 2010 12:18:20 -0400
+
+libva (1.0.1-1) unstable; urgency=low
+
+  * New upstream release. (Closes: #569635)
+  * Rework debianization.
+
+ -- Andres Mejia <mcitadel@gmail.com>  Fri, 12 Feb 2010 18:55:19 -0500
+
+libva (0.24-1) unstable; urgency=low
+
+  * Updated to v0.24
+  * Display attributes added
+  * H264 parameter fixes
+  * Swapped vaGetConfigAttributes and vaQueryConfigAttributes
+
+ -- Waldo Bastian <waldo.bastian@intel.com>  Thu, 20 Sep 2007 15:08:04 -0700
+
+libva (0.22-1) unstable; urgency=low
+
+  * Updated to v0.22
+  * VAImage and VASubpicture added
+
+ -- Waldo Bastian <waldo.bastian@intel.com>  Fri, 07 Sep 2007 04:32:28 -0700
+
+libva (0.20-1) unstable; urgency=low
+
+  * Updated to v0.20
+  * Clean up & exporting DRI interface
+
+ -- Waldo Bastian <waldo.bastian@intel.com>  Thu, 09 Aug 2007 11:49:43 -0700
+
+libva (0.20~-1) unstable; urgency=low
+
+  * Add VA_INVALID_SURFACE
+
+ -- Waldo Bastian <waldo.bastian@intel.com>  Wed, 11 Jul 2007 17:24:10 -0700
+
+libva (0.20~~-1) unstable; urgency=low
+
+  * Initial release of libva
+
+ -- Waldo Bastian <waldo.bastian@intel.com>  Mon, 18 Jun 2007 21:35:31 -0700

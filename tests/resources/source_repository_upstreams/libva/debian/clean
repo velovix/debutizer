@@ -1,0 +1,3 @@
+debian/dh/dh_libva.1
+debian/shlibs.local
+va/wayland/wayland-drm-client-protocol.c

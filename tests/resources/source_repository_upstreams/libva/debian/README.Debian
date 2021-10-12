@@ -1,0 +1,15 @@
+Package naming scheme for VAAPI drivers
+---------------------------------------
+
+The various VAAPI driver packages are named using a scheme based off of the
+files that they install under /usr/lib/<triplet>/dri.
+
+The *.so files from a driver package installed at /usr/lib/<triplet>/dri have
+the name *_drv_video.so. The beginning part of those files are used for the
+name of the driver package. For example, the i965-va-driver package contains
+the *.so file whose name is "i965_drv_video.so".
+
+Also, for drivers that provide more than one *.so file, the package are named
+based off of one of the files, and they use a "Provides" package relationship
+to provide virtual packages whose names are based off of the other *.so files.
+This is the case with the vdpau-va-driver package.

@@ -1,20 +1,34 @@
-repos:
-  - repo: https://github.com/psf/black
-    rev: 21.9b0
-    hooks:
-      - id: black
+# Configures linting tools to run before developers commit their code.
 
-  - repo: https://github.com/timothycrosley/isort
-    rev: 5.9.3
+# The pre-commit tool is designed install tools for you, ensuring they're
+# always available. However, we rely on Poetry to install our tools instead, so
+# we bypass this feature by defining our own custom hooks.
+
+fail_fast: true
+repos:
+  - repo: local
     hooks:
       - id: isort
+        name: isort
+        entry: poetry run isort --check --dont-follow-links .
+        require_serial: true
+        pass_filenames: false
+        language: system
 
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.910
+  - repo: local
+    hooks:
+      - id: black
+        name: black
+        entry: poetry run black --check .
+        require_serial: true
+        pass_filenames: false
+        language: system
+
+  - repo: local
     hooks:
       - id: mypy
-
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
-    hooks:
-      - id: trailing-whitespace
+        name: mypy
+        entry: poetry run mypy -p debutizer
+        require_serial: true
+        pass_filenames: false
+        language: system

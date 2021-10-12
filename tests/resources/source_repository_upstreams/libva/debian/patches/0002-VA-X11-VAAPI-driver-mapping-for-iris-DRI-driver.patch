@@ -1,0 +1,24 @@
+From: "U. Artie Eoff" <ullysses.a.eoff@intel.com>
+Date: Mon, 13 Apr 2020 12:39:45 -0700
+Subject: VA/X11: VAAPI driver mapping for iris DRI driver
+
+Fixes #396
+
+Signed-off-by: U. Artie Eoff <ullysses.a.eoff@intel.com>
+---
+ va/x11/va_x11.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/va/x11/va_x11.c b/va/x11/va_x11.c
+index 3b88a62..cb23168 100644
+--- a/va/x11/va_x11.c
++++ b/va/x11/va_x11.c
+@@ -53,6 +53,8 @@ struct driver_name_map {
+ static const struct driver_name_map g_dri2_driver_name_map[] = {
+     { "i965",       4, "iHD"    }, // Intel iHD  VAAPI driver with i965 DRI driver
+     { "i965",       4, "i965"   }, // Intel i965 VAAPI driver with i965 DRI driver
++    { "iris",       4, "iHD"    }, // Intel iHD  VAAPI driver with iris DRI driver
++    { "iris",       4, "i965"   }, // Intel i965 VAAPI driver with iris DRI driver
+     { NULL,         0, NULL }
+ };
+ 

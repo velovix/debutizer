@@ -1,0 +1,5 @@
+version=4
+opts="uversionmangle=s/\.pre/~pre/, \
+  filenamemangle=s%(?:.*?)@ANY_VERSION@\.tar\.gz%libva-$1.tar.gz%" \
+  https://github.com/intel/libva/releases \
+  .*/(\d+.*)\.tar\.gz
