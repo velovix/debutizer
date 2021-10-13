@@ -1,7 +1,7 @@
 # Configures linting tools to run before developers commit their code.
 
 # The pre-commit tool is designed install tools for you, ensuring they're
-# always available. However, we rely on Poetry to install our tools instead, so
+# always available. However, we rely on Pip to install our tools instead, so
 # we bypass this feature by defining our own custom hooks.
 
 fail_fast: true
@@ -10,7 +10,7 @@ repos:
     hooks:
       - id: isort
         name: isort
-        entry: poetry run isort --check --dont-follow-links .
+        entry: isort --check --dont-follow-links .
         require_serial: true
         pass_filenames: false
         language: system
@@ -19,7 +19,7 @@ repos:
     hooks:
       - id: black
         name: black
-        entry: poetry run black --check .
+        entry: black --check .
         require_serial: true
         pass_filenames: false
         language: system
@@ -28,7 +28,7 @@ repos:
     hooks:
       - id: mypy
         name: mypy
-        entry: poetry run mypy -p debutizer
+        entry: mypy -p debutizer
         require_serial: true
         pass_filenames: false
         language: system

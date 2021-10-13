@@ -14,7 +14,7 @@ package_dir = upstream.fetch()
 
 source_package = SourcePackage(package_dir)
 
-source_package.add_to_changelog(
+source_package.changelog.add(
     version="2.7.0-2myorg1",
     urgency="medium",
     changes=["* Repackaged this in my repository!"],

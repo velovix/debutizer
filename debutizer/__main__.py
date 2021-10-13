@@ -8,6 +8,19 @@ from debutizer.print_utils import Color, Format, print_color
 
 
 def main():
+    """An exception handling wrapper around the real entrypoint, _main"""
+    try:
+        _main()
+    except CommandError as ex:
+        print("")
+        print_color(ex.message, color=Color.RED, format_=Format.BOLD, file=sys.stderr)
+        if "DEBUTIZER_SHOW_TRACEBACKS" in os.environ:
+            raise ex
+        else:
+            sys.exit(1)
+
+
+def _main():
     args = _parse_args()
 
     if args.command is None:
@@ -34,12 +47,4 @@ def _parse_args() -> argparse.Namespace:
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except CommandError as ex:
-        print("")
-        print_color(ex.message, color=Color.RED, format_=Format.BOLD, file=sys.stderr)
-        if "DEBUTIZER_SHOW_TRACEBACKS" in os.environ:
-            raise ex
-        else:
-            sys.exit(1)
+    main()

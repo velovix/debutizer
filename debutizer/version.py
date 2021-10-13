@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from debian.debian_support import Version as DebVersion
+from debian import debian_support
 
 from .errors import CommandError
 
@@ -17,7 +17,7 @@ class Version:
 
     @staticmethod
     def from_string(version: str) -> Version:
-        match = DebVersion.re_valid_version.match(version)
+        match = debian_support.Version.re_valid_version.match(version)
         if match is None:
             raise CommandError(
                 f"Version string '{version}' is in an invalid format. "

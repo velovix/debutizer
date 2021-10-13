@@ -13,7 +13,7 @@ package_dir = upstream.fetch()
 
 source_package = SourcePackage(package_dir)
 
-source_package.add_to_changelog(
+source_package.changelog.add(
     version="1.6-1myorg1",
     urgency="medium",
     changes=[

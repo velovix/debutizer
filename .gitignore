@@ -4,6 +4,8 @@
 # Python
 __pycache__/
 .mypy_cache/
+dist/
+*.egg-info/
 
 # GNU gettext
 *.mo

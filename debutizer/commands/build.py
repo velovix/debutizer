@@ -105,53 +105,66 @@ class BuildCommand(Command):
                 color=Color.MAGENTA,
                 format_=Format.BOLD,
             )
-            package_config = PackagePy(package_dir / PackagePy.FILE_NAME)
-            package_configs.append(package_config)
-            registry.add(package_config.source_package)
+            package_py = PackagePy(package_dir / PackagePy.FILE_NAME)
+            package_configs.append(package_py)
+            registry.add(package_py.source_package)
 
         print("")
 
-        for package_config in package_configs:
+        for package_py in package_configs:
             print_color(
-                f"Running pre-build hook for {package_config.source_package.name}",
+                f"Running pre-build hook for {package_py.source_package.name}",
                 color=Color.MAGENTA,
                 format_=Format.BOLD,
             )
-            package_config.pre_build(registry)
+            package_py.pre_build(registry)
 
         print("")
 
-        for package_config in package_configs:
+        for package_py in package_configs:
             print_color(
-                f"Building {package_config.source_package.name}",
+                f"Building {package_py.source_package.name}",
                 color=Color.MAGENTA,
                 format_=Format.BOLD,
             )
 
             # Check if a debian/ directory exists
-            debian_dir = package_config.source_package.package_dir / "debian"
+            debian_dir = package_py.source_package.package_dir / "debian"
             if not debian_dir.is_dir():
                 raise CommandError(
                     f"No 'debian' directory is present in {debian_dir.parent}"
                 )
 
-            # Run the build
-            output_dir = args.build_dir / f"{package_config.source_package.name}-output"
-            output_dir.mkdir()
-            working_dir = package_config.source_package.package_dir
+            working_dir = package_py.source_package.package_dir
 
+            # Generate the Debian source file and Debian archive
+            run(
+                [
+                    "dpkg-source",
+                    "--build",
+                    str(working_dir),
+                ],
+                on_failure="Failed to generate Debian source files",
+                cwd=working_dir.parent,
+            )
+
+            # Run the build
+            dsc_file_name = f"{package_py.source_package.name}_{package_py.source_package.version}.dsc"
+            output_dir = args.build_dir / f"{package_py.source_package.name}-output"
+            output_dir.mkdir()
             try:
                 run(
                     [
-                        "pdebuild",
+                        "pbuilder",
+                        "build",
                         "--buildresult",
                         str(output_dir),
-                        "--",
                         "--basetgz",
                         str(chroot_archive_path),
+                        str(working_dir.parent / dsc_file_name),
                     ],
                     on_failure="Failed to build the package",
-                    cwd=working_dir,
+                    cwd=working_dir.parent,
                     root=True,
                 )
             finally:
@@ -163,7 +176,7 @@ class BuildCommand(Command):
                         root=True,
                     )
 
-            # pdebuild does not reproduce the source archive, copy it manually
+            # pbuilder does not reproduce the source archive, copy it manually
             for orig_archive in working_dir.parent.glob(_SOURCE_ARCHIVE_GLOB):
                 shutil.copy2(orig_archive, output_dir)
 
@@ -171,7 +184,7 @@ class BuildCommand(Command):
                 output_dir=output_dir,
                 artifacts_dir=args.artifacts_dir,
                 distribution=args.distribution,
-                component=package_config.component,
+                component=package_py.component,
                 architecture=args.architecture,
             )
 
