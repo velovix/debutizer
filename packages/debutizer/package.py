@@ -46,9 +46,6 @@ source_package.control.add_binary_package(
         "pbuilder",
         "devscripts",
         "quilt",
-        # "python3-apt",
-        # "python3-debian",
-        # "python3-xdg",
     ],
     recommends=[
         "debian-keyring",

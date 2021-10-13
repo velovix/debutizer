@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 import pytest
 
 from debutizer.errors import CommandError
@@ -15,7 +13,6 @@ def test_registering_duplicate_packages():
         registry.add(MockSourcePackage("mypackage1"))
 
 
-@dataclass
 class MockSourcePackage(SourcePackage):
     def __init__(self, name: str):
         self._name = name

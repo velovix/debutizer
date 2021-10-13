@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-from dataclasses import dataclass
 from typing import Optional
 
 from debian import debian_support
@@ -8,15 +5,27 @@ from debian import debian_support
 from .errors import CommandError
 
 
-@dataclass
 class Version:
     epoch: Optional[str]
     upstream_version: str
     debian_revision: str
     full_version: str
 
+    def __init__(
+        self,
+        *,
+        epoch: Optional[str],
+        upstream_version: str,
+        debian_revision: str,
+        full_version: str,
+    ):
+        self.epoch = epoch
+        self.upstream_version = upstream_version
+        self.debian_revision = debian_revision
+        self.full_version = full_version
+
     @staticmethod
-    def from_string(version: str) -> Version:
+    def from_string(version: str) -> "Version":
         match = debian_support.Version.re_valid_version.match(version)
         if match is None:
             raise CommandError(
