@@ -16,23 +16,24 @@ class SourcePackage:
     changelog: Changelog
     control: Control
     copyright: Copyright
-    package_dir: Path
+    directory: Path
     _complete: bool
 
-    def __init__(self, package_dir: Path, complete: bool = True):
+    def __init__(self, directory: Path, complete: bool = True):
         """Creates a SourcePackage configured using files found in the given directory.
 
-        :param package_dir: The package directory, as created by an upstream
+        :param directory: The directory containing the upstream source and debian/
+            folder
         :param complete: If True, configuration in the package directory is expected
             to be finished and static checks will be performed against it
         """
         if self.distribution is None:
             raise UnexpectedError("The distribution field must be set!")
 
-        self.package_dir = package_dir
-        self.changelog = Changelog(package_dir, self.distribution, self.name)
-        self.control = Control(package_dir, self.name)
-        self.copyright = Copyright(package_dir)
+        self.directory = directory
+        self.changelog = Changelog(directory, self.distribution, self.name)
+        self.control = Control(directory, self.name)
+        self.copyright = Copyright(directory)
         self._complete = complete
         self.load()
 
@@ -41,7 +42,7 @@ class SourcePackage:
         """
         :return: The name of the source package
         """
-        return self.package_dir.parent.name
+        return self.directory.parent.name
 
     @property
     def version(self) -> str:
@@ -71,22 +72,22 @@ class SourcePackage:
         self.load()
 
     def set_source_format(self, format_: str = "3.0 (quilt)") -> None:
-        source_format_file = self.package_dir / "debian" / "source" / "format"
+        source_format_file = self.directory / "debian" / "source" / "format"
         source_format_file.parent.mkdir(parents=True, exist_ok=True)
         source_format_file.write_text(format_)
 
     def apply_patches(self) -> None:
         """Applies Quilt patch files found in the patches/ directory"""
-        patches_dir = self.package_dir / "patches"
+        patches_dir = self.directory / "patches"
         if not patches_dir.is_dir():
             raise CommandError("The package has no patches directory")
 
         run(
             ["quilt", "push", "-a"],
             on_failure="Failed to apply patches",
-            cwd=self.package_dir,
+            cwd=self.directory,
             env={
-                "QUILT_PATCHES": str(self.package_dir / "patches"),
+                "QUILT_PATCHES": str(self.directory / "patches"),
             },
         )
 

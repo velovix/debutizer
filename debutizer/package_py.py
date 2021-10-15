@@ -12,22 +12,29 @@ class PackagePy:
     FILE_NAME: ClassVar[str] = "package.py"
 
     source_package: SourcePackage
+    """The source package defined by this configuration"""
     component: str
+    """The component of the repository where the configuration's packages will be stored
+    """
     # pre_build: Callable[[Registry], None]
+    """A callback that will be run before a package is built"""
+    build_dir: Path
+    """The directory where scratch work will be done for this configuration"""
 
-    def __init__(self, package_file: Path):
-        if not package_file.is_file():
+    def __init__(self, package_py: Path, build_dir: Path):
+        if not package_py.is_file():
             raise CommandError(
-                f"Package {package_file.parent.name} is missing a "
+                f"Package {package_py.parent.name} is missing a "
                 f"{PackagePy.FILE_NAME} file"
             )
+        self.build_dir = build_dir / package_py.parent.name
 
-        package_module = ModuleType(package_file.name)
+        package_module = ModuleType(package_py.name)
         # Put the module in a package so it can do relative imports
-        package_module.__package__ = package_file.name
+        package_module.__package__ = package_py.name
 
-        code = package_file.read_text()
-        compiled = compile(code, package_file, "exec")
+        code = package_py.read_text()
+        compiled = compile(code, package_py, "exec")
 
         try:
             exec(compiled, package_module.__dict__)
