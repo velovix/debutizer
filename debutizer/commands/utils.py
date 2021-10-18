@@ -67,6 +67,16 @@ def make_source_files(source_package: SourcePackage) -> None:
         on_failure="Failed to generate Debian source files",
         cwd=source_package.directory.parent,
     )
+    run(
+        [
+            "dpkg-genchanges",
+            "--build=source",
+            f"-O../{source_package.name}_source.changes",
+            # str(source_package.directory),
+        ],
+        on_failure="Failed to generate a .changes file",
+        cwd=source_package.directory,
+    )
 
 
 def build_package(
@@ -105,6 +115,44 @@ def build_package(
     # pbuilder does not reproduce the source archive, copy it manually
     # for orig_archive in working_dir.glob(SOURCE_ARCHIVE_GLOB):
     #     shutil.copy2(orig_archive, output_dir)
+
+
+def make_chroot(distribution: str) -> Path:
+    """Creates a chroot environment for the package to be built in, if one does not
+    already exist.
+
+    :param distribution: The distribution codename to create a chroot for
+    :return: A path to the archive containing the chroot contents
+    """
+    pbuilder_cache_str = os.environ.get(
+        "DEBUTIZER_PBUILDER_CACHE_DIR", "/var/cache/pbuilder"
+    )
+    pbuilder_cache_path = Path(pbuilder_cache_str)
+    archive_path = pbuilder_cache_path / f"debutizer-{distribution}.tgz"
+
+    if not archive_path.is_file():
+        # Create a chroot for builds to be performed in
+        print_color(
+            f"Creating a chroot for distribution '{distribution}'",
+            color=Color.MAGENTA,
+            format_=Format.BOLD,
+        )
+        run(
+            [
+                "pbuilder",
+                "create",
+                "--basetgz",
+                str(archive_path),
+                "--distribution",
+                distribution,
+            ],
+            on_failure="Failed to create pbuilder chroot environment",
+            root=True,
+        )
+    else:
+        print(f"Using existing chroot at {archive_path}")
+
+    return archive_path
 
 
 DEBIAN_SOURCE_FILE_GLOB = "*.dsc"

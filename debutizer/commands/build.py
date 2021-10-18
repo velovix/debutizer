@@ -7,12 +7,12 @@ from ..errors import CommandError
 from ..print_utils import Color, Format, done_message, print_color
 from ..registry import Registry
 from ..source_package import SourcePackage
-from ..subprocess_utils import run
 from ..upstreams import Upstream
 from .command import Command, register
 from .utils import (
     build_package,
     get_package_dirs,
+    make_chroot,
     make_source_files,
     process_package_pys,
 )
@@ -48,7 +48,7 @@ class BuildCommand(Command):
         SourcePackage.distribution = args.distribution
 
         package_dirs = get_package_dirs(args.package_dir)
-        chroot_archive_path = _make_chroot(args.distribution)
+        chroot_archive_path = make_chroot(args.distribution)
         package_pys = process_package_pys(package_dirs, registry, args.build_dir)
 
         print("")
@@ -77,44 +77,6 @@ class BuildCommand(Command):
 
             print("")
             done_message("Build")
-
-
-def _make_chroot(distribution: str) -> Path:
-    """Creates a chroot environment for the package to be built in, if one does not
-    already exist.
-
-    :param distribution: The distribution codename to create a chroot for
-    :return: A path to the archive containing the chroot contents
-    """
-    pbuilder_cache_str = os.environ.get(
-        "DEBUTIZER_PBUILDER_CACHE_DIR", "/var/cache/pbuilder"
-    )
-    pbuilder_cache_path = Path(pbuilder_cache_str)
-    archive_path = pbuilder_cache_path / f"debutizer-{distribution}.tgz"
-
-    if not archive_path.is_file():
-        # Create a chroot for builds to be performed in
-        print_color(
-            f"Creating a chroot for distribution '{distribution}'",
-            color=Color.MAGENTA,
-            format_=Format.BOLD,
-        )
-        run(
-            [
-                "pbuilder",
-                "create",
-                "--basetgz",
-                str(archive_path),
-                "--distribution",
-                distribution,
-            ],
-            on_failure="Failed to create pbuilder chroot environment",
-            root=True,
-        )
-    else:
-        print(f"Using existing chroot at {archive_path}")
-
-    return archive_path
 
 
 def _copy_build_output(

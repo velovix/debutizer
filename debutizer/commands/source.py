@@ -13,6 +13,7 @@ from .utils import (
     DEBIAN_SOURCE_FILE_GLOB,
     SOURCE_ARCHIVE_GLOB,
     get_package_dirs,
+    make_chroot,
     make_source_files,
     process_package_pys,
 )
@@ -41,6 +42,7 @@ class SourceCommand(Command):
         SourcePackage.distribution = args.distribution
 
         package_dirs = get_package_dirs(args.package_dir)
+        chroot_archive_path = make_chroot(args.distribution)
         package_pys = process_package_pys(package_dirs, registry, args.build_dir)
 
         for package_py in package_pys:
@@ -69,8 +71,6 @@ def _copy_build_output(
     distribution: str,
     component: str,
 ):
-    print(f"Checking in {package_build_dir}")
-
     dsc_files = list(package_build_dir.glob(DEBIAN_SOURCE_FILE_GLOB))
     orig_tar_files = list(package_build_dir.glob(SOURCE_ARCHIVE_GLOB))
     debian_tar_files = list(package_build_dir.glob(DEBIAN_ARCHIVE_GLOB))
