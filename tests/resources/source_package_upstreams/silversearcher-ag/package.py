@@ -5,16 +5,16 @@ from debutizer.upstreams import SourcePackageUpstream
 from debutizer.version import Version
 
 upstream = SourcePackageUpstream(
-    name="jq",
-    version=Version.from_string("1.6-1"),
-    dsc_url="http://archive.ubuntu.com/ubuntu/pool/universe/j/jq/jq_1.6-1ubuntu0.20.04.1.dsc",
+    name="silversearcher-ag",
+    version=Version.from_string("2.2.0-1"),
+    dsc_url="http://archive.ubuntu.com/ubuntu/pool/universe/s/silversearcher-ag/silversearcher-ag_2.2.0-1.dsc",
 )
 package_dir = upstream.fetch()
 
 source_package = SourcePackage(package_dir)
 
 source_package.changelog.add(
-    version="1.6-1myorg1",
+    version="2.2.0-1myorg1",
     urgency="medium",
     changes=[
         "* Repackaged this in my repository!",
