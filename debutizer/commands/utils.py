@@ -12,6 +12,9 @@ from ..subprocess_utils import run
 
 
 def get_package_dirs(package_dir: Path) -> List[Path]:
+    if not package_dir.is_dir():
+        raise CommandError(f"The package directory '{package_dir}' does not exist")
+
     package_dirs = list(filter(Path.is_dir, package_dir.iterdir()))
 
     if len(package_dirs) == 0:

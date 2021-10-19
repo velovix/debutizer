@@ -54,8 +54,29 @@ class Version:
             full_version=version,
         )
 
+    def __repr__(self):
+        return (
+            f"Version("
+            f"epoch={self.epoch}, "
+            f"upstream_version={self.upstream_version}, "
+            f"debian_revision={self.debian_revision}, "
+            f"full_version={self.full_version}"
+            f")"
+        )
+
     def __str__(self) -> str:
         return self.full_version
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Version):
+            return NotImplemented
+
+        return (
+            self.epoch == other.epoch
+            and self.upstream_version == other.upstream_version
+            and self.debian_revision == other.debian_revision
+            and self.full_version == other.full_version
+        )
 
 
 _FORMAT_DESCRIPTION = (

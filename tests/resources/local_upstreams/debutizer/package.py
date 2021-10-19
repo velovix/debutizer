@@ -1,15 +1,13 @@
 from datetime import datetime
+from pathlib import Path
 
 from debutizer.copyright import Copyright
 from debutizer.source_package import SourcePackage
-from debutizer.upstreams import SourceRepositoryUpstream
+from debutizer.upstreams import LocalUpstream
 from debutizer.version import Version
 
-upstream = SourceRepositoryUpstream(
-    name="debutizer",
-    version=Version.from_string("0.1.0-1"),
-    repository_url="https://github.com/velovix/debutizer",
-    revision_format="v{upstream_version}",
+upstream = LocalUpstream(
+    name="debutizer", version=Version.from_string("0.1.0-1"), path=Path(".")
 )
 package_dir = upstream.fetch()
 
