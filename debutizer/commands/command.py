@@ -7,7 +7,7 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Type
 
-from xdg import xdg_cache_home
+from xdg.BaseDirectory import save_cache_path
 
 from ..errors import CommandError
 
@@ -36,7 +36,7 @@ class Command(ABC):
             help="The directory that holds the package directories",
         )
 
-        default_build_dir = xdg_cache_home() / "debutizer"
+        default_build_dir = save_cache_path("debutizer")
         parser.add_argument(
             "--build-dir",
             type=Path,

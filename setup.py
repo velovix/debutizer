@@ -18,11 +18,13 @@ setup(
         "Programming Language :: Python :: 3 :: Only",
     ],
     keywords="deb, apt",
-    packages=find_packages(include=["debutizer", "debutizer.commands"]),
+    packages=find_packages(
+        include=["debutizer", "debutizer.commands", "debutizer.upstreams"]
+    ),
     python_requires=">=3.6, <4",
     install_requires=[
         "python-debian",
-        "xdg",
+        "pyxdg",
         "requests",
     ],
     extras_require={
