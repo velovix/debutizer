@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="debutizer",
-    version="0.1.0",
+    version="0.2.0",
     description="A tool for managing APT packages",
     long_description="TODO: Read this from README",
     long_description_content_type="text/markdown",

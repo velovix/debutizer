@@ -7,7 +7,7 @@ from debutizer.upstreams import LocalUpstream
 from debutizer.version import Version
 
 upstream = LocalUpstream(
-    name="debutizer", version=Version.from_string("0.1.0-1"), path=Path(".")
+    name="debutizer", version=Version.from_string("0.2.0-1"), path=Path(".")
 )
 package_dir = upstream.fetch()
 
@@ -70,7 +70,7 @@ source_package.copyright.add_license(
 source_package.compat.from_distribution()
 
 source_package.changelog.add(
-    version="0.1.0-1",
+    version="0.2.0-1",
     urgency="medium",
     changes=["* Initial packaging"],
     author="Tyler Compton <xaviosx@gmail.com>",
