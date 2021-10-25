@@ -5,6 +5,9 @@ inputs:
   distribution:
     description: The distribution to make a release for
     required: true
+  upstream_repo:
+    description: The upstream repo to check against when building
+    required: true
   bucket_name:
     description: The name of the bucket to upload to
     required: true
@@ -23,6 +26,7 @@ runs:
     run: >
       python -m debutizer build
       --distribution ${{ inputs.distribution }}
+      --upstream-repo ${{ inputs.upstream_repo }}
       --package-dir tests/resources/local_upstreams
     shell: bash
   - name: Upload
