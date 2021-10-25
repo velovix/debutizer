@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import Optional
 
-from debutizer.errors import CommandError
+from .environment import Environment
+from .errors import CommandError, UnexpectedError
 
 
 class Compat:
@@ -10,6 +11,22 @@ class Compat:
     def __init__(self, package_dir: Path):
         self.version = None
         self._package_dir = package_dir
+
+    def from_distribution(self) -> None:
+        """Use the debhelper compatibility version used by the current distribution"""
+        if Environment.codename is None:
+            raise UnexpectedError("The Environment.codename field must be set")
+
+        if Environment.codename in ["bionic"]:
+            self.version = 11
+        elif Environment.codename in ["focal", "buster"]:
+            self.version = 12
+        elif Environment.codename in ["groovy", "hirsute", "impish", "bullseye"]:
+            self.version = 13
+        else:
+            raise UnexpectedError(f"Unknown distribution: {Environment.codename}")
+
+        self.save()
 
     def load(self, complete: bool):
         compat_file = self._package_dir / "debian" / "compat"
