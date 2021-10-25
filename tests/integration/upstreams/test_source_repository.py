@@ -15,5 +15,6 @@ def test_build_source_repository_upstream_package():
             artifacts_dir=Path(artifacts_dir),
             distribution="focal",
             architecture="amd64",
+            upstream_repo=None,
         )
         command.behavior(args)
