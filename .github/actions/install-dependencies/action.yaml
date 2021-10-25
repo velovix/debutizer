@@ -21,5 +21,7 @@ runs:
       python3-xdg
     shell: bash
   - name: Install Python dependencies
-    run: pip3 install ".[dev]"
+    # This is done with sudo so that packages are installed system-wide. This
+    # allows Pip to skip packages that are already installed via apt.
+    run: sudo pip3 install ".[dev]"
     shell: bash
