@@ -1,0 +1,35 @@
+name: Release
+description: Runs a release
+
+inputs:
+  distribution:
+    description: The distribution to make a release for
+    required: true
+  bucket_name:
+    description: The name of the bucket to upload to
+    required: true
+  access_key:
+    description: The access key for the bucket
+    required: true
+  secret_key:
+    description: The secret key for the bucket
+    required: true
+
+runs:
+  using: composite
+  steps:
+  - uses: ./.github/actions/install-dependencies
+  - name: Build
+    run: >
+      python -m debutizer build
+      --distribution ${{ inputs.distribution }}
+      --package-dir tests/resources/local_upstreams
+    shell: bash
+  - name: Upload
+    run: >
+      python -m debutizer s3-repo upload
+      --endpoint https://storage.googleapis.com
+      --bucket ${{ inputs.bucket_name }}
+      --access-key ${{ inputs.access_key }}
+      --secret-key ${{ inputs.secret_key }}
+    shell: bash

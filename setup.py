@@ -18,9 +18,7 @@ setup(
         "Programming Language :: Python :: 3 :: Only",
     ],
     keywords="deb, apt",
-    packages=find_packages(
-        include=["debutizer", "debutizer.commands", "debutizer.upstreams"]
-    ),
+    packages=find_packages(),
     python_requires=">=3.6, <4",
     install_requires=[
         "python-debian",
@@ -34,6 +32,7 @@ setup(
             "black==21.9b0",
             "isort~=5.9",
             "mypy~=0.910",
+            "types-requests",
         ],
     },
     entry_points={

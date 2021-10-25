@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import ClassVar, Optional
 
 from .changelog import Changelog
+from .compat import Compat
 from .control import Control
 from .copyright import Copyright
 from .errors import CommandError, UnexpectedError
@@ -17,6 +18,7 @@ class SourcePackage:
     control: Control
     copyright: Copyright
     directory: Path
+    compat: Compat
     _complete: bool
 
     def __init__(self, directory: Path, complete: bool = True):
@@ -34,6 +36,7 @@ class SourcePackage:
         self.changelog = Changelog(directory, self.distribution, self.name)
         self.control = Control(directory, self.name)
         self.copyright = Copyright(directory)
+        self.compat = Compat(directory)
         self._complete = complete
         self.load()
 
@@ -56,12 +59,14 @@ class SourcePackage:
         self.changelog.save()
         self.control.save()
         self.copyright.save()
+        self.compat.save()
 
     def load(self) -> None:
         """Applies changes from the disk to this object"""
         self.copyright.load(self._complete)
         self.control.load(self._complete)
         self.copyright.load(self._complete)
+        self.compat.load(self._complete)
 
     def complete(self):
         """Mark the SourcePackage as complete, which will load the latest from the disk
