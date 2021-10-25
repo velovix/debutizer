@@ -6,23 +6,17 @@ on:
       - created
 
 jobs:
-  bionic:
+  release:
     runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        distribution: [ 'bionic', 'focal', 'hirsute' ]
     steps:
       - uses: actions/checkout@v2
       - uses: ./.github/actions/release
         with:
-          distribution: bionic
+          distribution: ${{ matrix.distribution }}
+          upstream_repo: http://apt.debutizer.dev
           bucket_name: apt-debutizer-dev
           access_key: ${{ secrets.PROD_ACCESS_KEY }}
           secret_key: ${{ secrets.PROD_SECRET_KEY }}
-  focal:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/release
-        with:
-          distribution: focal
-          bucket_name: apt-debutizer-dev
-          access_key: ${{ secrets.prod_ACCESS_KEY }}
-          secret_key: ${{ secrets.prod_SECRET_KEY }}
