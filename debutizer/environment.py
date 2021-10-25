@@ -1,6 +1,6 @@
-from typing import ClassVar
+from typing import ClassVar, Optional
 
 
 class Environment:
-    codename: ClassVar[str] = None
-    architecture: ClassVar[str] = None
+    codename: ClassVar[Optional[str]] = None
+    architecture: ClassVar[Optional[str]] = None
