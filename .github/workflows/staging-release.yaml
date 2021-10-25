@@ -3,7 +3,7 @@ name: Staging Release
 on:
   push:
     branches:
-      - main
+      - feature/6-s3-upload
 
 jobs:
   bionic:
