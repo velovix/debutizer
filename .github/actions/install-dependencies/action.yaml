@@ -4,12 +4,24 @@ description: Installs system and Python dependencies for Debutizer
 runs:
   using: composite
   steps:
-  - uses: actions/setup-python@v2
-    with:
-      python-version: '3.8'
+  # TODO: Find a way to pull this from tests/resources/local_upstreams/debutizer
   - name: Install system dependencies
-    run: sudo apt-get update && sudo apt-get install pbuilder devscripts quilt debian-keyring s3fs
+    run: >
+      sudo apt-get update &&
+      sudo apt-get install
+      pbuilder
+      devscripts
+      quilt
+      debian-keyring
+      s3fs
+      python3-setuptools
+      python3-pip
+      python3-debian
+      python3-requests
+      python3-xdg
     shell: bash
   - name: Install Python dependencies
-    run: python -m pip install ".[dev]"
+    # This is done with sudo so that packages are installed system-wide. This
+    # allows Pip to skip packages that are already installed via apt.
+    run: sudo pip3 install ".[dev]"
     shell: bash
