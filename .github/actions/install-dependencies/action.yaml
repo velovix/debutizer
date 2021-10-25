@@ -13,8 +13,19 @@ runs:
   - uses: actions/setup-python@v2
     with:
       python-version: ${{ inputs.python_version }}
+  # TODO: Find a way to pull this from tests/resources/local_upstreams/debutizer
   - name: Install system dependencies
-    run: sudo apt-get update && sudo apt-get install pbuilder devscripts quilt debian-keyring s3fs
+    run: >
+      sudo apt-get update &&
+      sudo apt-get install
+      pbuilder
+      devscripts
+      quilt
+      debian-keyring
+      s3fs
+      python3-debian
+      python3-requests
+      python3-xdg
     shell: bash
   - name: Install Python dependencies
     run: python -m pip install ".[dev]"
