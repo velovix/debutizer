@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 
 import requests
 
-from debutizer.errors import CommandError
+from debutizer.errors import CommandError, UnexpectedError
 from debutizer.print_utils import Color, Format, print_color, print_done
 
 from ..artifacts import find_archives
@@ -146,6 +146,11 @@ def _upload_artifact(
         },
     )
     prepared = request.prepare()
+    if prepared.method is None:
+        raise UnexpectedError("Prepared request has a method type of None")
+    path = urlparse(prepared.url).path
+    if isinstance(path, bytes):
+        path = path.decode()
 
     hmac_message = (
         prepared.method
@@ -156,7 +161,7 @@ def _upload_artifact(
         + "\n"
         + prepared.headers["Date"]
         + "\n"
-        + urlparse(prepared.url).path
+        + path
     )
 
     signature = hmac.new(
@@ -223,7 +228,7 @@ def _update_packages_file(artifacts_dir: Path) -> List[Path]:
     packages_files = []
 
     dirs = artifacts_dir.glob("dists/*/*/binary-*")
-    dirs = [d.relative_to(artifacts_dir) for d in dirs]
+    dirs = (d.relative_to(artifacts_dir) for d in dirs)
 
     for dir_ in dirs:
         result = subprocess.run(
@@ -248,7 +253,7 @@ def _update_sources_file(artifacts_dir: Path) -> List[Path]:
     sources_files = []
 
     dirs = artifacts_dir.glob("dists/*/*/source")
-    dirs = [d.relative_to(artifacts_dir) for d in dirs]
+    dirs = (d.relative_to(artifacts_dir) for d in dirs)
 
     for dir_ in dirs:
         result = subprocess.run(
