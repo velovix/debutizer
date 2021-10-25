@@ -7,16 +7,22 @@ on:
 
 jobs:
   bionic:
-    uses: ./.circleci/actions/release/action.yaml
-    with:
-      distribution: bionic
-      bucket_name: apt-staging-debutizer-dev
-      access_key: ${{ secrets.ACCESS_KEY }}
-      secret_key: ${{ secrets.SECRET_KEY }}
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v1
+      - uses: ./.github/actoins/release.yaml
+        with:
+          distribution: bionic
+          bucket_name: apt-staging-debutizer-dev
+          access_key: ${{ secrets.ACCESS_KEY }}
+          secret_key: ${{ secrets.SECRET_KEY }}
   focal:
-    uses: ./.circleci/actions/release/action.yaml
-    with:
-      distribution: focal
-      bucket_name: apt-staging-debutizer-dev
-      access_key: ${{ secrets.ACCESS_KEY }}
-      secret_key: ${{ secrets.SECRET_KEY }}
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v1
+      - uses: ./.github/actoins/release.yaml
+        with:
+          distribution: focal
+          bucket_name: apt-staging-debutizer-dev
+          access_key: ${{ secrets.ACCESS_KEY }}
+          secret_key: ${{ secrets.SECRET_KEY }}
