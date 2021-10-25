@@ -2,7 +2,6 @@ from datetime import datetime
 from pathlib import Path
 
 from debutizer.copyright import Copyright
-from debutizer.environment import Environment
 from debutizer.source_package import SourcePackage
 from debutizer.upstreams import LocalUpstream
 from debutizer.version import Version
@@ -68,13 +67,7 @@ source_package.copyright.add_files(
 source_package.copyright.add_license(
     license_=Copyright.full_license_text("BSD-3-Clause"),
 )
-
-if Environment.codename == "bionic":
-    source_package.compat.version = 11
-elif Environment.codename == "focal":
-    source_package.compat.version = 12
-else:
-    raise RuntimeError(f"Unsupported codename: {Environment.codename}")
+source_package.compat.from_distribution()
 
 source_package.changelog.add(
     version="0.1.0-1",

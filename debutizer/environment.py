@@ -2,5 +2,5 @@ from typing import ClassVar
 
 
 class Environment:
-    codename: ClassVar[str]
-    architecture: ClassVar[str]
+    codename: ClassVar[str] = None
+    architecture: ClassVar[str] = None
