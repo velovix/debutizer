@@ -9,8 +9,8 @@ from ..upstreams import Upstream
 from .command import Command
 from .utils import (
     build_package,
-    copy_binary_output,
-    copy_source_output,
+    copy_binary_artifacts,
+    copy_source_artifacts,
     get_package_dirs,
     make_chroot,
     make_source_files,
@@ -53,25 +53,27 @@ class BuildCommand(Command):
                 format_=Format.BOLD,
             )
 
-            make_source_files(package_py.source_package)
-            build_package(
+            source_results_dir = make_source_files(
+                args.build_dir, package_py.source_package
+            )
+            binary_results_dir = build_package(
                 package_py.source_package,
                 args.build_dir,
                 chroot_archive_path,
             )
 
-            copy_binary_output(
-                package_build_dir=package_py.build_dir,
+            copy_source_artifacts(
+                results_dir=source_results_dir,
+                artifacts_dir=args.artifacts_dir,
+                distribution=args.distribution,
+                component=package_py.component,
+            )
+            copy_binary_artifacts(
+                results_dir=binary_results_dir,
                 artifacts_dir=args.artifacts_dir,
                 distribution=args.distribution,
                 component=package_py.component,
                 architecture=args.architecture,
-            )
-            copy_source_output(
-                package_build_dir=package_py.build_dir,
-                artifacts_dir=args.artifacts_dir,
-                distribution=args.distribution,
-                component=package_py.component,
             )
 
             print("")

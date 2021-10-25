@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from typing import List
 
@@ -11,7 +12,8 @@ def find_debian_source_files(path: Path, recursive: bool = False) -> List[Path]:
 
 
 def find_source_archives(path: Path, recursive: bool = False) -> List[Path]:
-    return _glob_search(path, SOURCE_ARCHIVE_GLOB, recursive)
+    results = _glob_search(path, SOURCE_ARCHIVE_GLOB, recursive)
+    return [r for r in results if _SOURCE_ARCHIVE_REGEX.match(r.name)]
 
 
 def find_debian_archives(path: Path, recursive: bool = False) -> List[Path]:
@@ -40,3 +42,9 @@ BINARY_PACKAGE_GLOB = "*.deb"
 DEBIAN_SOURCE_FILE_GLOB = "*.dsc"
 SOURCE_ARCHIVE_GLOB = "*.orig.tar.*"
 DEBIAN_ARCHIVE_GLOB = "*.debian.tar.*"
+
+
+_SOURCE_ARCHIVE_REGEX = re.compile("^.*\.orig\.tar\.[a-zA-Z]+$")
+"""A more specific version of the source archive glob that filters out files that aren't
+actually archives, like mypackage.orig.tar.gz.asc.
+"""

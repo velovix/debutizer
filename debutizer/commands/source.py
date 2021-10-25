@@ -7,7 +7,7 @@ from ..source_package import SourcePackage
 from ..upstreams import Upstream
 from .command import Command
 from .utils import (
-    copy_source_output,
+    copy_source_artifacts,
     get_package_dirs,
     make_source_files,
     process_package_pys,
@@ -43,10 +43,10 @@ class SourceCommand(Command):
                 format_=Format.BOLD,
             )
 
-            make_source_files(package_py.source_package)
+            results_dir = make_source_files(args.build_dir, package_py.source_package)
 
-            copy_source_output(
-                package_build_dir=package_py.build_dir,
+            copy_source_artifacts(
+                results_dir=results_dir,
                 artifacts_dir=args.artifacts_dir,
                 distribution=args.distribution,
                 component=package_py.component,

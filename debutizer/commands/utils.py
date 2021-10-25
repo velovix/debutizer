@@ -64,7 +64,11 @@ def process_package_pys(
     return package_configs
 
 
-def make_source_files(source_package: SourcePackage) -> None:
+def make_source_files(build_dir: Path, source_package: SourcePackage) -> Path:
+    results_dir = build_dir / "outputs" / source_package.name
+    results_dir.mkdir(parents=True, exist_ok=True)
+    working_dir = source_package.directory.parent
+
     # Check if a debian/ directory exists
     debian_dir = source_package.directory / "debian"
     if not debian_dir.is_dir():
@@ -74,30 +78,67 @@ def make_source_files(source_package: SourcePackage) -> None:
     run(
         [
             "dpkg-source",
+            "--compression=xz",
             "--build",
             str(source_package.directory),
         ],
         on_failure="Failed to generate Debian source files",
-        cwd=source_package.directory.parent,
+        cwd=working_dir,
     )
+    dsc_file = working_dir / f"{source_package.name}_{source_package.version}.dsc"
+    if not dsc_file.is_file():
+        raise CommandError(
+            f"dpkg-source failed to generate a Debian source file. Expected one at "
+            f"{dsc_file}."
+        )
+    shutil.copy2(str(dsc_file), str(results_dir))
+    debian_archive_file = (
+        working_dir / f"{source_package.name}_{source_package.version}.debian.tar.xz"
+    )
+    if not debian_archive_file.is_file():
+        raise CommandError(
+            f"dpkg-source failed to generate a Debian archive file. Expected one at "
+            f"{debian_archive_file}."
+        )
+    shutil.copy2(str(debian_archive_file), str(results_dir))
+
+    changes_file = results_dir / f"{source_package.name}_source.changes"
     run(
         [
             "dpkg-genchanges",
             "--build=source",
-            f"-O../{source_package.name}_source.changes",
-            # str(source_package.directory),
+            f"-O{changes_file}",
         ],
         on_failure="Failed to generate a .changes file",
         cwd=source_package.directory,
     )
+    if not changes_file.is_file():
+        raise CommandError(
+            f"dpkg-genchanges failed to generate a changes file. Expected one at "
+            f"{changes_file}."
+        )
+
+    # Copy the source archive created by the upstream into the results directory
+    glob_str = f"{source_package.name}_*.orig.tar.*"
+    glob_results = list(working_dir.glob(glob_str))
+    if len(glob_results) == 0:
+        raise CommandError(
+            f"The upstream failed to generate a source archive file. Expected one at "
+            f"{working_dir / glob_str}."
+        )
+    shutil.copy2(str(glob_results[0]), str(results_dir))
+
+    return results_dir
 
 
 def build_package(
     source_package: SourcePackage,
     build_dir: Path,
     chroot_archive_path: Path,
-) -> None:
+) -> Path:
     working_dir = source_package.directory.parent
+    results_dir = build_dir / "outputs" / source_package.name
+    results_dir.mkdir(parents=True, exist_ok=True)
 
     # Run the build
     dsc_file = working_dir / f"{source_package.name}_{source_package.version}.dsc"
@@ -107,7 +148,7 @@ def build_package(
                 "pbuilder",
                 "build",
                 "--buildresult",
-                str(working_dir),
+                str(results_dir),
                 "--basetgz",
                 str(chroot_archive_path),
                 str(dsc_file),
@@ -120,10 +161,12 @@ def build_package(
         if os.geteuid() != 0:
             # Give the current user ownership of build output
             run(
-                ["chown", "--recursive", str(os.getuid()), str(build_dir)],
+                ["chown", "--recursive", str(os.getuid()), str(results_dir)],
                 on_failure="Failed to fix permissions for the build path",
                 root=True,
             )
+
+    return results_dir
 
 
 def make_chroot(distribution: str) -> Path:
@@ -164,15 +207,15 @@ def make_chroot(distribution: str) -> Path:
     return archive_path
 
 
-def copy_source_output(
-    package_build_dir: Path,
+def copy_source_artifacts(
+    results_dir: Path,
     artifacts_dir: Path,
     distribution: str,
     component: str,
 ):
-    dsc_files = find_debian_source_files(package_build_dir)
-    orig_tar_files = find_source_archives(package_build_dir)
-    debian_tar_files = find_debian_archives(package_build_dir)
+    dsc_files = find_debian_source_files(results_dir)
+    orig_tar_files = find_source_archives(results_dir)
+    debian_tar_files = find_debian_archives(results_dir)
 
     # Check that the expected files are present, but not _too_ present
     if len(dsc_files) == 0:
@@ -215,14 +258,14 @@ def copy_source_output(
         shutil.copy2(source_file, source_path)
 
 
-def copy_binary_output(
-    package_build_dir: Path,
+def copy_binary_artifacts(
+    results_dir: Path,
     artifacts_dir: Path,
     distribution: str,
     component: str,
     architecture: str,
 ):
-    deb_files = find_binary_packages(package_build_dir)
+    deb_files = find_binary_packages(results_dir)
 
     # Check that the expected files are present, but not _too_ present
     if len(deb_files) == 0:
