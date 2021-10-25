@@ -7,18 +7,16 @@ on:
 
 jobs:
   bionic:
-    uses: velovix/debutizer/release.yaml@feature/6-s3-upload
+    uses: ./.circleci/actions/release/action.yaml
     with:
       distribution: bionic
       bucket_name: apt-staging-debutizer-dev
-    secrets:
       access_key: ${{ secrets.ACCESS_KEY }}
       secret_key: ${{ secrets.SECRET_KEY }}
   focal:
-    uses: velovix/debutizer/release.yaml@feature/6-s3-upload
+    uses: ./.circleci/actions/release/action.yaml
     with:
-      distribution: cocal
+      distribution: focal
       bucket_name: apt-staging-debutizer-dev
-    secrets:
       access_key: ${{ secrets.ACCESS_KEY }}
       secret_key: ${{ secrets.SECRET_KEY }}
