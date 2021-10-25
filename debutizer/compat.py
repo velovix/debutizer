@@ -17,9 +17,9 @@ class Compat:
         if Environment.codename is None:
             raise UnexpectedError("The Environment.codename field must be set")
 
-        if Environment.codename == "bionic":
+        if Environment.codename in ["bionic"]:
             self.version = 11
-        elif Environment.codename == ["focal", "buster"]:
+        elif Environment.codename in ["focal", "buster"]:
             self.version = 12
         elif Environment.codename in ["groovy", "hirsute", "impish", "bullseye"]:
             self.version = 13
