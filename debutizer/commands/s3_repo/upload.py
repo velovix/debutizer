@@ -94,20 +94,7 @@ class UploadCommand(Command):
             secret_key=args.secret_key,
             mount_path=Path(mount_path),
         ):
-            print("")
-            print_color(
-                "Updating the Packages file",
-                color=Color.MAGENTA,
-                format_=Format.BOLD,
-            )
             metadata_files += _update_packages_file(args.artifacts_dir)
-
-            print("")
-            print_color(
-                "Updating the Sources file",
-                color=Color.MAGENTA,
-                format_=Format.BOLD,
-            )
             metadata_files += _update_sources_file(args.artifacts_dir)
 
         for metadata_file in metadata_files:
@@ -231,6 +218,13 @@ def _update_packages_file(artifacts_dir: Path) -> List[Path]:
     dirs = (d.relative_to(artifacts_dir) for d in dirs)
 
     for dir_ in dirs:
+        print("")
+        print_color(
+            f"Updating the Packages file for packages in {dir_}",
+            color=Color.MAGENTA,
+            format_=Format.BOLD,
+        )
+
         result = subprocess.run(
             [
                 "dpkg-scanpackages",
@@ -256,6 +250,13 @@ def _update_sources_file(artifacts_dir: Path) -> List[Path]:
     dirs = (d.relative_to(artifacts_dir) for d in dirs)
 
     for dir_ in dirs:
+        print("")
+        print_color(
+            f"Updating the Sources file for packages in {dir_}",
+            color=Color.MAGENTA,
+            format_=Format.BOLD,
+        )
+
         result = subprocess.run(
             [
                 "dpkg-scansources",
