@@ -39,6 +39,6 @@ runs:
       python -m debutizer s3-repo upload
       --endpoint https://storage.googleapis.com
       --bucket ${{ inputs.bucket_name }}
-      --access-key ${{ secrets.access_key }}
-      --secret-key ${{ secrets.secret_key }}
+      --access-key ${{ inputs.access_key }}
+      --secret-key ${{ inputs.secret_key }}
     shell: bash
