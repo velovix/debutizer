@@ -7,7 +7,7 @@ on:
 
 jobs:
   bionic:
-    uses: velovix/debutizer/.circleci/workflows/release.yaml@feature/6-s3-upload
+    uses: velovix/debutizer/release.yaml@feature/6-s3-upload
     with:
       distribution: bionic
       bucket_name: apt-staging-debutizer-dev
@@ -15,7 +15,7 @@ jobs:
       access_key: ${{ secrets.ACCESS_KEY }}
       secret_key: ${{ secrets.SECRET_KEY }}
   focal:
-    uses: velovix/debutizer/.circleci/workflows/release.yaml@feature/6-s3-upload
+    uses: velovix/debutizer/release.yaml@feature/6-s3-upload
     with:
       distribution: cocal
       bucket_name: apt-staging-debutizer-dev
