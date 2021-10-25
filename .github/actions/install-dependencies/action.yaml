@@ -1,12 +1,18 @@
 name: Install Dependencies
 description: Installs system and Python dependencies for Debutizer
 
+inputs:
+  python_version:
+    description: The version of Python to install
+    default: '3.8'
+    required: false
+
 runs:
   using: composite
   steps:
   - uses: actions/setup-python@v2
     with:
-      python-version: '3.8'
+      python-version: {{ inputs.python_version }}
   - name: Install system dependencies
     run: sudo apt-get update && sudo apt-get install pbuilder devscripts quilt debian-keyring s3fs
     shell: bash
