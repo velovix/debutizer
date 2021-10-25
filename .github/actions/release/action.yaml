@@ -23,7 +23,7 @@ runs:
     with:
       python-version: '3.8'
   - name: Install system dependencies
-    run: sudo apt-get update && sudo apt-get install pbuilder devscripts quilt debian-keyring
+    run: sudo apt-get update && sudo apt-get install pbuilder devscripts quilt debian-keyring s3fs
     shell: bash
   - name: Install Python dependencies
     run: python -m pip install ".[dev]"
