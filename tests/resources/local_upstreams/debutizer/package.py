@@ -2,6 +2,7 @@ from datetime import datetime
 from pathlib import Path
 
 from debutizer.copyright import Copyright
+from debutizer.environment import Environment
 from debutizer.source_package import SourcePackage
 from debutizer.upstreams import LocalUpstream
 from debutizer.version import Version
@@ -20,7 +21,7 @@ source_package.control.set_source_package(
     section="utils",
     priority="optional",
     build_depends=[
-        "debhelper-compat (= 12)",
+        "debhelper",
         "dh-python",
         "python3-all",
         "python3-pytest",
@@ -28,6 +29,7 @@ source_package.control.set_source_package(
         "python3-debian",
         "python3-xdg",
         "python3-requests",
+        "s3fs",
     ],
     uploaders=["Tyler Compton <xaviosx@gmail.com>"],
     homepage="https://github.com/velovix/debutizer",
@@ -66,6 +68,13 @@ source_package.copyright.add_files(
 source_package.copyright.add_license(
     license_=Copyright.full_license_text("BSD-3-Clause"),
 )
+
+if Environment.codename == "bionic":
+    source_package.compat.version = 11
+elif Environment.codename == "focal":
+    source_package.compat.version = 12
+else:
+    raise RuntimeError(f"Unsupported codename: {Environment.codename}")
 
 source_package.changelog.add(
     version="0.1.0-1",

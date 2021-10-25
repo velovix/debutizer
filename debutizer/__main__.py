@@ -1,8 +1,7 @@
-import argparse
 import os
 import sys
 
-from debutizer.commands import commands
+from debutizer import commands
 from debutizer.errors import CommandError
 from debutizer.print_utils import Color, Format, print_color
 
@@ -21,29 +20,16 @@ def main():
 
 
 def _main():
-    args = _parse_args()
+    root = commands.RootCommand()
 
-    if args.command is None:
-        print(
-            "Debutizer is a tool for managing APT packages.\n\n"
-            "To get started, try running 'debutizer --help'."
-        )
-    elif args.command in commands:
-        command = commands[args.command]
-        command.run()
-    else:
-        raise CommandError(f"Unknown command: {args.command}")
+    root.add_subcommand("source", commands.SourceCommand())
+    root.add_subcommand("build", commands.BuildCommand())
 
+    s3_repo_command = commands.S3RepoCommand()
+    root.add_subcommand("s3-repo", s3_repo_command)
+    s3_repo_command.add_subcommand("upload", commands.s3_repo.UploadCommand())
 
-def _parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        prog="debutizer",
-        description="A tool for managing APT packages",
-    )
-
-    parser.add_argument("command", nargs="?", help="The command to run")
-
-    return parser.parse_args(sys.argv[1:2])
+    root.run()
 
 
 if __name__ == "__main__":

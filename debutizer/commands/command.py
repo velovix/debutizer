@@ -3,49 +3,38 @@ import os
 import platform
 import sys
 from abc import ABC, abstractmethod
-from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Type
+from typing import Dict
 
 from xdg.BaseDirectory import save_cache_path
 
-from ..errors import CommandError
-
 
 class Command(ABC):
-    @abstractmethod
-    def define_args(self) -> argparse.ArgumentParser:
-        """Defines the arguments that the command will take"""
+    parser: argparse.ArgumentParser
+    subcommands: Dict[str, "Command"] = {}
+
+    def add_subcommand(self, name: str, command: "Command") -> None:
+        """Registers the command under the given name.
+
+        :param name: The name of the command
+        :param command: The command to register
+        """
+        self.subcommands[name] = command
 
     @abstractmethod
     def behavior(self, args: argparse.Namespace) -> None:
         """Behavior for when the command is run"""
 
+    def parse_args(self) -> argparse.Namespace:
+        return self.parser.parse_args(sys.argv[2:])
+
     def run(self) -> None:
         """Runs the command"""
-        parser = self.define_args()
-        args = parser.parse_args(sys.argv[2:])
+        args = self.parse_args()
         self.behavior(args)
 
-    def add_common_args(self, parser: argparse.ArgumentParser) -> None:
-        parser.add_argument(
-            "--package-dir",
-            type=Path,
-            default=os.environ.get("DEBUTIZER_PACKAGE_DIR", Path.cwd() / "packages"),
-            required=False,
-            help="The directory that holds the package directories",
-        )
-
-        default_build_dir = save_cache_path("debutizer")
-        parser.add_argument(
-            "--build-dir",
-            type=Path,
-            default=os.environ.get("DEBUTIZER_BUILD_DIR", default_build_dir),
-            required=False,
-            help="The directory that will hold intermediate build files",
-        )
-
-        parser.add_argument(
+    def add_archive_args(self) -> None:
+        self.parser.add_argument(
             "--artifacts-dir",
             type=Path,
             default=os.environ.get("DEBUTIZER_ARTIFACTS_DIR", Path.cwd() / "artifacts"),
@@ -54,7 +43,27 @@ class Command(ABC):
             "artifacts",
         )
 
-        parser.add_argument(
+    def add_common_args(self) -> None:
+        self.add_archive_args()
+
+        self.parser.add_argument(
+            "--package-dir",
+            type=Path,
+            default=os.environ.get("DEBUTIZER_PACKAGE_DIR", Path.cwd() / "packages"),
+            required=False,
+            help="The directory that holds the package directories",
+        )
+
+        default_build_dir = save_cache_path("debutizer")
+        self.parser.add_argument(
+            "--build-dir",
+            type=Path,
+            default=os.environ.get("DEBUTIZER_BUILD_DIR", default_build_dir),
+            required=False,
+            help="The directory that will hold intermediate build files",
+        )
+
+        self.parser.add_argument(
             "--distribution",
             type=str,
             required=True,
@@ -63,7 +72,7 @@ class Command(ABC):
         )
 
         # TODO: Update the help text when cross-building is supported. qemubuilder?
-        parser.add_argument(
+        self.parser.add_argument(
             "--architecture",
             type=str,
             required=False,
@@ -72,27 +81,6 @@ class Command(ABC):
             "Defaults to the host architecture. Changing this value will currently "
             "break your build.",
         )
-
-
-commands: Dict[str, Command] = {}
-
-
-def register(name: str) -> Callable[[Type], Any]:
-    """Registers the command under the given name.
-
-    :param name: The name of the command
-    """
-
-    def decorator(cls):
-        commands[name] = cls()
-
-        @wraps(cls)
-        def wrapper(*args, **kwargs):
-            return cls(*args, **kwargs)
-
-        return wrapper
-
-    return decorator
 
 
 def _host_architecture() -> str:

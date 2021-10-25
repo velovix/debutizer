@@ -1,0 +1,30 @@
+name: Staging Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  bionic:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v1
+      - uses: .circleci/workflows/releases.yaml
+        with:
+          distribution: bionic
+          bucket_name: apt-staging-debutizer-dev
+        secrets:
+          access_key: ${{ secrets.ACCESS_KEY }}
+          secret_key: ${{ secrets.SECRET_KEY }}
+  focal:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v1
+      - uses: .circleci/workflows/releases.yaml
+        with:
+          distribution: cocal
+          bucket_name: apt-staging-debutizer-dev
+        secrets:
+          access_key: ${{ secrets.ACCESS_KEY }}
+          secret_key: ${{ secrets.SECRET_KEY }}

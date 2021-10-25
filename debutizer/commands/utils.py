@@ -3,12 +3,22 @@ import shutil
 from pathlib import Path
 from typing import List
 
-from ..errors import CommandError
+from ..errors import CommandError, UnexpectedError
 from ..package_py import PackagePy
 from ..print_utils import Color, Format, print_color
 from ..registry import Registry
 from ..source_package import SourcePackage
 from ..subprocess_utils import run
+from .artifacts import (
+    BINARY_PACKAGE_GLOB,
+    DEBIAN_ARCHIVE_GLOB,
+    DEBIAN_SOURCE_FILE_GLOB,
+    SOURCE_ARCHIVE_GLOB,
+    find_binary_packages,
+    find_debian_archives,
+    find_debian_source_files,
+    find_source_archives,
+)
 
 
 def get_package_dirs(package_dir: Path) -> List[Path]:
@@ -115,10 +125,6 @@ def build_package(
                 root=True,
             )
 
-    # pbuilder does not reproduce the source archive, copy it manually
-    # for orig_archive in working_dir.glob(SOURCE_ARCHIVE_GLOB):
-    #     shutil.copy2(orig_archive, output_dir)
-
 
 def make_chroot(distribution: str) -> Path:
     """Creates a chroot environment for the package to be built in, if one does not
@@ -158,6 +164,80 @@ def make_chroot(distribution: str) -> Path:
     return archive_path
 
 
-DEBIAN_SOURCE_FILE_GLOB = "*.dsc"
-SOURCE_ARCHIVE_GLOB = "*.orig.tar.*"
-DEBIAN_ARCHIVE_GLOB = "*.debian.tar.*"
+def copy_source_output(
+    package_build_dir: Path,
+    artifacts_dir: Path,
+    distribution: str,
+    component: str,
+):
+    dsc_files = find_debian_source_files(package_build_dir)
+    orig_tar_files = find_source_archives(package_build_dir)
+    debian_tar_files = find_debian_archives(package_build_dir)
+
+    # Check that the expected files are present, but not _too_ present
+    if len(dsc_files) == 0:
+        raise CommandError(
+            f"The build process failed to produce a Debian source "
+            f"({DEBIAN_SOURCE_FILE_GLOB}) file."
+        )
+    elif len(dsc_files) > 1:
+        raise UnexpectedError(
+            f"The build process produced more than one Debian source "
+            f"({DEBIAN_SOURCE_FILE_GLOB}) file. This shouldn't be possible, as "
+            f"only one source package can be built at a time."
+        )
+    if len(orig_tar_files) == 0:
+        raise CommandError(
+            f"The build process failed to produce a source archive "
+            f"({SOURCE_ARCHIVE_GLOB}) file. "
+        )
+    elif len(orig_tar_files) > 1:
+        raise UnexpectedError(
+            f"The build process produced more than one source archive "
+            f"({SOURCE_ARCHIVE_GLOB}) file. This shouldn't be possible, as only "
+            f"one source package can be built at a time."
+        )
+    if len(debian_tar_files) == 0:
+        raise CommandError(
+            f"The build process failed to produce a Debian archive "
+            f"({DEBIAN_ARCHIVE_GLOB}) file."
+        )
+    elif len(debian_tar_files) > 1:
+        raise UnexpectedError(
+            f"The build process produced more than one Debian archive "
+            f"({DEBIAN_ARCHIVE_GLOB}) file. This shouldn't be possible as only "
+            "one source package can be built at a time."
+        )
+
+    source_path = artifacts_dir / Path("dists") / distribution / component / "source"
+    source_path.mkdir(parents=True, exist_ok=True)
+    for source_file in dsc_files + orig_tar_files + debian_tar_files:
+        shutil.copy2(source_file, source_path)
+
+
+def copy_binary_output(
+    package_build_dir: Path,
+    artifacts_dir: Path,
+    distribution: str,
+    component: str,
+    architecture: str,
+):
+    deb_files = find_binary_packages(package_build_dir)
+
+    # Check that the expected files are present, but not _too_ present
+    if len(deb_files) == 0:
+        raise CommandError(
+            f"The build process failed to produce any binary package "
+            f"({BINARY_PACKAGE_GLOB}) files."
+        )
+
+    binary_path = (
+        artifacts_dir
+        / Path("dists")
+        / distribution
+        / component
+        / f"binary-{architecture}"
+    )
+    binary_path.mkdir(parents=True, exist_ok=True)
+    for deb_file in deb_files:
+        shutil.copy2(deb_file, binary_path)

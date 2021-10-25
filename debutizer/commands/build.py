@@ -1,16 +1,16 @@
 import argparse
-import os
 import shutil
-from pathlib import Path
 
-from ..errors import CommandError
-from ..print_utils import Color, Format, done_message, print_color
+from ..environment import Environment
+from ..print_utils import Color, Format, print_color, print_done
 from ..registry import Registry
 from ..source_package import SourcePackage
 from ..upstreams import Upstream
-from .command import Command, register
+from .command import Command
 from .utils import (
     build_package,
+    copy_binary_output,
+    copy_source_output,
     get_package_dirs,
     make_chroot,
     make_source_files,
@@ -18,26 +18,19 @@ from .utils import (
 )
 
 
-@register("build")
 class BuildCommand(Command):
-    def define_args(self) -> argparse.ArgumentParser:
-        parser = argparse.ArgumentParser(
+    def __init__(self):
+        self.parser = argparse.ArgumentParser(
             prog="debutizer build", description="Builds your APT packages"
         )
 
-        self.add_common_args(parser)
-
-        parser.add_argument(
-            "--debug",
-            action="store_true",
-            default=False,
-            help="Enters a shell if the build fails",
-        )
-
-        return parser
+        self.add_common_args()
 
     def behavior(self, args: argparse.Namespace) -> None:
         registry = Registry()
+
+        Environment.codename = args.distribution
+        Environment.architecture = args.architecture
 
         if args.build_dir.is_dir():
             shutil.rmtree(args.build_dir)
@@ -67,45 +60,19 @@ class BuildCommand(Command):
                 chroot_archive_path,
             )
 
-            _copy_build_output(
+            copy_binary_output(
                 package_build_dir=package_py.build_dir,
                 artifacts_dir=args.artifacts_dir,
                 distribution=args.distribution,
                 component=package_py.component,
                 architecture=args.architecture,
             )
+            copy_source_output(
+                package_build_dir=package_py.build_dir,
+                artifacts_dir=args.artifacts_dir,
+                distribution=args.distribution,
+                component=package_py.component,
+            )
 
             print("")
-            done_message("Build")
-
-
-def _copy_build_output(
-    package_build_dir: Path,
-    artifacts_dir: Path,
-    distribution: str,
-    component: str,
-    architecture: str,
-):
-    deb_files = list(package_build_dir.glob(_BINARY_PACKAGE_GLOB))
-
-    # Check that the expected files are present, but not _too_ present
-    if len(deb_files) == 0:
-        raise CommandError(
-            f"The build process failed to produce any binary package "
-            f"({_BINARY_PACKAGE_GLOB}) files."
-        )
-
-    binary_path = (
-        artifacts_dir
-        / Path("dists")
-        / distribution
-        / component
-        / f"binary-{architecture}"
-    )
-    binary_path.mkdir(parents=True, exist_ok=True)
-    for deb_file in deb_files:
-        shutil.copy2(deb_file, binary_path)
-
-
-_BINARY_PACKAGE_GLOB = "*.deb"
-_SOURCE_ARCHIVE_GLOB = "*.orig.tar.*"
+            print_done("Build")

@@ -29,7 +29,7 @@ def print_color(
     print(f"{format_.value}{color.value}{message}{_END}", **kwargs)
 
 
-def done_message(task: str):
+def print_done(task: str):
     if "DEBUTIZER_AVRDUDE_MODE" in os.environ:
         message = "debutizer done.  Thank you."
     else:
