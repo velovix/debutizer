@@ -16,6 +16,10 @@ jobs:
       - uses: ./.github/actions/release
         with:
           distribution: ${{ matrix.distribution }}
+          # We check against the production repo so that new packages will be
+          # rebuilt for every new commit before being introduced to production,
+          # making development easier.
+          upstream_repo: http://apt.debutizer.dev
           bucket_name: apt-staging-debutizer-dev
           access_key: ${{ secrets.STAGING_ACCESS_KEY }}
           secret_key: ${{ secrets.STAGING_SECRET_KEY }}
