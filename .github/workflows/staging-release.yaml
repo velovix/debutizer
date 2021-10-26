@@ -3,7 +3,7 @@ name: Staging Release
 on:
   push:
     branches:
-      - main
+      - feature/13-package-signing
 
 jobs:
   release:
