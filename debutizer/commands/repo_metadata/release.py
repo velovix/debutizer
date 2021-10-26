@@ -9,7 +9,9 @@ from debutizer.errors import CommandError
 from debutizer.print_utils import Color, Format, print_color
 
 
-def add_release_files(artifacts_dir: Path, sign: bool, gpg_key_id: Optional[str]) -> List[Path]:
+def add_release_files(
+    artifacts_dir: Path, sign: bool, gpg_key_id: Optional[str]
+) -> List[Path]:
     """Adds Release files to the given APT package file tree. Release files provide MD5
     hashes for Packages and Sources files, verifying their integrity. They also contain
     metadata related to the repository.
@@ -79,7 +81,14 @@ def add_release_files(artifacts_dir: Path, sign: bool, gpg_key_id: Optional[str]
 
 def _import_gpg_key(key: str) -> None:
     process = subprocess.Popen(
-        ["gpg", "--armor", "--import"],
+        [
+            "gpg",
+            "--armor",
+            "--import",
+            "--no-tty",
+            "--batch",
+            "--yes",
+        ],
         stdout=subprocess.PIPE,
         stdin=subprocess.PIPE,
     )
