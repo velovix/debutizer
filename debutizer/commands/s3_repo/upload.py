@@ -1,6 +1,5 @@
 import argparse
 import base64
-import gzip
 import hashlib
 import hmac
 import os
@@ -12,16 +11,17 @@ from datetime import datetime, timezone
 from email.utils import format_datetime
 from pathlib import Path
 from time import sleep
-from typing import List
 from urllib.parse import urlparse
 
 import requests
 
 from debutizer.errors import CommandError, UnexpectedError
-from debutizer.print_utils import Color, Format, print_color, print_done
+from debutizer.print_utils import print_done
 
 from ..artifacts import find_archives
 from ..command import Command
+from ..repo_metadata import add_packages_files, add_release_files, add_sources_files
+from ..utils import sensitive_temp_file
 
 
 class UploadCommand(Command):
@@ -59,11 +59,36 @@ class UploadCommand(Command):
             required=True,
             help="The secret key for this bucket",
         )
+        self.parser.add_argument(
+            "--sign",
+            action="store_true",
+            help="If provided, the Release files will be signed. If --gpg-key-id is "
+            "provided, that key will be used. Otherwise, the GPG key stored in the "
+            "$GPG_SIGNING_KEY environment variable will be added to your keyring and "
+            "used. If your key has a password, store it in the $GPG_PASSWORD "
+            "environment variable.",
+        )
+        self.parser.add_argument(
+            "--gpg-key-id",
+            type=str,
+            required=False,
+            help="The ID of the GPG key in your keyring to sign Release files with",
+        )
 
     def parse_args(self) -> argparse.Namespace:
         return self.parser.parse_args(sys.argv[3:])
 
     def behavior(self, args: argparse.Namespace) -> None:
+        if (
+            args.sign
+            and args.gpg_key_id is None
+            and "GPG_SIGNING_KEY" not in os.environ
+        ):
+            raise CommandError(
+                "When signing is enabled, either the --gpg-key-id or the "
+                "$GPG_SIGNING_KEY environment variable must be set"
+            )
+
         endpoint = urlparse(args.endpoint)
         if endpoint.scheme not in _SUPPORTED_SCHEMES:
             raise CommandError(
@@ -95,8 +120,11 @@ class UploadCommand(Command):
             secret_key=args.secret_key,
             mount_path=Path(mount_path),
         ):
-            metadata_files += _update_packages_file(args.artifacts_dir)
-            metadata_files += _update_sources_file(args.artifacts_dir)
+            metadata_files += add_packages_files(args.artifacts_dir)
+            metadata_files += add_sources_files(args.artifacts_dir)
+            metadata_files += add_release_files(
+                args.artifacts_dir, args.sign, args.gpg_key_id
+            )
 
         for metadata_file in metadata_files:
             _upload_artifact(
@@ -105,6 +133,8 @@ class UploadCommand(Command):
                 secret_key=args.secret_key,
                 artifacts_dir=args.artifacts_dir,
                 artifact_file_path=metadata_file,
+                # Metadata files update often
+                no_cache=True,
             )
 
         print("")
@@ -117,6 +147,7 @@ def _upload_artifact(
     secret_key: str,
     artifacts_dir: Path,
     artifact_file_path: Path,
+    no_cache: bool = False,
 ) -> None:
     key = str(artifact_file_path.relative_to(artifacts_dir))
 
@@ -159,6 +190,8 @@ def _upload_artifact(
     )
     signature_str = base64.b64encode(signature.digest()).decode().rstrip("\n")
     prepared.headers["Authorization"] = f"AWS {access_key}:{signature_str}"
+    if no_cache:
+        prepared.headers["Cache-Control"] = "no-cache"
 
     with requests.Session() as session:
         try:
@@ -177,17 +210,13 @@ def _upload_artifact(
 def _mount_s3fs(
     endpoint: str, bucket: str, access_key: str, secret_key: str, mount_path: Path
 ):
-    _, passwd_path = tempfile.mkstemp()
-    try:
-        with Path(passwd_path).open("w") as f:
-            f.write(f"{access_key}:{secret_key}")
-
+    with sensitive_temp_file(f"{access_key}:{secret_key}") as password_path:
         subprocess.run(
             [
                 "s3fs",
                 str(mount_path),
                 "-o",
-                f"passwd_file={passwd_path}",
+                f"passwd_file={password_path}",
                 "-o",
                 f"url={endpoint}",
                 "-o",
@@ -208,81 +237,6 @@ def _mount_s3fs(
                 ["umount", str(mount_path)],
                 check=True,
             )
-    finally:
-        os.remove(passwd_path)
-
-
-def _update_packages_file(artifacts_dir: Path) -> List[Path]:
-    packages_files = []
-
-    dirs = artifacts_dir.glob("dists/*/*/binary-*")
-    dirs = (d.relative_to(artifacts_dir) for d in dirs)
-
-    for dir_ in dirs:
-        print_color(
-            f"Updating the Packages file for packages in {dir_}",
-            color=Color.MAGENTA,
-            format_=Format.BOLD,
-        )
-
-        result = subprocess.run(
-            [
-                "dpkg-scanpackages",
-                "--multiversion",
-                dir_,
-            ],
-            cwd=artifacts_dir,
-            check=True,
-            stdout=subprocess.PIPE,
-            encoding="utf-8",
-        )
-        packages_file = artifacts_dir / dir_ / "Packages"
-        packages_content = result.stdout.encode()
-        packages_file.write_bytes(packages_content)
-        packages_files.append(packages_file)
-
-        compressed_file = packages_file.with_suffix(".gz")
-        with gzip.open(compressed_file, "wb") as f:
-            f.write(packages_content)
-        packages_files.append(compressed_file)
-
-    return packages_files
-
-
-def _update_sources_file(artifacts_dir: Path) -> List[Path]:
-    sources_files = []
-
-    dirs = artifacts_dir.glob("dists/*/*/source")
-    dirs = (d.relative_to(artifacts_dir) for d in dirs)
-
-    for dir_ in dirs:
-        print_color(
-            f"Updating the Sources file for packages in {dir_}",
-            color=Color.MAGENTA,
-            format_=Format.BOLD,
-        )
-
-        result = subprocess.run(
-            [
-                "dpkg-scansources",
-                dir_,
-            ],
-            cwd=artifacts_dir,
-            check=True,
-            stdout=subprocess.PIPE,
-            encoding="utf-8",
-        )
-        sources_file = artifacts_dir / dir_ / "Sources"
-        sources_content = result.stdout.encode()
-        sources_file.write_bytes(sources_content)
-        sources_files.append(sources_file)
-
-        compressed_file = sources_file.with_suffix(".gz")
-        with gzip.open(compressed_file, "wb") as f:
-            f.write(sources_content)
-        sources_files.append(compressed_file)
-
-    return sources_files
 
 
 _SUPPORTED_SCHEMES = ["http", "https"]
