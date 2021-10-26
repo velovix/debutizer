@@ -11,8 +11,8 @@ you're running on a Debian-based distribution, Debutizer can be installed with
 the following commands:
 
 ```bash
-curl -SsL https://raw.githubusercontent.com/velovix/debutizer/main/debutizer.key | apt-key add -
-echo "deb http://apt.debutizer.dev $(lsb_release -s -c) main" > /etc/apt/sources.list.d/debutizer.list
-apt update
-apt install debutizer
+curl -SsL https://raw.githubusercontent.com/velovix/debutizer/main/debutizer.key | sudo apt-key add -
+echo "deb http://apt.debutizer.dev $(lsb_release -s -c) main" | sudo tee /etc/apt/sources.list.d/debutizer.list
+sudo apt update
+sudo apt install debutizer
 ```
