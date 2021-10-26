@@ -1,3 +1,4 @@
+import gzip
 import subprocess
 from pathlib import Path
 from typing import List
@@ -39,7 +40,13 @@ def add_sources_files(artifacts_dir: Path) -> List[Path]:
             encoding="utf-8",
         )
         sources_file = artifacts_dir / dir_ / "Sources"
-        sources_file.write_text(result.stdout)
+        sources_content = result.stdout.encode()
+        sources_file.write_bytes(sources_content)
         sources_files.append(sources_file)
+
+        compressed_file = sources_file.with_suffix(".gz")
+        with gzip.open(compressed_file, "wb") as f:
+            f.write(sources_content)
+        sources_files.append(compressed_file)
 
     return sources_files
