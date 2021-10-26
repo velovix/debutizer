@@ -1,7 +1,9 @@
 import os
 import shutil
+import tempfile
+from contextlib import contextmanager
 from pathlib import Path
-from typing import List
+from typing import Iterator, List
 
 from ..errors import CommandError, UnexpectedError
 from ..package_py import PackagePy
@@ -284,3 +286,16 @@ def copy_binary_artifacts(
     binary_path.mkdir(parents=True, exist_ok=True)
     for deb_file in deb_files:
         shutil.copy2(deb_file, binary_path)
+
+
+@contextmanager
+def sensitive_temp_file(content: str) -> Iterator[Path]:
+    _, file_ = tempfile.mkstemp()
+    path = Path(file_)
+
+    with path.open("w") as f:
+        f.write(content)
+
+    yield path
+
+    path.unlink()
