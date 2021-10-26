@@ -20,3 +20,6 @@ jobs:
           bucket_name: apt-debutizer-dev
           access_key: ${{ secrets.PROD_ACCESS_KEY }}
           secret_key: ${{ secrets.PROD_SECRET_KEY }}
+        env:
+          GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
+          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}

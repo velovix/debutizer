@@ -36,4 +36,5 @@ runs:
       --bucket ${{ inputs.bucket_name }}
       --access-key ${{ inputs.access_key }}
       --secret-key ${{ inputs.secret_key }}
+      --sign
     shell: bash
