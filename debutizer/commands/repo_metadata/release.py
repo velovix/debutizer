@@ -2,14 +2,14 @@ import os
 import subprocess
 from contextlib import ExitStack
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from debutizer.commands.utils import sensitive_temp_file
 from debutizer.errors import CommandError
 from debutizer.print_utils import Color, Format, print_color
 
 
-def add_release_files(artifacts_dir: Path, sign: bool) -> List[Path]:
+def add_release_files(artifacts_dir: Path, sign: bool, gpg_key_id: Optional[str]) -> List[Path]:
     """Adds Release files to the given APT package file tree. Release files provide MD5
     hashes for Packages and Sources files, verifying their integrity. They also contain
     metadata related to the repository.
@@ -23,11 +23,12 @@ def add_release_files(artifacts_dir: Path, sign: bool) -> List[Path]:
 
     :param artifacts_dir: The root of the APT package file tree
     :param sign: If true, Release files will be signed as InRelease files
+    :param gpg_key_id: If provided, the GPG key with this ID will be used to sign
     :return: The newly created Release (and potentially InRelease) files
     """
     release_files = []
 
-    if sign:
+    if sign and gpg_key_id is None:
         _import_gpg_key(os.environ["GPG_SIGNING_KEY"])
 
     dirs = artifacts_dir.glob("dists/*")
@@ -70,7 +71,7 @@ def add_release_files(artifacts_dir: Path, sign: bool) -> List[Path]:
             )
 
             signed_release_file = release_file.with_name("InRelease")
-            _sign_file(release_file, signed_release_file)
+            _sign_file(release_file, signed_release_file, gpg_key_id)
             release_files.append(signed_release_file)
 
     return release_files
@@ -87,16 +88,19 @@ def _import_gpg_key(key: str) -> None:
         raise CommandError("Failed to import the GPG key")
 
 
-def _sign_file(input_: Path, output: Path) -> None:
+def _sign_file(input_: Path, output: Path, gpg_key_id: Optional[str]) -> None:
     command = [
         "gpg",
         "--pinentry-mode=loopback",
         "--batch",
         "--yes",
-        "--clearsign",
+        "--clear-sign",
         "--output",
         str(output),
     ]
+
+    if gpg_key_id is not None:
+        command += ["--default-key", gpg_key_id]
 
     gpg_password = os.environ.get("GPG_PASSWORD")
 

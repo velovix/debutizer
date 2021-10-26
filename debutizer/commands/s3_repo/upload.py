@@ -62,19 +62,31 @@ class UploadCommand(Command):
         self.parser.add_argument(
             "--sign",
             action="store_true",
-            help="If provided, the Release file will be signed using the GPG key "
-            "stored in the $GPG_SIGNING_KEY environment variable. If your key has a "
-            "password, store it in the $GPG_PASSWORD environment variable.",
+            help="If provided, the Release files will be signed. If --gpg-key-id is "
+            "provided, that key will be used. Otherwise, the GPG key stored in the "
+            "$GPG_SIGNING_KEY environment variable will be added to your keyring and "
+            "used. If your key has a password, store it in the $GPG_PASSWORD "
+            "environment variable.",
+        )
+        self.parser.add_argument(
+            "--gpg-key-id",
+            type=str,
+            required=False,
+            help="The ID of the GPG key in your keyring to sign Release files with",
         )
 
     def parse_args(self) -> argparse.Namespace:
         return self.parser.parse_args(sys.argv[3:])
 
     def behavior(self, args: argparse.Namespace) -> None:
-        if args.sign and "GPG_SIGNING_KEY" not in os.environ:
+        if (
+            args.sign
+            and args.gpg_key_id is None
+            and "GPG_SIGNING_KEY" not in os.environ
+        ):
             raise CommandError(
-                "The $GPG_SIGNING_KEY environment variable must be set when "
-                "signing is enabled"
+                "When signing is enabled, either the --gpg-key-id or the "
+                "$GPG_SIGNING_KEY environment variable must be set"
             )
 
         endpoint = urlparse(args.endpoint)
@@ -110,7 +122,9 @@ class UploadCommand(Command):
         ):
             metadata_files += add_packages_files(args.artifacts_dir)
             metadata_files += add_sources_files(args.artifacts_dir)
-            metadata_files += add_release_files(args.artifacts_dir, args.sign)
+            metadata_files += add_release_files(
+                args.artifacts_dir, args.sign, args.gpg_key_id
+            )
 
         for metadata_file in metadata_files:
             _upload_artifact(
