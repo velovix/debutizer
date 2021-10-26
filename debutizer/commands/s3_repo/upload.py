@@ -1,5 +1,6 @@
 import argparse
 import base64
+import gzip
 import hashlib
 import hmac
 import os
@@ -218,7 +219,6 @@ def _update_packages_file(artifacts_dir: Path) -> List[Path]:
     dirs = (d.relative_to(artifacts_dir) for d in dirs)
 
     for dir_ in dirs:
-        print("")
         print_color(
             f"Updating the Packages file for packages in {dir_}",
             color=Color.MAGENTA,
@@ -237,8 +237,14 @@ def _update_packages_file(artifacts_dir: Path) -> List[Path]:
             encoding="utf-8",
         )
         packages_file = artifacts_dir / dir_ / "Packages"
-        packages_file.write_text(result.stdout)
+        packages_content = result.stdout.encode()
+        packages_file.write_bytes(packages_content)
         packages_files.append(packages_file)
+
+        compressed_file = packages_file.with_suffix(".gz")
+        with gzip.open(compressed_file, "wb") as f:
+            f.write(packages_content)
+        packages_files.append(compressed_file)
 
     return packages_files
 
@@ -250,7 +256,6 @@ def _update_sources_file(artifacts_dir: Path) -> List[Path]:
     dirs = (d.relative_to(artifacts_dir) for d in dirs)
 
     for dir_ in dirs:
-        print("")
         print_color(
             f"Updating the Sources file for packages in {dir_}",
             color=Color.MAGENTA,
@@ -268,8 +273,14 @@ def _update_sources_file(artifacts_dir: Path) -> List[Path]:
             encoding="utf-8",
         )
         sources_file = artifacts_dir / dir_ / "Sources"
-        sources_file.write_text(result.stdout)
+        sources_content = result.stdout.encode()
+        sources_file.write_bytes(sources_content)
         sources_files.append(sources_file)
+
+        compressed_file = sources_file.with_suffix(".gz")
+        with gzip.open(compressed_file, "wb") as f:
+            f.write(sources_content)
+        sources_files.append(compressed_file)
 
     return sources_files
 
