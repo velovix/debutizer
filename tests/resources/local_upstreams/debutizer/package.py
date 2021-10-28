@@ -1,8 +1,16 @@
 from datetime import datetime
 from pathlib import Path
 
-from debutizer.copyright import Copyright
+from debutizer.binary_paragraph import BinaryParagraph
+from debutizer.copyright import (
+    Copyright,
+    CopyrightFiles,
+    CopyrightHeader,
+    CopyrightLicense,
+)
+from debutizer.relation import Dependency, PackageRelations, Relation
 from debutizer.source_package import SourcePackage
+from debutizer.source_paragraph import SourceParagraph
 from debutizer.upstreams import LocalUpstream
 from debutizer.version import Version
 
@@ -15,57 +23,74 @@ source_package = SourcePackage(package_dir, complete=False)
 
 source_package.set_source_format()
 
-source_package.control.set_source_package(
-    maintainer="Tyler Compton <xaviosx@gmail.com>",
-    section="utils",
-    priority="optional",
-    build_depends=[
-        "debhelper",
-        "dh-python",
-        "python3-all",
-        "python3-pytest",
-        "python3-setuptools",
-        "python3-debian",
-        "python3-xdg",
-        "python3-requests",
-        "s3fs",
-    ],
-    uploaders=["Tyler Compton <xaviosx@gmail.com>"],
-    homepage="https://github.com/velovix/debutizer",
+source_package.control.set_source(
+    SourceParagraph(
+        source=source_package.name,
+        maintainer="Tyler Compton <xaviosx@gmail.com>",
+        section="utils",
+        priority="optional",
+        build_depends=PackageRelations.from_strings(
+            [
+                "debhelper",
+                "dh-python",
+                "python3-all",
+                "python3-pytest",
+                "python3-setuptools",
+                "python3-debian",
+                "python3-xdg",
+                "python3-requests",
+                "s3fs",
+            ]
+        ),
+        uploaders=["Tyler Compton <xaviosx@gmail.com>"],
+        homepage="https://github.com/velovix/debutizer",
+    )
 )
-source_package.control.add_binary_package(
-    package="debutizer",
-    architecture="any",
-    description="A tool for managing APT packages",
-    section="utils",
-    priority="optional",
-    depends=[
-        "${python3:Depends}",
-        "${misc:Depends}",
-        "pbuilder",
-        "devscripts",
-        "quilt",
-    ],
-    recommends=[
-        "debian-keyring",
-    ],
-    homepage="https://github.com/velovix/debutizer",
+source_package.control.add_binary(
+    BinaryParagraph(
+        package="debutizer",
+        architecture="any",
+        description="A tool for managing APT packages",
+        section="utils",
+        priority="optional",
+        depends=PackageRelations.from_strings(
+            [
+                "${python3:Depends}",
+                "${misc:Depends}",
+                "pbuilder",
+                "devscripts",
+                "quilt",
+            ]
+        ),
+        recommends=PackageRelations.from_strings(
+            [
+                "debian-keyring",
+            ]
+        ),
+        homepage="https://github.com/velovix/debutizer",
+    )
 )
 
 source_package.copyright.set_header(
-    upstream_name="debutizer",
-    upstream_contact=["Tyler Compton <xaviosx@gmail.com>"],
-    source="https://github.com/velovix/debutizer",
-    license_="BSD-3-Clause",
-    copyright_="Copyright 2021 Tyler Compton",
+    CopyrightHeader(
+        upstream_name="debutizer",
+        upstream_contact=["Tyler Compton <xaviosx@gmail.com>"],
+        source="https://github.com/velovix/debutizer",
+        license_="BSD-3-Clause",
+        copyright_="Copyright 2021 Tyler Compton",
+    )
 )
 source_package.copyright.add_files(
-    files=["*", "debian/*"],
-    copyright_="Copyright 2021 Tyler Compton",
-    license_="BSD-3-Clause",
+    CopyrightFiles(
+        files=["*", "debian/*"],
+        copyright_="Copyright 2021 Tyler Compton",
+        license_="BSD-3-Clause",
+    )
 )
 source_package.copyright.add_license(
-    license_=Copyright.full_license_text("BSD-3-Clause"),
+    CopyrightLicense(
+        license_=Copyright.full_license_text("BSD-3-Clause"),
+    )
 )
 source_package.compat.from_distribution()
 

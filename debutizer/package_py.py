@@ -63,6 +63,9 @@ class PackagePy:
                 f"The source_package variable must be of type {SourcePackage.__name__}"
             )
 
+        # Apply any changes to the disk
+        self.source_package.save()
+
         # TODO: Type annotate this attribute when this PR makes it into a MyPy release
         #       https://github.com/python/mypy/pull/10548
         self.pre_build = getattr(package_module, "pre_build", lambda _: None)

@@ -1,6 +1,7 @@
-from typing import Dict, Optional
+from typing import Dict
 
 from .errors import CommandError
+from .relation import Dependency, Relation
 from .source_package import SourcePackage
 
 
@@ -14,20 +15,33 @@ class Registry:
     def __init__(self):
         self._packages: Dict[str, SourcePackage] = {}
 
-    def add(self, source_package: SourcePackage) -> None:
-        if source_package.name in self._packages:
+    def add(self, package: SourcePackage) -> None:
+        if package.name in self._packages:
             raise CommandError(
-                f"A source package with the name {source_package.name} has already "
+                f"A source package with the name {package.name} has already "
                 f"been registered! No two source packages may share the same name."
             )
 
-        self._packages[source_package.name] = source_package
+        self._packages[package.name] = package
 
-    def require(self, name: str) -> SourcePackage:
-        try:
-            return self._packages[name]
-        except KeyError:
-            raise NoSuchPackageError(name)
+    def make_relation(self, package_name: str) -> Relation:
+        source_package = None
+        binary_package = None
 
-    def get(self, name: str) -> Optional[SourcePackage]:
-        return self._packages.get(name)
+        for source in self._packages.values():
+            for binary in source.control.binaries:
+                if binary.package == package_name:
+                    source_package = source
+                    binary_package = binary
+
+        if binary_package is None:
+            raise CommandError(
+                f"Binary package {package_name} has not been added to the registry"
+            )
+
+        dependency = Dependency(
+            name=binary_package.package,
+            version=source_package.version,
+            relationship="=",
+        )
+        return Relation([dependency])

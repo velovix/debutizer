@@ -5,10 +5,88 @@ from debian import copyright as deb_copyright
 from debian.deb822 import Deb822
 
 from ._license_full_text import spdx_to_full_text
-from .deb822_utils import ListType, add_field
+from .deb822_schema import Deb822Schema
+from .deb822_utils import Field
 from .errors import CommandError
 
 _COPYRIGHT_FORMAT = "https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/"
+
+
+class CopyrightHeader(Deb822Schema):
+    def __init__(
+        self,
+        *,
+        format_: str = _COPYRIGHT_FORMAT,
+        upstream_name: Optional[str] = None,
+        upstream_contact: Optional[List[str]] = None,
+        source: Optional[str] = None,
+        disclaimer: Optional[str] = None,
+        comment: Optional[str] = None,
+        license_: Optional[str] = None,
+        copyright_: Optional[str] = None,
+    ):
+        super().__init__(Deb822)
+
+        self.format_ = format_
+        self.upstream_name = upstream_name
+        self.upstream_contact = upstream_contact
+        self.source = source
+        self.disclaimer = disclaimer
+        self.comment = comment
+        self.license_ = license_
+        self.copyright_ = copyright_
+
+    FIELDS = {
+        "format_": Field("Format"),
+        "upstream_name": Field("Upstream-Name"),
+        "upstream_contact": Field(
+            "Upstream-Contact", Field.Array(Field.Array.Separator.LINE_BASED)
+        ),
+        "source": Field("Source"),
+        "disclaimer": Field("Disclaimer"),
+        "comment": Field("Comment"),
+        "license_": Field("License"),  # TODO: Manage indentation. Synopsis?
+        "copyright_": Field("Copyright"),  # TODO: No synopsis?
+    }
+
+
+class CopyrightFiles(Deb822Schema):
+    def __init__(
+        self,
+        *,
+        files: List[str],
+        copyright_: str,
+        license_: str,
+        comment: Optional[str] = None,
+    ):
+        super().__init__(Deb822)
+
+        self.files = files
+        self.copyright_ = copyright_
+        self.license_ = license_
+        self.comment = comment
+
+    FIELDS = {
+        "files": Field(
+            "Files", Field.Array(Field.Array.Separator.WHITESPACE_SEPARATED)
+        ),
+        "copyright_": Field("Copyright"),  # TODO: No synopsis?
+        "license_": Field("License"),  # TODO: Synopsis?
+        "comment": Field("Comment"),  # TODO: Synopsis?
+    }
+
+
+class CopyrightLicense(Deb822Schema):
+    def __init__(self, *, license_: str, comment: Optional[str] = None):
+        super().__init__(Deb822)
+
+        self.license_ = license_
+        self.comment = comment
+
+    FIELDS = {
+        "license_": Field("License"),  # TODO: Synopsis?
+        "comment": Field("Comment"),  # TODO: No synopsis?
+    }
 
 
 class Copyright:
@@ -41,75 +119,30 @@ class Copyright:
         except deb_copyright.NotMachineReadableError as ex:
             raise CommandError(f"While parsing the copyright file: {ex}") from ex
 
-    def set_header(
-        self,
-        *,
-        format_: str = _COPYRIGHT_FORMAT,
-        upstream_name: Optional[str] = None,
-        upstream_contact: Optional[List[str]] = None,
-        source: Optional[str] = None,
-        disclaimer: Optional[str] = None,
-        comment: Optional[str] = None,
-        license_: Optional[str] = None,
-        copyright_: Optional[str] = None,
-        others: Dict[str, Union[str, List[str]]] = None,
-    ):
+    def set_header(self, header: CopyrightHeader) -> None:
         if self.deb_obj is None:
             self.deb_obj = deb_copyright.Copyright()
 
-        fields = Deb822()
-
-        add_field(fields, "Format", format_)
-        add_field(fields, "Upstream-Name", upstream_name)
-        add_field(fields, "Upstream-Contact", upstream_contact, ListType.LINE_BASED)
-        add_field(fields, "Source", source)
-        add_field(fields, "Disclaimer", disclaimer)
-        add_field(fields, "Comment", comment)
-        add_field(fields, "License", license_)  # TODO: Manage indentation. Synopsis?
-        add_field(fields, "Copyright", copyright_)  # TODO: No synopsis?
-
-        if others is not None:
-            for name, value in others.items():
-                add_field(fields, name, value)
-
-        self.deb_obj.header = deb_copyright.Header(data=fields)
-
+        self.deb_obj.header = deb_copyright.Header(data=header.serialize())
         self.save()
 
-    def add_files(
-        self,
-        *,
-        files: List[str],
-        copyright_: str,
-        license_: str,
-        comment: Optional[str] = None,
-    ):
+    def add_files(self, files: CopyrightFiles) -> None:
         if self.deb_obj is None:
             self.deb_obj = deb_copyright.Copyright()
 
-        fields = Deb822()
-
-        add_field(fields, "Files", files, ListType.WHITESPACE_SEPARATED)
-        add_field(fields, "Copyright", copyright_)  # TODO: No synopsis?
-        add_field(fields, "License", license_)  # TODO: Synopsis?
-        if comment is not None:
-            add_field(fields, "Comment", comment)  # TODO: No synopsis?
-
-        self.deb_obj.add_files_paragraph(deb_copyright.FilesParagraph(data=fields))
-
+        self.deb_obj.add_files_paragraph(
+            deb_copyright.FilesParagraph(data=files.serialize())
+        )
         self.save()
 
-    def add_license(self, *, license_: str, comment: Optional[str] = None):
+    def add_license(self, license_: CopyrightLicense) -> None:
         if self.deb_obj is None:
             self.deb_obj = deb_copyright.Copyright()
 
-        fields = Deb822()
-
-        add_field(fields, "License", license_)  # TODO: Synopsis?
-        if comment is not None:
-            add_field(fields, "Comment", comment)  # TODO: No synopsis?
-
-        self.deb_obj.add_license_paragraph(deb_copyright.LicenseParagraph(data=fields))
+        self.deb_obj.add_license_paragraph(
+            deb_copyright.LicenseParagraph(data=license_.serialize())
+        )
+        self.save()
 
     @staticmethod
     def full_license_text(spdx_identifier: str) -> str:
