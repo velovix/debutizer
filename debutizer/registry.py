@@ -34,7 +34,7 @@ class Registry:
                     source_package = source
                     binary_package = binary
 
-        if binary_package is None:
+        if binary_package is None or source_package is None:
             raise CommandError(
                 f"Binary package {package_name} has not been added to the registry"
             )
