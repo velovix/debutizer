@@ -34,7 +34,7 @@ class LocalUpstream(Upstream):
                 "--gzip",
                 f"--file={self.name}_{self.version.upstream_version}.orig.tar.gz",
                 f"--directory={build_dir}",
-                str(package_dir.relative_to(build_dir)),
+                package_dir.relative_to(build_dir),
             ],
             on_failure="Failed to compress the local source",
             cwd=build_dir,

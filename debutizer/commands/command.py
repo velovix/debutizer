@@ -10,6 +10,8 @@ from xdg.BaseDirectory import save_cache_path
 
 
 class Command(ABC):
+    """A Debutizer CLI command"""
+
     parser: argparse.ArgumentParser
     subcommands: Dict[str, "Command"] = {}
 

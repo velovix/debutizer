@@ -18,10 +18,11 @@ import requests
 from debutizer.errors import CommandError, UnexpectedError
 from debutizer.print_utils import print_done
 
+from debutizer.subprocess_utils import run
 from ..artifacts import find_archives
 from ..command import Command
 from ..repo_metadata import add_packages_files, add_release_files, add_sources_files
-from ..utils import sensitive_temp_file
+from ..utils import temp_file
 
 
 class UploadCommand(Command):
@@ -210,11 +211,11 @@ def _upload_artifact(
 def _mount_s3fs(
     endpoint: str, bucket: str, access_key: str, secret_key: str, mount_path: Path
 ):
-    with sensitive_temp_file(f"{access_key}:{secret_key}") as password_path:
-        subprocess.run(
+    with temp_file(f"{access_key}:{secret_key}") as password_path:
+        run(
             [
                 "s3fs",
-                str(mount_path),
+                mount_path,
                 "-o",
                 f"passwd_file={password_path}",
                 "-o",
@@ -224,7 +225,7 @@ def _mount_s3fs(
                 "-o",
                 "use_path_request_style",
             ],
-            check=True,
+            on_failure="Failed to mount the bucket",
         )
 
         try:
@@ -233,9 +234,9 @@ def _mount_s3fs(
             # Avoids a "device or resource busy" error
             sleep(5)
 
-            subprocess.run(
-                ["umount", str(mount_path)],
-                check=True,
+            run(
+                ["umount", mount_path],
+                on_failure="Failed to unmount the bucket",
             )
 
 

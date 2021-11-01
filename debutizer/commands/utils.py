@@ -3,7 +3,7 @@ import shutil
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterator, List
+from typing import Dict, Iterator, List, Set, Union
 
 from ..errors import CommandError, UnexpectedError
 from ..package_py import PackagePy
@@ -23,7 +23,8 @@ from .artifacts import (
 )
 
 
-def get_package_dirs(package_dir: Path) -> List[Path]:
+def find_package_dirs(package_dir: Path) -> List[Path]:
+    """Finds directories defining packages"""
     if not package_dir.is_dir():
         raise CommandError(f"The package directory '{package_dir}' does not exist")
 
@@ -40,7 +41,10 @@ def process_package_pys(
     registry: Registry,
     build_dir: Path,
 ) -> List[PackagePy]:
-    package_configs: List[PackagePy] = []
+    """Runs the package.py file in each package directory, extracting the configuration
+    provided by that file
+    """
+    package_pys: List[PackagePy] = []
 
     for package_dir in package_dirs:
         print("")
@@ -50,12 +54,12 @@ def process_package_pys(
             format_=Format.BOLD,
         )
         package_py = PackagePy(package_dir / PackagePy.FILE_NAME, build_dir)
-        package_configs.append(package_py)
+        package_pys.append(package_py)
         registry.add(package_py.source_package)
 
     print("")
 
-    for package_py in package_configs:
+    for package_py in package_pys:
         print_color(
             f"Running pre-build hook for {package_py.source_package.name}",
             color=Color.MAGENTA,
@@ -63,10 +67,78 @@ def process_package_pys(
         )
         package_py.pre_build(registry)
 
-    return package_configs
+    package_pys = _order_package_pys(package_pys)
+    return package_pys
+
+
+def _order_package_pys(package_pys: List[PackagePy]) -> List[PackagePy]:
+    """Order packages by the order in which they need to be built based on their
+    dependencies.
+    """
+    binary_package_names = []
+    for package_py in package_pys:
+        for binary_package in package_py.source_package.control.binaries:
+            binary_package_names.append(binary_package.package)
+
+    start_nodes: List[PackagePy] = []
+    # Keep track of all unprocessed edges in the graph for each package
+    edges: Dict[PackagePy, Set[PackagePy]] = {}
+
+    for package_py in package_pys:
+        if package_py.source_package.control.source is None:
+            raise CommandError(
+                f"Source package {package_py.source_package.name} is missing a source "
+                f"paragraph in the control file"
+            )
+
+        depends_names = []
+        for relation in package_py.source_package.control.source.all_build_depends():
+            for dependency in relation:
+                depends_names.append(dependency.name)
+
+        managed_depends = set()
+        for name in set(depends_names) & set(binary_package_names):
+            for other in package_pys:
+                other_binary_names = [
+                    b.package for b in other.source_package.control.binaries
+                ]
+                if name in other_binary_names:
+                    managed_depends.add(other)
+
+        edges[package_py] = managed_depends
+
+        # Add this as a start node if this package has no dependencies
+        if len(managed_depends) == 0:
+            start_nodes.append(package_py)
+
+    ordered: List[PackagePy] = []
+
+    while len(start_nodes) > 0:
+        node = start_nodes.pop()
+        ordered.append(node)
+
+        reverse_depends = (p for p in package_pys if node in edges[p])
+        for package in reverse_depends:
+            edges[package].remove(node)
+            if len(edges[package]) == 0:
+                start_nodes.append(package)
+
+    if len(ordered) != len(package_pys):
+        raise CommandError(
+            "Could not solve dependency graph. Is there a circular dependency?"
+        )
+
+    return ordered
 
 
 def make_source_files(build_dir: Path, source_package: SourcePackage) -> Path:
+    """Generates files related to the source package, specifically the Debian source
+    file, the Debian archive, the source archive, and the .changes file.
+
+    :param build_dir: The directory to do work in
+    :param source_package: The source package object to generate files for
+    :return: The directory under the build directory where the new files are placed
+    """
     results_dir = build_dir / "outputs" / source_package.name
     results_dir.mkdir(parents=True, exist_ok=True)
     working_dir = source_package.directory.parent
@@ -82,7 +154,7 @@ def make_source_files(build_dir: Path, source_package: SourcePackage) -> Path:
             "dpkg-source",
             "--compression=xz",
             "--build",
-            str(source_package.directory),
+            source_package.directory,
         ],
         on_failure="Failed to generate Debian source files",
         cwd=working_dir,
@@ -138,23 +210,34 @@ def build_package(
     build_dir: Path,
     chroot_archive_path: Path,
 ) -> Path:
+    """Builds binary packages for the given source package.
+
+    :param source_package: The source package object to build binary packages for
+    :param build_dir: The directory to do work in
+    :param chroot_archive_path: A path to the pbuilder chroot archive
+    :return: The directory under the build directory where the new files are placed
+    """
     working_dir = source_package.directory.parent
     results_dir = build_dir / "outputs" / source_package.name
     results_dir.mkdir(parents=True, exist_ok=True)
 
-    # Run the build
     dsc_file = working_dir / f"{source_package.name}_{source_package.version}.dsc"
+
+    command: List[Union[Path, str]] = ["pbuilder", "build"]
+
+    command += [
+        "--hookdir",
+        Path(__file__).parent / "pbuilder_hooks",
+        "--buildresult",
+        results_dir,
+        "--basetgz",
+        chroot_archive_path,
+        dsc_file,
+    ]
+
     try:
         run(
-            [
-                "pbuilder",
-                "build",
-                "--buildresult",
-                str(results_dir),
-                "--basetgz",
-                str(chroot_archive_path),
-                str(dsc_file),
-            ],
+            command,
             on_failure="Failed to build the package",
             cwd=working_dir,
             root=True,
@@ -163,7 +246,7 @@ def build_package(
         if os.geteuid() != 0:
             # Give the current user ownership of build output
             run(
-                ["chown", "--recursive", str(os.getuid()), str(results_dir)],
+                ["chown", "--recursive", str(os.getuid()), results_dir],
                 on_failure="Failed to fix permissions for the build path",
                 root=True,
             )
@@ -178,11 +261,7 @@ def make_chroot(distribution: str) -> Path:
     :param distribution: The distribution codename to create a chroot for
     :return: A path to the archive containing the chroot contents
     """
-    pbuilder_cache_str = os.environ.get(
-        "DEBUTIZER_PBUILDER_CACHE_DIR", "/var/cache/pbuilder"
-    )
-    pbuilder_cache_path = Path(pbuilder_cache_str)
-    archive_path = pbuilder_cache_path / f"debutizer-{distribution}.tgz"
+    archive_path = _chroot_tgz_path(distribution)
 
     if not archive_path.is_file():
         # Create a chroot for builds to be performed in
@@ -191,22 +270,59 @@ def make_chroot(distribution: str) -> Path:
             color=Color.MAGENTA,
             format_=Format.BOLD,
         )
-        run(
-            [
-                "pbuilder",
-                "create",
-                "--basetgz",
-                str(archive_path),
-                "--distribution",
-                distribution,
-            ],
-            on_failure="Failed to create pbuilder chroot environment",
-            root=True,
-        )
+        try:
+            run(
+                [
+                    "pbuilder",
+                    "create",
+                    "--basetgz",
+                    archive_path,
+                    "--distribution",
+                    distribution,
+                ],
+                on_failure="Failed to create pbuilder chroot environment",
+                root=True,
+            )
+        except Exception:
+            # Remove the partially created chroot
+            archive_path.unlink()
+            raise
     else:
         print(f"Using existing chroot at {archive_path}")
 
     return archive_path
+
+
+def set_chroot_repos(distribution: str, repositories: List[str]) -> None:
+    """Sets additional repositories for the chroot corresponding to the given
+    distribution
+    """
+    apt_list = Path("/etc/apt/sources.list.d/debutizer.list")
+
+    script = "#!/bin/sh\n"
+    script += f"rm -f {apt_list}\n"
+    for repo in repositories:
+        script += f"echo '{repo}' >> {apt_list}\n"
+
+    with temp_file(script) as script_file:
+        print_color(
+            f"Adding APT lists to the '{distribution}' chroot",
+            color=Color.MAGENTA,
+            format_=Format.BOLD,
+        )
+        run(
+            [
+                "pbuilder",
+                "execute",
+                "--basetgz",
+                _chroot_tgz_path(distribution),
+                "--save-after-exec",
+                "--",
+                script_file,
+            ],
+            on_failure="Failed to set APT repositories in the chroot",
+            root=True,
+        )
 
 
 def copy_source_artifacts(
@@ -214,7 +330,14 @@ def copy_source_artifacts(
     artifacts_dir: Path,
     distribution: str,
     component: str,
-):
+) -> None:
+    """Copies source files to their proper location in the artifacts directory.
+
+    :param results_dir: The path where the source files are
+    :param artifacts_dir: The artifacts directory
+    :param distribution: The distribution these packages are for
+    :param component: The repository component that this package is under
+    """
     dsc_files = find_debian_source_files(results_dir)
     orig_tar_files = find_source_archives(results_dir)
     debian_tar_files = find_debian_archives(results_dir)
@@ -267,6 +390,13 @@ def copy_binary_artifacts(
     component: str,
     architecture: str,
 ):
+    """Copies binary package files to their proper location in the artifacts directory.
+
+    :param results_dir: The path where the binary package files are
+    :param artifacts_dir: The artifacts directory
+    :param distribution: The distribution these packages are for
+    :param component: The repository component that this package is under
+    """
     deb_files = find_binary_packages(results_dir)
 
     # Check that the expected files are present, but not _too_ present
@@ -289,7 +419,7 @@ def copy_binary_artifacts(
 
 
 @contextmanager
-def sensitive_temp_file(content: str) -> Iterator[Path]:
+def temp_file(content: str) -> Iterator[Path]:
     _, file_ = tempfile.mkstemp()
     path = Path(file_)
 
@@ -299,3 +429,11 @@ def sensitive_temp_file(content: str) -> Iterator[Path]:
     yield path
 
     path.unlink()
+
+
+def _chroot_tgz_path(distribution: str) -> Path:
+    pbuilder_cache_str = os.environ.get(
+        "DEBUTIZER_PBUILDER_CACHE_DIR", "/var/cache/pbuilder"
+    )
+    pbuilder_cache_path = Path(pbuilder_cache_str)
+    return pbuilder_cache_path / f"debutizer-{distribution}.tgz"

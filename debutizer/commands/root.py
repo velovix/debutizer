@@ -6,6 +6,10 @@ from .command import Command
 
 
 class RootCommand(Command):
+    """The command at the root of the command tree. All top-level commands, like
+    'debutizer build', are a subcommand of this command.
+    """
+
     def __init__(self):
         self.parser = argparse.ArgumentParser(
             prog="debutizer",

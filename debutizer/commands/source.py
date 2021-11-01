@@ -8,7 +8,7 @@ from ..upstreams import Upstream
 from .command import Command
 from .utils import (
     copy_source_artifacts,
-    get_package_dirs,
+    find_package_dirs,
     make_source_files,
     process_package_pys,
 )
@@ -17,7 +17,7 @@ from .utils import (
 class SourceCommand(Command):
     def __init__(self):
         self.parser = argparse.ArgumentParser(
-            prog="debutizer source", description="Fetches and sources your APT packages"
+            prog="debutizer source", description="Fetches and sources APT packages"
         )
 
         self.add_common_args()
@@ -33,7 +33,7 @@ class SourceCommand(Command):
         Upstream.build_root = args.build_dir
         SourcePackage.distribution = args.distribution
 
-        package_dirs = get_package_dirs(args.package_dir)
+        package_dirs = find_package_dirs(args.package_dir)
         package_pys = process_package_pys(package_dirs, registry, args.build_dir)
 
         for package_py in package_pys:

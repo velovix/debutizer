@@ -1,9 +1,11 @@
-import gzip
 import subprocess
 from pathlib import Path
 from typing import List
 
 from debutizer.print_utils import Color, Format, print_color
+
+from debutizer.subprocess_utils import run
+from .utils import save_metadata_files
 
 
 def add_sources_files(artifacts_dir: Path) -> List[Path]:
@@ -29,24 +31,17 @@ def add_sources_files(artifacts_dir: Path) -> List[Path]:
             format_=Format.BOLD,
         )
 
-        result = subprocess.run(
+        result = run(
             [
                 "dpkg-scansources",
                 dir_,
             ],
+            on_failure="Failed to update the Sources file",
             cwd=artifacts_dir,
-            check=True,
             stdout=subprocess.PIPE,
             encoding="utf-8",
         )
         sources_file = artifacts_dir / dir_ / "Sources"
-        sources_content = result.stdout.encode()
-        sources_file.write_bytes(sources_content)
-        sources_files.append(sources_file)
-
-        compressed_file = sources_file.with_suffix(".gz")
-        with gzip.open(compressed_file, "wb") as f:
-            f.write(sources_content)
-        sources_files.append(compressed_file)
+        sources_files += save_metadata_files(sources_file, result.stdout)
 
     return sources_files

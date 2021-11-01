@@ -92,7 +92,7 @@ source_package.copyright.add_license(
         license_=Copyright.full_license_text("BSD-3-Clause"),
     )
 )
-source_package.compat.from_distribution()
+source_package.set_debhelper_compat_version()
 
 source_package.changelog.add(
     version="0.2.0-1",
