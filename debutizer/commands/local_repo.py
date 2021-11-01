@@ -1,7 +1,12 @@
-import functools
-from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Thread
+from wsgiref import simple_server
+
+import falcon
+
+
+# TODO: Consider using http.server instead of Falcon when Python 3.6 is no
+#       longer supported
 
 
 class LocalRepository:
@@ -11,11 +16,16 @@ class LocalRepository:
 
     def __init__(self, port: int, artifacts_dir: Path):
         self._artifacts_dir = artifacts_dir
-        self._server = ThreadingHTTPServer(
-            ("", port),
-            functools.partial(SimpleHTTPRequestHandler, directory=artifacts_dir),
+        self._app = falcon.App()
+
+        self._app.add_static_route("/", str(self._artifacts_dir))
+
+        self._server = simple_server.make_server(
+            "0.0.0.0",
+            port,
+            app=self._app,
+            handler_class=simple_server.WSGIRequestHandler,
         )
-        self._server.allow_reuse_address = True
 
         self._thread = Thread(
             name="Local Repository",
@@ -28,3 +38,4 @@ class LocalRepository:
 
     def close(self):
         self._server.shutdown()
+        self._thread.join()

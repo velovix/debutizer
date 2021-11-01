@@ -39,6 +39,7 @@ source_package.control.set_source(
                 "python3-debian",
                 "python3-xdg",
                 "python3-requests",
+                "python3-falcon",
                 "s3fs",
             ]
         ),
