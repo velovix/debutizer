@@ -27,6 +27,7 @@ class LocalRepository:
             app=self._app,
             handler_class=simple_server.WSGIRequestHandler,
         )
+        self._server.allow_reuse_address = True
 
         self._thread = Thread(
             name="Local Repository",
@@ -38,6 +39,6 @@ class LocalRepository:
         self._thread.start()
 
     def close(self):
-        self._server.server_close()
         self._server.shutdown()
+        self._server.server_close()
         self._thread.join()
