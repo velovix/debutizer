@@ -4,9 +4,11 @@ import platform
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List, Callable
 
 from xdg.BaseDirectory import save_cache_path
+
+from debutizer.print_utils import print_color
 
 
 class Command(ABC):
@@ -14,6 +16,8 @@ class Command(ABC):
 
     parser: argparse.ArgumentParser
     subcommands: Dict[str, "Command"] = {}
+    cleanup_hooks: List[Callable[[], None]] = []
+    """Hooks that run after a command is finished, even in the case of an error"""
 
     def add_subcommand(self, name: str, command: "Command") -> None:
         """Registers the command under the given name.
@@ -33,7 +37,14 @@ class Command(ABC):
     def run(self) -> None:
         """Runs the command"""
         args = self.parse_args()
-        self.behavior(args)
+        try:
+            self.behavior(args)
+        finally:
+            try:
+                for hook in self.cleanup_hooks:
+                    hook()
+            except Exception as ex:
+                print_color(f"WARNING: Ignoring exception while cleaning up: {ex}")
 
     def add_archive_args(self) -> None:
         self.parser.add_argument(

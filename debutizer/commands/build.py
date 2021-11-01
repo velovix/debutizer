@@ -48,6 +48,7 @@ class BuildCommand(Command):
         registry = Registry()
         local_repo = LocalRepository(port=8080, artifacts_dir=args.artifacts_dir)
         local_repo.start()
+        self.cleanup_hooks.append(local_repo.close)
 
         Environment.codename = args.distribution
         Environment.architecture = args.architecture
