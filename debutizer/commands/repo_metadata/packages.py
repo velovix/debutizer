@@ -1,9 +1,11 @@
-import gzip
 import subprocess
 from pathlib import Path
 from typing import List
 
 from debutizer.print_utils import Color, Format, print_color
+from debutizer.subprocess_utils import run
+
+from .utils import save_metadata_files
 
 
 def add_packages_files(artifacts_dir: Path) -> List[Path]:
@@ -30,25 +32,18 @@ def add_packages_files(artifacts_dir: Path) -> List[Path]:
             format_=Format.BOLD,
         )
 
-        result = subprocess.run(
+        result = run(
             [
                 "dpkg-scanpackages",
                 "--multiversion",
                 dir_,
             ],
+            on_failure="Failed to update the Packages file",
             cwd=artifacts_dir,
-            check=True,
             stdout=subprocess.PIPE,
             encoding="utf-8",
         )
         packages_file = artifacts_dir / dir_ / "Packages"
-        packages_content = result.stdout.encode()
-        packages_file.write_bytes(packages_content)
-        packages_files.append(packages_file)
-
-        compressed_file = packages_file.with_suffix(".gz")
-        with gzip.open(compressed_file, "wb") as f:
-            f.write(packages_content)
-        packages_files.append(compressed_file)
+        packages_files += save_metadata_files(packages_file, result.stdout)
 
     return packages_files

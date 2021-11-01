@@ -39,6 +39,7 @@ source_package.control.set_source(
                 "python3-debian",
                 "python3-xdg",
                 "python3-requests",
+                "python3-flask",
                 "s3fs",
             ]
         ),
@@ -92,7 +93,7 @@ source_package.copyright.add_license(
         license_=Copyright.full_license_text("BSD-3-Clause"),
     )
 )
-source_package.compat.from_distribution()
+source_package.set_debhelper_compat_version()
 
 source_package.changelog.add(
     version="0.2.0-1",

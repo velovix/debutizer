@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Makes pbuilder update the package list before installing build dependencies.
+# This is necessary since we add a local APT repository to the source list.
+
+echo "Updating the package list..."
+apt-get update

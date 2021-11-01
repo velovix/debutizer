@@ -10,9 +10,19 @@ def main():
     """An exception handling wrapper around the real entrypoint, _main"""
     try:
         _main()
-    except CommandError as ex:
+    except (CommandError, KeyboardInterrupt) as ex:
         print("")
-        print_color(ex.message, color=Color.RED, format_=Format.BOLD, file=sys.stderr)
+        if isinstance(ex, KeyboardInterrupt):
+            print_color(
+                "Interrupted by SIGINT",
+                color=Color.RED,
+                format_=Format.BOLD,
+                file=sys.stderr,
+            )
+        else:
+            print_color(
+                ex.message, color=Color.RED, format_=Format.BOLD, file=sys.stderr
+            )
         if "DEBUTIZER_SHOW_TRACEBACKS" in os.environ:
             raise ex
         else:

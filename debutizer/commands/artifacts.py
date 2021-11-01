@@ -44,7 +44,7 @@ SOURCE_ARCHIVE_GLOB = "*.orig.tar.*"
 DEBIAN_ARCHIVE_GLOB = "*.debian.tar.*"
 
 
-_SOURCE_ARCHIVE_REGEX = re.compile("^.*\.orig\.tar\.[a-zA-Z]+$")
+_SOURCE_ARCHIVE_REGEX = re.compile(r"^.*\.orig\.tar\.[a-zA-Z]+$")
 """A more specific version of the source archive glob that filters out files that aren't
 actually archives, like mypackage.orig.tar.gz.asc.
 """

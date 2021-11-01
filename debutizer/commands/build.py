@@ -11,14 +11,17 @@ from ..registry import Registry
 from ..source_package import SourcePackage
 from ..upstreams import Upstream
 from .command import Command
+from .local_repo import LocalRepository
+from .repo_metadata import add_packages_files, add_release_files, add_sources_files
 from .utils import (
     build_package,
     copy_binary_artifacts,
     copy_source_artifacts,
-    get_package_dirs,
+    find_package_dirs,
     make_chroot,
     make_source_files,
     process_package_pys,
+    set_chroot_repos,
 )
 
 
@@ -41,7 +44,11 @@ class BuildCommand(Command):
         )
 
     def behavior(self, args: argparse.Namespace) -> None:
+        args.artifacts_dir.mkdir(exist_ok=True)
         registry = Registry()
+        local_repo = LocalRepository(port=8080, artifacts_dir=args.artifacts_dir)
+        local_repo.start()
+        self.cleanup_hooks.append(local_repo.close)
 
         Environment.codename = args.distribution
         Environment.architecture = args.architecture
@@ -54,7 +61,7 @@ class BuildCommand(Command):
         Upstream.build_root = args.build_dir
         SourcePackage.distribution = args.distribution
 
-        package_dirs = get_package_dirs(args.package_dir)
+        package_dirs = find_package_dirs(args.package_dir)
         chroot_archive_path = make_chroot(args.distribution)
         package_pys = process_package_pys(package_dirs, registry, args.build_dir)
 
@@ -70,13 +77,33 @@ class BuildCommand(Command):
                     new_package_pys.append(package_py)
             package_pys = new_package_pys
 
+        print("")
+        print_color(
+            "Building the following packages in this order:",
+            color=Color.MAGENTA,
+            format_=Format.BOLD,
+        )
         for package_py in package_pys:
+            print(f" * {package_py.source_package.name}")
+
+        for i, package_py in enumerate(package_pys):
             print("")
             print_color(
                 f"Building {package_py.source_package.name}",
                 color=Color.MAGENTA,
                 format_=Format.BOLD,
             )
+
+            if i == 0:
+                # This is the first package being built, and APT does not like empty
+                # repositories
+                repositories = []
+            else:
+                repositories = [
+                    f"deb [trusted=yes] http://localhost:8080 {args.distribution} main",
+                ]
+
+            set_chroot_repos(args.distribution, repositories)
 
             source_results_dir = make_source_files(
                 args.build_dir, package_py.source_package
@@ -100,6 +127,10 @@ class BuildCommand(Command):
                 component=package_py.component,
                 architecture=args.architecture,
             )
+
+            add_packages_files(args.artifacts_dir)
+            add_sources_files(args.artifacts_dir)
+            add_release_files(args.artifacts_dir, sign=False, gpg_key_id=None)
 
         print("")
         print_done("Build")

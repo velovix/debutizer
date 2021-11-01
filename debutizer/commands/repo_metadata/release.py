@@ -2,11 +2,12 @@ import os
 import subprocess
 from contextlib import ExitStack
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
-from debutizer.commands.utils import sensitive_temp_file
+from debutizer.commands.utils import temp_file
 from debutizer.errors import CommandError
 from debutizer.print_utils import Color, Format, print_color
+from debutizer.subprocess_utils import run
 
 
 def add_release_files(
@@ -48,15 +49,15 @@ def add_release_files(
         for key, value in metadata.items():
             metadata_flags += ["-o", f"APT::FTPArchive::Release::{key}={value}"]
 
-        result = subprocess.run(
+        result = run(
             [
                 "apt-ftparchive",
                 "release",
                 *metadata_flags,
                 dir_,
             ],
+            on_failure="Failed to update the Release file",
             cwd=artifacts_dir,
-            check=True,
             stdout=subprocess.PIPE,
             encoding="utf-8",
         )
@@ -98,14 +99,14 @@ def _import_gpg_key(key: str) -> None:
 
 
 def _sign_file(input_: Path, output: Path, gpg_key_id: Optional[str]) -> None:
-    command = [
+    command: List[Union[str, Path]] = [
         "gpg",
         "--pinentry-mode=loopback",
         "--batch",
         "--yes",
         "--clear-sign",
         "--output",
-        str(output),
+        output,
     ]
 
     if gpg_key_id is not None:
@@ -116,16 +117,13 @@ def _sign_file(input_: Path, output: Path, gpg_key_id: Optional[str]) -> None:
     with ExitStack() as stack:
         if gpg_password is not None:
             # Add a password if the GPG key uses one
-            password_path = stack.enter_context(sensitive_temp_file(gpg_password))
-            command += ["--passphrase-file", str(password_path)]
+            password_path = stack.enter_context(temp_file(gpg_password))
+            command += ["--passphrase-file", password_path]
 
         # Add the actual GPG command, which must be after all options
-        command += ["--sign", str(input_)]
+        command += ["--sign", input_]
 
-        try:
-            subprocess.run(command, check=True)
-        except subprocess.CalledProcessError:
-            raise CommandError(f"Failed to sign {input_} as {output}")
+        run(command, on_failure=f"Failed to sign {input_} as {output}")
 
 
 def _repo_metadata(path: Path) -> Dict[str, str]:

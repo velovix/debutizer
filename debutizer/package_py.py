@@ -75,3 +75,6 @@ class PackagePy:
         self.component = getattr(package_module, "component", "main")
         if not isinstance(self.component, str):
             raise CommandError("The component variable must be a string")
+
+    def __repr__(self) -> str:
+        return f"PackagePy(source_package={self.source_package})"

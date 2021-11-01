@@ -37,7 +37,7 @@ class SourceRepositoryUpstream(Upstream):
                 "--recurse-submodules",
                 f"--branch={revision}",
                 self.repository_url,
-                str(package_dir),
+                package_dir,
             ],
             on_failure="Failed to clone the upstream source",
         )
@@ -53,7 +53,7 @@ class SourceRepositoryUpstream(Upstream):
                 "--gzip",
                 f"--file={self.name}_{self.version.upstream_version}.orig.tar.gz",
                 f"--directory={build_dir}",
-                str(package_dir.relative_to(build_dir)),
+                package_dir.relative_to(build_dir),
             ],
             on_failure="Failed to compress the upstream source",
             cwd=build_dir,

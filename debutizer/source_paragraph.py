@@ -80,6 +80,21 @@ class SourceParagraph(Deb822Schema):
             vcs_type_value=vcs_type_value,
         )
 
+    def all_build_depends(self) -> PackageRelations:
+        all_relations = PackageRelations([])
+
+        if self.build_depends is not None:
+            for relation in self.build_depends:
+                all_relations.add_relation(relation, replace=True)
+        if self.build_depends_indep:
+            for relation in self.build_depends_indep:
+                all_relations.add_relation(relation, replace=True)
+        if self.build_depends_arch:
+            for relation in self.build_depends_arch:
+                all_relations.add_relation(relation, replace=True)
+
+        return all_relations
+
     FIELDS = {
         "source": Field("Source"),
         "maintainer": Field("Maintainer"),

@@ -5,7 +5,9 @@ from .changelog import Changelog
 from .compat import Compat
 from .control import Control
 from .copyright import Copyright
+from .environment import Environment
 from .errors import CommandError, UnexpectedError
+from .relation import Relation
 from .subprocess_utils import run
 
 
@@ -97,3 +99,54 @@ class SourcePackage:
         )
 
         self.load()
+
+    def set_debhelper_compat_version(self, version: Optional[str] = None) -> None:
+        """Sets the debhelper compatibility version. This replaces any existing
+        compatibility versions, be they specified in a compat file or as a build
+        dependency.
+
+        :param version: The compat version. If None, the compatibility version is
+            automatically selected based on the current distribution
+        """
+        if version is None:
+            version = _compat_version_from_environment()
+
+        set_in_build_depends = False
+        if (
+            self.control.source is not None
+            and self.control.source.build_depends is not None
+        ):
+            for relation in self.control.source.build_depends:
+                for dependency in relation:
+                    if (
+                        dependency.name == "debhelper-compat"
+                        and dependency.version is not None
+                    ):
+                        set_in_build_depends = True
+
+        if set_in_build_depends:
+            # We know that source and build_depends are not None from the previous check
+            self.control.source.build_depends.add_relation(  # type: ignore[union-attr]
+                Relation.from_string(f"debhelper-compat (= {version})"),
+                replace=True,
+            )
+        else:
+            self.compat.version = version
+
+    def __repr__(self) -> str:
+        return f"SourcePackage(name={self.name}, version={self.version})"
+
+
+def _compat_version_from_environment() -> str:
+    """Use the debhelper compatibility version used by the current distribution"""
+    if Environment.codename is None:
+        raise UnexpectedError("The Environment.codename field must be set")
+
+    if Environment.codename in ["bionic"]:
+        return "11"
+    elif Environment.codename in ["focal", "buster"]:
+        return "12"
+    elif Environment.codename in ["groovy", "hirsute", "impish", "bullseye"]:
+        return "13"
+    else:
+        raise UnexpectedError(f"Unknown distribution: {Environment.codename}")

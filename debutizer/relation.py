@@ -34,16 +34,16 @@ class Dependency:
     def deserialize(cls, relation: "PkgRelation.ParsedRelation") -> "Dependency":
         version = None
         relationship = None
-        if relation["version"] is not None:
+        if relation.get("version") is not None:
             relationship, version = relation["version"]
 
         return Dependency(
             name=relation["name"],
-            archqual=relation["archqual"],
+            archqual=relation.get("archqual"),
             version=version,
             relationship=relationship,
-            arch=relation["arch"],
-            restrictions=relation["restrictions"],
+            arch=relation.get("arch"),
+            restrictions=relation.get("restrictions"),
         )
 
     def serialize(self) -> "PkgRelation.ParsedRelation":
@@ -63,6 +63,7 @@ class Dependency:
 class Relation:
     def __init__(self, dependencies: List[Dependency]):
         self._dependencies = dependencies
+        self._iter_index = 0
 
     def __len__(self) -> int:
         return len(self._dependencies)
@@ -75,6 +76,18 @@ class Relation:
 
     def __contains__(self, key: int) -> bool:
         return key in self._dependencies
+
+    def __iter__(self) -> "Relation":
+        self._iter_index = 0
+        return self
+
+    def __next__(self) -> Dependency:
+        if self._iter_index >= len(self._dependencies):
+            raise StopIteration
+
+        output = self._dependencies[self._iter_index]
+        self._iter_index += 1
+        return output
 
     def __repr__(self) -> str:
         dependency_list = ", ".join(str(d) for d in self._dependencies)
@@ -123,6 +136,7 @@ class Relation:
 class PackageRelations:
     def __init__(self, relations: List[Relation]):
         self._relations = relations
+        self._iter_index = 0
 
     def __len__(self) -> int:
         return len(self._relations)
@@ -135,6 +149,17 @@ class PackageRelations:
 
     def __contains__(self, key: int) -> bool:
         return key in self._relations
+
+    def __iter__(self) -> "PackageRelations":
+        self._iter_index = 0
+        return self
+
+    def __next__(self) -> Relation:
+        if self._iter_index >= len(self._relations):
+            raise StopIteration
+        value = self._relations[self._iter_index]
+        self._iter_index += 1
+        return value
 
     def add_relation(self, new: Relation, replace: bool = False) -> None:
         conflicting = [r for r in self._relations if r.intersects(new)]
