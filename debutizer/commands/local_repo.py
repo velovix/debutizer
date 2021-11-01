@@ -15,6 +15,7 @@ class LocalRepository:
             ("", port),
             functools.partial(SimpleHTTPRequestHandler, directory=artifacts_dir),
         )
+        self._server.allow_reuse_address = True
 
         self._thread = Thread(
             name="Local Repository",
@@ -26,4 +27,4 @@ class LocalRepository:
         self._thread.start()
 
     def close(self):
-        self._server.server_close()
+        self._server.shutdown()
