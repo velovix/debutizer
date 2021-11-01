@@ -19,7 +19,7 @@ runs:
       python3-debian
       python3-requests
       python3-xdg
-      python3-falcon
+      python3-flask
     shell: bash
   - name: Install Python dependencies
     # This is done with sudo so that packages are installed system-wide. This

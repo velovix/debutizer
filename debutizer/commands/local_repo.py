@@ -2,10 +2,9 @@ from pathlib import Path
 from threading import Thread
 from wsgiref import simple_server
 
-import falcon
+import flask
 
-
-# TODO: Consider using http.server instead of Falcon when Python 3.6 is no
+# TODO: Consider using http.server instead of Flask when Python 3.6 is no
 #       longer supported
 
 
@@ -16,14 +15,16 @@ class LocalRepository:
 
     def __init__(self, port: int, artifacts_dir: Path):
         self._artifacts_dir = artifacts_dir
-        self._api= falcon.API()
+        self._app = flask.Flask(__name__)
 
-        self._api.add_static_route("/", str(self._artifacts_dir))
+        @self._app.route("/<path:path>")
+        def static_files(path: str) -> flask.Response:
+            return flask.send_from_directory(self._artifacts_dir, path)
 
         self._server = simple_server.make_server(
             "0.0.0.0",
             port,
-            app=self._api,
+            app=self._app,
             handler_class=simple_server.WSGIRequestHandler,
         )
 

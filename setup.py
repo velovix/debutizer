@@ -29,7 +29,7 @@ setup(
         "python-debian",
         "pyxdg",
         "requests",
-        "falcon",
+        "flask",
     ],
     extras_require={
         "dev": [
