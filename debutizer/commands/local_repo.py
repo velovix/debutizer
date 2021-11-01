@@ -16,14 +16,14 @@ class LocalRepository:
 
     def __init__(self, port: int, artifacts_dir: Path):
         self._artifacts_dir = artifacts_dir
-        self._app = falcon.App()
+        self._api= falcon.API()
 
-        self._app.add_static_route("/", str(self._artifacts_dir))
+        self._api.add_static_route("/", str(self._artifacts_dir))
 
         self._server = simple_server.make_server(
             "0.0.0.0",
             port,
-            app=self._app,
+            app=self._api,
             handler_class=simple_server.WSGIRequestHandler,
         )
 
