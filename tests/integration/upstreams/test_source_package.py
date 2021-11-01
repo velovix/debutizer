@@ -1,6 +1,7 @@
 import argparse
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import Mock
 
 from debutizer.commands.build import BuildCommand
 
@@ -17,4 +18,5 @@ def test_build_source_package_upstream_package():
             architecture="amd64",
             upstream_repo=None,
         )
-        command.behavior(args)
+        command.parse_args = Mock(return_value=args)
+        command.run()

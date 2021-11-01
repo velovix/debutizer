@@ -28,7 +28,8 @@ def run(
         root_command = shlex.split(root_command_str)
         command_no_path = root_command + command_no_path
 
-    command_str = shlex.join(command_no_path)
+    # TODO: Use shlex.join when Python 3.8 is the oldest supported version
+    command_str = " ".join(command_no_path)
     print_color(f"> {command_str}", format_=Format.BOLD)
 
     try:

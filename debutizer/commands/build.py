@@ -132,8 +132,6 @@ class BuildCommand(Command):
             add_sources_files(args.artifacts_dir)
             add_release_files(args.artifacts_dir, sign=False, gpg_key_id=None)
 
-        local_repo.close()
-
         print("")
         print_done("Build")
 

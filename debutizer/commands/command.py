@@ -4,11 +4,11 @@ import platform
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, List, Callable
+from typing import Callable, Dict, List
 
 from xdg.BaseDirectory import save_cache_path
 
-from debutizer.print_utils import print_color
+from debutizer.print_utils import Color, Format, print_color
 
 
 class Command(ABC):
@@ -31,6 +31,19 @@ class Command(ABC):
     def behavior(self, args: argparse.Namespace) -> None:
         """Behavior for when the command is run"""
 
+    def clean_up(self) -> None:
+        """Runs any clean-up hooks"""
+        try:
+            for hook in self.cleanup_hooks:
+                hook()
+        except Exception as ex:
+            print_color(
+                f"WARNING: Ignoring exception while cleaning up: {ex}",
+                color=Color.YELLOW,
+                format_=Format.BOLD,
+                file=sys.stderr,
+            )
+
     def parse_args(self) -> argparse.Namespace:
         return self.parser.parse_args(sys.argv[2:])
 
@@ -40,11 +53,7 @@ class Command(ABC):
         try:
             self.behavior(args)
         finally:
-            try:
-                for hook in self.cleanup_hooks:
-                    hook()
-            except Exception as ex:
-                print_color(f"WARNING: Ignoring exception while cleaning up: {ex}")
+            self.clean_up()
 
     def add_archive_args(self) -> None:
         self.parser.add_argument(
