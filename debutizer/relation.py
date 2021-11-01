@@ -34,16 +34,16 @@ class Dependency:
     def deserialize(cls, relation: "PkgRelation.ParsedRelation") -> "Dependency":
         version = None
         relationship = None
-        if relation["version"] is not None:
+        if relation.get("version") is not None:
             relationship, version = relation["version"]
 
         return Dependency(
             name=relation["name"],
-            archqual=relation["archqual"],
+            archqual=relation.get("archqual"),
             version=version,
             relationship=relationship,
-            arch=relation["arch"],
-            restrictions=relation["restrictions"],
+            arch=relation.get("arch"),
+            restrictions=relation.get("restrictions"),
         )
 
     def serialize(self) -> "PkgRelation.ParsedRelation":
