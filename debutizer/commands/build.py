@@ -1,5 +1,6 @@
 import argparse
 import shutil
+from typing import List
 
 import requests
 
@@ -42,6 +43,20 @@ class BuildCommand(Command):
             "built again. Packages can also pull dependencies down from this "
             "repository where necessary.",
         )
+        self.parser.add_argument(
+            "--upstream-is-trusted",
+            action="store_true",
+            help="If provided, the upstream repository will be set as a trusted "
+            "repository in the build chroot. This allows the repository contents to be "
+            "unsigned.",
+        )
+        self.parser.add_argument(
+            "--upstream-components",
+            nargs="+",
+            default=["main"],
+            help="The components to include in the build chroot from the upstream "
+            "repository. By default, the main component is included.",
+        )
 
     def behavior(self, args: argparse.Namespace) -> None:
         args.artifacts_dir.mkdir(exist_ok=True)
@@ -78,13 +93,20 @@ class BuildCommand(Command):
             package_pys = new_package_pys
 
         print("")
-        print_color(
-            "Building the following packages in this order:",
-            color=Color.MAGENTA,
-            format_=Format.BOLD,
-        )
-        for package_py in package_pys:
-            print(f" * {package_py.source_package.name}")
+        if len(package_pys) > 0:
+            print_color(
+                "Building the following packages in this order:",
+                color=Color.MAGENTA,
+                format_=Format.BOLD,
+            )
+            for package_py in package_pys:
+                print(f" * {package_py.source_package.name}")
+        else:
+            print_color(
+                "No packages will be built",
+                color=Color.MAGENTA,
+                format_=Format.BOLD,
+            )
 
         for i, package_py in enumerate(package_pys):
             print("")
@@ -94,15 +116,21 @@ class BuildCommand(Command):
                 format_=Format.BOLD,
             )
 
-            if i == 0:
-                # This is the first package being built, and APT does not like empty
-                # repositories
-                repositories = []
-            else:
-                repositories = [
-                    f"deb [trusted=yes] http://localhost:8080 {args.distribution} main",
-                ]
-
+            repositories = []
+            if args.upstream_repo is not None:
+                entry = _make_upstream_source_entry(
+                    upstream_repo=args.upstream_repo,
+                    distribution=args.distribution,
+                    components=args.upstream_components,
+                    trusted=args.upstream_is_trusted,
+                )
+                repositories.append(entry)
+            if i > 0:
+                # We can't add the local repo if this is the first package being built
+                # because APT does not like empty repositories
+                repositories.append(
+                    f"deb [trusted=yes] http://localhost:8080 {args.distribution} main"
+                )
             set_chroot_repos(args.distribution, repositories)
 
             source_results_dir = make_source_files(
@@ -134,6 +162,22 @@ class BuildCommand(Command):
 
         print("")
         print_done("Build")
+
+
+def _make_upstream_source_entry(
+    upstream_repo: str,
+    distribution: str,
+    components: List[str],
+    trusted: bool,
+) -> str:
+    """Creates an APT source list entry based on the provided configuration"""
+    parameters = ""
+    if trusted:
+        parameters = "[trusted=yes]"
+
+    components_str = " ".join(components)
+
+    return f"deb {parameters} {upstream_repo} {distribution} {components_str}"
 
 
 def _exists_upstream(
