@@ -15,7 +15,7 @@ from debutizer.upstreams import LocalUpstream
 from debutizer.version import Version
 
 upstream = LocalUpstream(
-    name="debutizer", version=Version.from_string("0.4.4-1"), path=Path(".")
+    name="debutizer", version=Version.from_string("0.4.5-1"), path=Path(".")
 )
 package_dir = upstream.fetch()
 
@@ -121,6 +121,14 @@ source_package.changelog.add(
     ],
     author="Tyler Compton <xaviosx@gmail.com>",
     date=datetime(2021, 11, 4, 13, 21),
+)
+
+source_package.changelog.add(
+    version="0.4.5-1",
+    urgency="medium",
+    changes=["* Persist changes to disk after running pre-build hooks"],
+    author="Tyler Compton <xaviosx@gmail.com>",
+    date=datetime(2021, 11, 4, 16, 8),
 )
 
 source_package.complete()
