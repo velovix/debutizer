@@ -66,6 +66,8 @@ def process_package_pys(
             format_=Format.BOLD,
         )
         package_py.pre_build(registry)
+        # Save any further changes to the disk
+        package_py.source_package.save()
 
     package_pys = _order_package_pys(package_pys)
     return package_pys
