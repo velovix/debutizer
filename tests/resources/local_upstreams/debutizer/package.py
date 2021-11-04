@@ -120,7 +120,7 @@ source_package.changelog.add(
         "* Allow configuration through environment variables",
     ],
     author="Tyler Compton <xaviosx@gmail.com>",
-    date=datetime(2021, 10, 25, 22, 58),
+    date=datetime(2021, 11, 4, 13, 21),
 )
 
 source_package.complete()
