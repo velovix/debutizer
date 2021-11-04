@@ -12,6 +12,7 @@ from ..registry import Registry
 from ..source_package import SourcePackage
 from ..upstreams import Upstream
 from .command import Command
+from .config import EnvArgumentParser
 from .local_repo import LocalRepository
 from .repo_metadata import add_packages_files, add_release_files, add_sources_files
 from .utils import (
@@ -28,13 +29,13 @@ from .utils import (
 
 class BuildCommand(Command):
     def __init__(self):
-        self.parser = argparse.ArgumentParser(
+        self.parser = EnvArgumentParser(
             prog="debutizer build", description="Builds your APT packages"
         )
 
         self.add_common_args()
 
-        self.parser.add_argument(
+        self.parser.add_env_flag(
             "--upstream-repo",
             type=str,
             required=False,
@@ -43,14 +44,14 @@ class BuildCommand(Command):
             "built again. Packages can also pull dependencies down from this "
             "repository where necessary.",
         )
-        self.parser.add_argument(
+        self.parser.add_env_flag(
             "--upstream-is-trusted",
             action="store_true",
             help="If provided, the upstream repository will be set as a trusted "
             "repository in the build chroot. This allows the repository contents to be "
             "unsigned.",
         )
-        self.parser.add_argument(
+        self.parser.add_env_flag(
             "--upstream-components",
             nargs="+",
             default=["main"],

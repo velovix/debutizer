@@ -8,13 +8,14 @@ from typing import Callable, Dict, List
 
 from xdg.BaseDirectory import save_cache_path
 
+from debutizer.commands.config import EnvArgumentParser
 from debutizer.print_utils import Color, Format, print_color
 
 
 class Command(ABC):
     """A Debutizer CLI command"""
 
-    parser: argparse.ArgumentParser
+    parser: EnvArgumentParser
     subcommands: Dict[str, "Command"] = {}
     cleanup_hooks: List[Callable[[], None]] = []
     """Hooks that run after a command is finished, even in the case of an error"""
@@ -56,7 +57,7 @@ class Command(ABC):
             self.clean_up()
 
     def add_archive_args(self) -> None:
-        self.parser.add_argument(
+        self.parser.add_env_flag(
             "--artifacts-dir",
             type=Path,
             default=os.environ.get("DEBUTIZER_ARTIFACTS_DIR", Path.cwd() / "artifacts"),
@@ -68,24 +69,24 @@ class Command(ABC):
     def add_common_args(self) -> None:
         self.add_archive_args()
 
-        self.parser.add_argument(
+        self.parser.add_env_flag(
             "--package-dir",
             type=Path,
-            default=os.environ.get("DEBUTIZER_PACKAGE_DIR", Path.cwd() / "packages"),
+            default=Path.cwd() / "packages",
             required=False,
             help="The directory that holds the package directories",
         )
 
         default_build_dir = save_cache_path("debutizer")
-        self.parser.add_argument(
+        self.parser.add_env_flag(
             "--build-dir",
             type=Path,
-            default=os.environ.get("DEBUTIZER_BUILD_DIR", default_build_dir),
+            default=default_build_dir,
             required=False,
             help="The directory that will hold intermediate build files",
         )
 
-        self.parser.add_argument(
+        self.parser.add_env_flag(
             "--distribution",
             type=str,
             required=True,
@@ -94,7 +95,7 @@ class Command(ABC):
         )
 
         # TODO: Update the help text when cross-building is supported. qemubuilder?
-        self.parser.add_argument(
+        self.parser.add_env_flag(
             "--architecture",
             type=str,
             required=False,

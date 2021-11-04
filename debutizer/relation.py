@@ -34,8 +34,9 @@ class Dependency:
     def deserialize(cls, relation: "PkgRelation.ParsedRelation") -> "Dependency":
         version = None
         relationship = None
-        if relation.get("version") is not None:
-            relationship, version = relation["version"]
+        version_tuple = relation.get("version")
+        if version_tuple is not None:
+            relationship, version = version_tuple
 
         return Dependency(
             name=relation["name"],

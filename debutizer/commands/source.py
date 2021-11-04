@@ -6,6 +6,7 @@ from ..registry import Registry
 from ..source_package import SourcePackage
 from ..upstreams import Upstream
 from .command import Command
+from .config import EnvArgumentParser
 from .utils import (
     copy_source_artifacts,
     find_package_dirs,
@@ -16,7 +17,7 @@ from .utils import (
 
 class SourceCommand(Command):
     def __init__(self):
-        self.parser = argparse.ArgumentParser(
+        self.parser = EnvArgumentParser(
             prog="debutizer source", description="Fetches and sources APT packages"
         )
 
