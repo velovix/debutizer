@@ -104,9 +104,21 @@ source_package.changelog.add(
 )
 
 source_package.changelog.add(
-    version="0.4.4-1",
+    version="0.3.0-1",
     urgency="medium",
     changes=["* Add support for GPG signing"],
+    author="Tyler Compton <xaviosx@gmail.com>",
+    date=datetime(2021, 10, 25, 22, 58),
+)
+
+source_package.changelog.add(
+    version="0.4.4-1",
+    urgency="medium",
+    changes=[
+        "* Add tools for editing package dependencies",
+        "* Add cross-package dependency support",
+        "* Allow configuration through environment variables",
+    ],
     author="Tyler Compton <xaviosx@gmail.com>",
     date=datetime(2021, 10, 25, 22, 58),
 )
