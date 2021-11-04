@@ -27,6 +27,7 @@ runs:
       python -m debutizer build
       --distribution ${{ inputs.distribution }}
       --upstream-repo ${{ inputs.upstream_repo }}
+      --upstream-is-trusted
       --package-dir tests/resources/local_upstreams
     shell: bash
   - name: Upload
