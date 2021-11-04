@@ -15,7 +15,7 @@ from debutizer.upstreams import LocalUpstream
 from debutizer.version import Version
 
 upstream = LocalUpstream(
-    name="debutizer", version=Version.from_string("0.4.3-1"), path=Path(".")
+    name="debutizer", version=Version.from_string("0.4.4-1"), path=Path(".")
 )
 package_dir = upstream.fetch()
 
@@ -104,7 +104,7 @@ source_package.changelog.add(
 )
 
 source_package.changelog.add(
-    version="0.4.2-1",
+    version="0.4.4-1",
     urgency="medium",
     changes=["* Add support for GPG signing"],
     author="Tyler Compton <xaviosx@gmail.com>",
