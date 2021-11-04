@@ -21,13 +21,14 @@ from debutizer.subprocess_utils import run
 
 from ..artifacts import find_archives
 from ..command import Command
+from ..config import EnvArgumentParser
 from ..repo_metadata import add_packages_files, add_release_files, add_sources_files
 from ..utils import temp_file
 
 
 class UploadCommand(Command):
     def __init__(self):
-        self.parser = argparse.ArgumentParser(
+        self.parser = EnvArgumentParser(
             prog="debutizer s3-repo upload",
             description="Uploads files in the archive directory to the S3-compatible "
             "bucket",
@@ -35,32 +36,32 @@ class UploadCommand(Command):
 
         self.add_archive_args()
 
-        self.parser.add_argument(
+        self.parser.add_env_flag(
             "--endpoint",
             type=str,
             required=True,
             help="The name of the S3-compatible endpoint. For AWS, this is "
             "https://s3.amazonaws.com",
         )
-        self.parser.add_argument(
+        self.parser.add_env_flag(
             "--bucket",
             type=str,
             required=True,
             help="The name of the bucket to upload to",
         )
-        self.parser.add_argument(
+        self.parser.add_env_flag(
             "--access-key",
             type=str,
             required=True,
             help="The access key for this bucket",
         )
-        self.parser.add_argument(
+        self.parser.add_env_flag(
             "--secret-key",
             type=str,
             required=True,
             help="The secret key for this bucket",
         )
-        self.parser.add_argument(
+        self.parser.add_env_flag(
             "--sign",
             action="store_true",
             help="If provided, the Release files will be signed. If --gpg-key-id is "
@@ -69,7 +70,7 @@ class UploadCommand(Command):
             "used. If your key has a password, store it in the $GPG_PASSWORD "
             "environment variable.",
         )
-        self.parser.add_argument(
+        self.parser.add_env_flag(
             "--gpg-key-id",
             type=str,
             required=False,
@@ -86,7 +87,7 @@ class UploadCommand(Command):
             and "GPG_SIGNING_KEY" not in os.environ
         ):
             raise CommandError(
-                "When signing is enabled, either the --gpg-key-id or the "
+                "When signing is enabled, either the --gpg-key-id flag or "
                 "$GPG_SIGNING_KEY environment variable must be set"
             )
 

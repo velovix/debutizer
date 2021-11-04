@@ -3,6 +3,7 @@ import sys
 
 from ..errors import CommandError
 from .command import Command
+from .config import EnvArgumentParser
 
 
 class RootCommand(Command):
@@ -11,7 +12,7 @@ class RootCommand(Command):
     """
 
     def __init__(self):
-        self.parser = argparse.ArgumentParser(
+        self.parser = EnvArgumentParser(
             prog="debutizer",
             description="A tool for managing APT packages",
         )

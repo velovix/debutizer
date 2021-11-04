@@ -4,12 +4,13 @@ import sys
 from debutizer.errors import CommandError
 
 from ..command import Command
+from ..config import EnvArgumentParser
 from .upload import UploadCommand
 
 
 class S3RepoCommand(Command):
     def __init__(self):
-        self.parser = argparse.ArgumentParser(
+        self.parser = EnvArgumentParser(
             prog="debutizer s3-repo",
             description="Manages repositories backed by an S3-compatible bucket",
         )
