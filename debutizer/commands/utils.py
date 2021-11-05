@@ -227,6 +227,13 @@ def build_package(
 
     command: List[Union[Path, str]] = ["pbuilder", "build"]
 
+    hook_dir = Path(__file__).parent / "pbuilder_hooks"
+    if not hook_dir.is_dir():
+        raise UnexpectedError(
+            f"The pbuilder hook dir does not exist at {hook_dir}. This suggests a "
+            f"broken installation of Debutizer."
+        )
+
     command += [
         "--hookdir",
         Path(__file__).parent / "pbuilder_hooks",
