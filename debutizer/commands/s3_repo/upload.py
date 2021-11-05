@@ -75,6 +75,14 @@ class UploadCommand(Command):
             required=False,
             help="The ID of the GPG key in your keyring to sign Release files with",
         )
+        self.parser.add_env_flag(
+            "--cache-control",
+            type=str,
+            default="public, max-age=3600",
+            help="The Cache-Control value to use for package files. Metadata files, "
+            "like Package, will always have a value of 'no-cache' since they are "
+            "changed regularly.",
+        )
 
     def parse_args(self) -> argparse.Namespace:
         return self.parser.parse_args(sys.argv[3:])
@@ -112,6 +120,7 @@ class UploadCommand(Command):
                 secret_key=args.secret_key,
                 artifacts_dir=args.artifacts_dir,
                 artifact_file_path=artifact_file_path,
+                cache_control=args.cache_control,
             )
 
         with tempfile.TemporaryDirectory() as mount_path, _mount_s3fs(
@@ -135,7 +144,7 @@ class UploadCommand(Command):
                 artifacts_dir=args.artifacts_dir,
                 artifact_file_path=metadata_file,
                 # Metadata files update often
-                no_cache=True,
+                cache_control="no-cache",
             )
 
         print_color("")
@@ -148,7 +157,7 @@ def _upload_artifact(
     secret_key: str,
     artifacts_dir: Path,
     artifact_file_path: Path,
-    no_cache: bool = False,
+    cache_control: str,
 ) -> None:
     key = str(artifact_file_path.relative_to(artifacts_dir))
 
@@ -191,8 +200,7 @@ def _upload_artifact(
     )
     signature_str = base64.b64encode(signature.digest()).decode().rstrip("\n")
     prepared.headers["Authorization"] = f"AWS {access_key}:{signature_str}"
-    if no_cache:
-        prepared.headers["Cache-Control"] = "no-cache"
+    prepared.headers["Cache-Control"] = cache_control
 
     with requests.Session() as session:
         try:

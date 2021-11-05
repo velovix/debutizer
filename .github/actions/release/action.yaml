@@ -17,6 +17,10 @@ inputs:
   secret_key:
     description: The secret key for the bucket
     required: true
+  cache_control:
+    description: The Cache-Control value to use for package files
+    required: false
+    default: 'public, max-age=3600'
 
 runs:
   using: composite
@@ -38,4 +42,5 @@ runs:
       --access-key ${{ inputs.access_key }}
       --secret-key ${{ inputs.secret_key }}
       --sign
+      --cache-control ${{ inputs.cache_control }}
     shell: bash
