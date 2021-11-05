@@ -42,5 +42,5 @@ runs:
       --access-key ${{ inputs.access_key }}
       --secret-key ${{ inputs.secret_key }}
       --sign
-      --cache-control ${{ inputs.cache_control }}
+      --cache-control '${{ inputs.cache_control }}'
     shell: bash

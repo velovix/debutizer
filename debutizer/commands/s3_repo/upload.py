@@ -172,6 +172,7 @@ def _upload_artifact(
             "Date": format_datetime(datetime.now(timezone.utc), usegmt=True),
             "Content-Type": "application/octet-stream",
             "Content-MD5": md5_hash,
+            "Cache-Control": cache_control,
         },
     )
     prepared = request.prepare()
@@ -200,7 +201,6 @@ def _upload_artifact(
     )
     signature_str = base64.b64encode(signature.digest()).decode().rstrip("\n")
     prepared.headers["Authorization"] = f"AWS {access_key}:{signature_str}"
-    prepared.headers["Cache-Control"] = cache_control
 
     with requests.Session() as session:
         try:
