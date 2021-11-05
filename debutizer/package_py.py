@@ -47,7 +47,6 @@ class PackagePy:
                 "Unexpected exception while running package.py:",
                 color=Color.RED,
                 format_=Format.BOLD,
-                file=sys.stderr,
             )
             raise
 

@@ -47,7 +47,7 @@ def process_package_pys(
     package_pys: List[PackagePy] = []
 
     for package_dir in package_dirs:
-        print("")
+        print_color("")
         print_color(
             f"Reading {PackagePy.FILE_NAME} file for {package_dir.name}...",
             color=Color.MAGENTA,
@@ -57,7 +57,7 @@ def process_package_pys(
         package_pys.append(package_py)
         registry.add(package_py.source_package)
 
-    print("")
+    print_color("")
 
     for package_py in package_pys:
         print_color(
@@ -290,7 +290,7 @@ def make_chroot(distribution: str) -> Path:
             archive_path.unlink()
             raise
     else:
-        print(f"Using existing chroot at {archive_path}")
+        print_color(f"Using existing chroot at {archive_path}")
 
     return archive_path
 

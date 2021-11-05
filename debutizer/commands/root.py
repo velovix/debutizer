@@ -2,6 +2,7 @@ import argparse
 import sys
 
 from ..errors import CommandError
+from ..print_utils import print_color
 from .command import Command
 from .config import EnvArgumentParser
 
@@ -24,7 +25,7 @@ class RootCommand(Command):
 
     def behavior(self, args: argparse.Namespace) -> None:
         if args.command is None:
-            print(
+            print_color(
                 "Debutizer is a tool for managing APT packages.\n\n"
                 "To get started, try running 'debutizer --help'."
             )

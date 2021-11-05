@@ -1,4 +1,5 @@
 import os
+import sys
 from enum import Enum
 
 
@@ -22,11 +23,15 @@ class Format(Enum):
 
 
 def print_color(
-    message: str, color: Color = Color.WHITE, format_: Format = Format.NORMAL, **kwargs
+    message: str,
+    color: Color = Color.WHITE,
+    format_: Format = Format.NORMAL,
+    file=sys.stderr,
+    **kwargs,
 ) -> None:
     color = _check_no_color(color)
     format_ = _check_no_formatting(format_)
-    print(f"{format_.value}{color.value}{message}{_END}", **kwargs)
+    print(f"{format_.value}{color.value}{message}{_END}", file=file, **kwargs)
 
 
 def print_done(task: str):

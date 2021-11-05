@@ -20,7 +20,7 @@ class SourcePackageUpstream(Upstream):
         build_dir.mkdir()
 
         run(
-            ["dget", self.dsc_url],
+            ["dget", "--quiet", self.dsc_url],
             on_failure="Failed to download the source package's .dsc file",
             cwd=build_dir,
         )

@@ -53,5 +53,5 @@ class SourceCommand(Command):
                 component=package_py.component,
             )
 
-        print("")
+        print_color("")
         print_done("Source")

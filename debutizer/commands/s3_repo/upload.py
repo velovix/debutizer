@@ -3,7 +3,6 @@ import base64
 import hashlib
 import hmac
 import os
-import subprocess
 import sys
 import tempfile
 from contextlib import contextmanager
@@ -16,7 +15,7 @@ from urllib.parse import urlparse
 import requests
 
 from debutizer.errors import CommandError, UnexpectedError
-from debutizer.print_utils import print_done
+from debutizer.print_utils import print_color, print_done
 from debutizer.subprocess_utils import run
 
 from ..artifacts import find_archives
@@ -106,7 +105,7 @@ class UploadCommand(Command):
 
         metadata_files = []
         for artifact_file_path in artifacts:
-            print(f"Uploading {artifact_file_path}...")
+            print_color(f"Uploading {artifact_file_path}...")
             _upload_artifact(
                 bucket_endpoint=bucket_endpoint,
                 access_key=args.access_key,
@@ -139,7 +138,7 @@ class UploadCommand(Command):
                 no_cache=True,
             )
 
-        print("")
+        print_color("")
         print_done("Upload")
 
 

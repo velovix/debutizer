@@ -85,7 +85,7 @@ class BuildCommand(Command):
             new_package_pys = []
             for package_py in package_pys:
                 if _exists_upstream(args.upstream_repo, args.distribution, package_py):
-                    print(
+                    print_color(
                         f"Package {package_py.source_package.name} already exists "
                         f"upstream, so it will not be built"
                     )
@@ -93,7 +93,7 @@ class BuildCommand(Command):
                     new_package_pys.append(package_py)
             package_pys = new_package_pys
 
-        print("")
+        print_color("")
         if len(package_pys) > 0:
             print_color(
                 "Building the following packages in this order:",
@@ -101,7 +101,7 @@ class BuildCommand(Command):
                 format_=Format.BOLD,
             )
             for package_py in package_pys:
-                print(f" * {package_py.source_package.name}")
+                print_color(f" * {package_py.source_package.name}")
         else:
             print_color(
                 "No packages will be built",
@@ -110,7 +110,7 @@ class BuildCommand(Command):
             )
 
         for i, package_py in enumerate(package_pys):
-            print("")
+            print_color("")
             print_color(
                 f"Building {package_py.source_package.name}",
                 color=Color.MAGENTA,
@@ -161,7 +161,7 @@ class BuildCommand(Command):
             add_sources_files(args.artifacts_dir)
             add_release_files(args.artifacts_dir, sign=False, gpg_key_id=None)
 
-        print("")
+        print_color("")
         print_done("Build")
 
 

@@ -42,7 +42,6 @@ class Command(ABC):
                 f"WARNING: Ignoring exception while cleaning up: {ex}",
                 color=Color.YELLOW,
                 format_=Format.BOLD,
-                file=sys.stderr,
             )
 
     def parse_args(self) -> argparse.Namespace:

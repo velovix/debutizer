@@ -11,13 +11,12 @@ def main():
     try:
         _main()
     except (CommandError, KeyboardInterrupt) as ex:
-        print("")
+        print_color("")
         if isinstance(ex, KeyboardInterrupt):
             print_color(
                 "Interrupted by SIGINT",
                 color=Color.RED,
                 format_=Format.BOLD,
-                file=sys.stderr,
             )
         else:
             print_color(
