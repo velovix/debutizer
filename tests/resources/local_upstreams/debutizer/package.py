@@ -8,14 +8,14 @@ from debutizer.copyright import (
     CopyrightHeader,
     CopyrightLicense,
 )
-from debutizer.relation import Dependency, PackageRelations, Relation
+from debutizer.relation import PackageRelations
 from debutizer.source_package import SourcePackage
 from debutizer.source_paragraph import SourceParagraph
 from debutizer.upstreams import LocalUpstream
 from debutizer.version import Version
 
 upstream = LocalUpstream(
-    name="debutizer", version=Version.from_string("0.4.6-1"), path=Path(".")
+    name="debutizer", version=Version.from_string("0.4.6-2"), path=Path(".")
 )
 package_dir = upstream.fetch()
 
@@ -135,6 +135,14 @@ source_package.changelog.add(
     version="0.4.6-1",
     urgency="medium",
     changes=["* Log to stderr by default"],
+    author="Tyler Compton <xaviosx@gmail.com>",
+    date=datetime(2021, 11, 5, 12, 42),
+)
+
+source_package.changelog.add(
+    version="0.4.6-2",
+    urgency="medium",
+    changes=["* TODO: Upcoming release"],
     author="Tyler Compton <xaviosx@gmail.com>",
     date=datetime(2021, 11, 5, 12, 42),
 )
