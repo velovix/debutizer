@@ -46,4 +46,11 @@ def add_packages_files(artifacts_dir: Path) -> List[Path]:
         packages_file = artifacts_dir / dir_ / "Packages"
         packages_files += save_metadata_files(packages_file, result.stdout)
 
+        print_color(
+            f"Saved the Packages file for {dir_}:\n"
+            f"========================\n"
+            f"{packages_file.read_text()}\n"
+            f"========================\n"
+        )
+
     return packages_files
