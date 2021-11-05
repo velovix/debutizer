@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - bugfix/cross-package-dependency-not-resolving
 
 jobs:
   release:
