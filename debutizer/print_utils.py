@@ -33,6 +33,12 @@ def print_color(
     format_ = _check_no_formatting(format_)
     print(f"{format_.value}{color.value}{message}{_END}", file=file, **kwargs)
 
+    # Immediately flush the file. This ensures that logs are interleaved with subprocess
+    # output in the proper order
+    # TODO: Remove this when Python 3.9 is the oldest supported version, since stderr
+    #       is line-buffered by default in that release
+    file.flush()
+
 
 def print_done(task: str):
     if "DEBUTIZER_AVRDUDE_MODE" in os.environ:

@@ -299,19 +299,20 @@ def set_chroot_repos(distribution: str, repositories: List[str]) -> None:
     """Sets additional repositories for the chroot corresponding to the given
     distribution
     """
+    print_color(
+        f"Adding APT lists to the '{distribution}' chroot:",
+        color=Color.MAGENTA,
+        format_=Format.BOLD,
+    )
     apt_list = Path("/etc/apt/sources.list.d/debutizer.list")
 
     script = "#!/bin/sh\n"
     script += f"rm -f {apt_list}\n"
     for repo in repositories:
         script += f"echo '{repo}' >> {apt_list}\n"
+        print_color(f" * {repo}")
 
     with temp_file(script) as script_file:
-        print_color(
-            f"Adding APT lists to the '{distribution}' chroot",
-            color=Color.MAGENTA,
-            format_=Format.BOLD,
-        )
         run(
             [
                 "pbuilder",
@@ -398,10 +399,11 @@ def copy_binary_artifacts(
     :param artifacts_dir: The artifacts directory
     :param distribution: The distribution these packages are for
     :param component: The repository component that this package is under
+    :param architecture: The CPU architecture these binary artifacts are for
     """
     deb_files = find_binary_packages(results_dir)
 
-    # Check that the expected files are present, but not _too_ present
+    # Check that the expected files are present
     if len(deb_files) == 0:
         raise CommandError(
             f"The build process failed to produce any binary package "
