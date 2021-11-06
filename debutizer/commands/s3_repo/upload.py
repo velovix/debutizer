@@ -123,13 +123,14 @@ class UploadCommand(Command):
                 cache_control=args.cache_control,
             )
 
-        with tempfile.TemporaryDirectory() as mount_path, _mount_s3fs(
+        with tempfile.TemporaryDirectory() as mount_path_name, _mount_s3fs(
             endpoint=endpoint.geturl(),
             bucket=args.bucket,
             access_key=args.access_key,
             secret_key=args.secret_key,
-            mount_path=Path(mount_path),
+            mount_path=Path(mount_path_name),
         ):
+            mount_path = Path(mount_path_name)
             metadata_files += add_packages_files(mount_path)
             metadata_files += add_sources_files(mount_path)
             metadata_files += add_release_files(mount_path, args.sign, args.gpg_key_id)
