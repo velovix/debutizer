@@ -1,0 +1,23 @@
+name: Release
+description: Releases to PyPI
+
+inputs:
+  api_token:
+    description: The PyPI token to upload with
+    required: true
+  repository_url:
+    description: The PyPI repository to upload to
+    required: true
+
+runs:
+  using: composite
+  steps:
+  - uses: ./.github/actions/install-dependencies
+  - name: Build
+    run: python3 -m build --sdist --wheel --outdir dist/
+    shell: bash
+  - name: Upload
+    uses: pypa/gh-action-pypi-publish@master
+    with:
+      repository_url: ${{ inputs.repository_url }}
+      password: ${{ inputs.api_token }}
