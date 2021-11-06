@@ -6,21 +6,45 @@ on:
       - main
 
 jobs:
-  apt-repository:
+  build-packages:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
         distribution: [ 'bionic', 'focal', 'hirsute' ]
     steps:
       - uses: actions/checkout@v2
-      - uses: ./.github/actions/apt-release
-        name: Release to APT Repository
+      - uses: ./.github/actions/apt-build
+        name: Build APT Package
         with:
           distribution: ${{ matrix.distribution }}
           # We check against the production repo so that new packages will be
           # rebuilt for every new commit before being introduced to production,
           # making development easier.
           upstream_repo: http://apt.debutizer.dev
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.distribution }}
+          path: artifacts/dists/${{ matrix.distribution }}
+  upload-packages:
+    needs: build-packages
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          name: bionic
+          path: artifacts/dists/bionic
+      - uses: actions/download-artifact@v2
+        with:
+          name: focal
+          path: artifacts/dists/focal
+      - uses: actions/download-artifact@v2
+        with:
+          name: hirsute
+          path: artifacts/dists/hirsute
+      - uses: ./.github/actions/apt-upload
+        name: Upload APT Packages
+        with:
           bucket_name: apt-staging-debutizer-dev
           access_key: ${{ secrets.STAGING_ACCESS_KEY }}
           secret_key: ${{ secrets.STAGING_SECRET_KEY }}

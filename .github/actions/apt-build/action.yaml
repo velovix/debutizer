@@ -1,0 +1,23 @@
+name: Release
+description: Releases to an APT repository
+
+inputs:
+  distribution:
+    description: The distribution to make a release for
+    required: true
+  upstream_repo:
+    description: The upstream repo to check against when building
+    required: true
+
+runs:
+  using: composite
+  steps:
+  - uses: ./.github/actions/install-dependencies
+  - name: Build
+    run: >
+      python -m debutizer build
+      --distribution ${{ inputs.distribution }}
+      --upstream-repo ${{ inputs.upstream_repo }}
+      --upstream-is-trusted
+      --package-dir tests/resources/local_upstreams
+    shell: bash
