@@ -39,6 +39,7 @@ setup(
             "isort~=5.9",
             "mypy~=0.910",
             "types-requests",
+            "build",
         ],
     },
     entry_points={

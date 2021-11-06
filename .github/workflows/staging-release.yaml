@@ -13,7 +13,8 @@ jobs:
         distribution: [ 'bionic', 'focal', 'hirsute' ]
     steps:
       - uses: actions/checkout@v2
-      - uses: ./.github/actions/release
+      - uses: ./.github/actions/apt-release
+        name: Release to APT Repository
         with:
           distribution: ${{ matrix.distribution }}
           # We check against the production repo so that new packages will be
@@ -28,3 +29,8 @@ jobs:
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
           GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+      - uses: ./.github/actions/pypi-release
+        name: Release to Test PyPI
+        with:
+          repository_url: https://test.pypi.org/legacy/
+          api_token: ${{ secrets.TEST_PYPI_API_TOKEN }}
