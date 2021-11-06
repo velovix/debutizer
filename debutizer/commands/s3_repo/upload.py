@@ -130,11 +130,9 @@ class UploadCommand(Command):
             secret_key=args.secret_key,
             mount_path=Path(mount_path),
         ):
-            metadata_files += add_packages_files(args.artifacts_dir)
-            metadata_files += add_sources_files(args.artifacts_dir)
-            metadata_files += add_release_files(
-                args.artifacts_dir, args.sign, args.gpg_key_id
-            )
+            metadata_files += add_packages_files(mount_path)
+            metadata_files += add_sources_files(mount_path)
+            metadata_files += add_release_files(mount_path, args.sign, args.gpg_key_id)
 
         for metadata_file in metadata_files:
             _upload_artifact(
