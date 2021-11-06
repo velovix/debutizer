@@ -22,9 +22,6 @@ jobs:
           # rebuilt for every new commit before being introduced to production,
           # making development easier.
           upstream_repo: http://apt.debutizer.dev
-        env:
-          GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
-          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.distribution }}
@@ -51,3 +48,6 @@ jobs:
           secret_key: ${{ secrets.STAGING_SECRET_KEY }}
           # Since we re-upload the same version of the package multiple times
           cache_control: no-cache
+        env:
+          GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
+          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
