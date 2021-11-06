@@ -15,7 +15,7 @@ from debutizer.upstreams import LocalUpstream
 from debutizer.version import Version
 
 upstream = LocalUpstream(
-    name="debutizer", version=Version.from_string("0.5.0-1"), path=Path(".")
+    name="debutizer", version=Version.from_string("0.5.1-1"), path=Path(".")
 )
 package_dir = upstream.fetch()
 
@@ -151,6 +151,14 @@ source_package.changelog.add(
         "* Start deploying to PyPI",
         "* Add a new 'check' subcommand for finding system packages",
     ],
+    author="Tyler Compton <xaviosx@gmail.com>",
+    date=datetime(2021, 11, 5, 21, 2),
+)
+
+source_package.changelog.add(
+    version="0.5.1-1",
+    urgency="medium",
+    changes=["* TODO: Upcoming release"],
     author="Tyler Compton <xaviosx@gmail.com>",
     date=datetime(2021, 11, 5, 21, 2),
 )
