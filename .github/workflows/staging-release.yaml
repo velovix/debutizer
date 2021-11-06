@@ -30,6 +30,7 @@ jobs:
           name: ${{ matrix.distribution }}
           path: artifacts/dists/${{ matrix.distribution }}
   upload-packages:
+    needs: build-packages
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
