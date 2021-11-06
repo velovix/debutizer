@@ -34,12 +34,15 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: bionic
+          path: artifacts/dists/bionic
       - uses: actions/download-artifact@v2
         with:
           name: focal
+          path: artifacts/dists/focal
       - uses: actions/download-artifact@v2
         with:
           name: hirsute
+          path: artifacts/dists/hirsute
       - uses: ./.github/actions/apt-upload
         name: Upload APT Packages
         with:
