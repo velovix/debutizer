@@ -31,3 +31,6 @@ own virtual environment to run in.
 ```
 pipx install debutizer
 ```
+
+You can check if Debutizer's system dependencies are available by running
+`debutizer check`.
