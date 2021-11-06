@@ -61,6 +61,7 @@ source_package.control.add_binary(
                 "pbuilder",
                 "devscripts",
                 "quilt",
+                "s3fs",
             ]
         ),
         recommends=PackageRelations.from_strings(
