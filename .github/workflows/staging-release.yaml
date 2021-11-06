@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - feature/20-deploy-to-pypi
 
 jobs:
   apt-repository:
