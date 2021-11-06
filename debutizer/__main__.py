@@ -33,6 +33,7 @@ def _main():
 
     root.add_subcommand("source", commands.SourceCommand())
     root.add_subcommand("build", commands.BuildCommand())
+    root.add_subcommand("check", commands.CheckCommand())
 
     s3_repo_command = commands.S3RepoCommand()
     root.add_subcommand("s3-repo", s3_repo_command)
