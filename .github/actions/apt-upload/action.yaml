@@ -19,7 +19,6 @@ inputs:
 runs:
   using: composite
   steps:
-  - uses: ./.github/actions/install-dependencies
   - name: Upload
     run: >
       python -m debutizer s3-repo upload
