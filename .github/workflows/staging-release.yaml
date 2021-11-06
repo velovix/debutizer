@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - bugfix/36-single-upload-ci
 
 jobs:
   build-packages:
