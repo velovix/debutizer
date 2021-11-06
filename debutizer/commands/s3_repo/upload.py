@@ -135,16 +135,18 @@ class UploadCommand(Command):
             metadata_files += add_sources_files(mount_path)
             metadata_files += add_release_files(mount_path, args.sign, args.gpg_key_id)
 
-        for metadata_file in metadata_files:
-            _upload_artifact(
-                bucket_endpoint=bucket_endpoint,
-                access_key=args.access_key,
-                secret_key=args.secret_key,
-                artifacts_dir=args.artifacts_dir,
-                artifact_file_path=metadata_file,
-                # Metadata files update often
-                cache_control="no-cache",
-            )
+            # Upload the files to the bucket. S3FS should take care of this, but we need
+            # to do it again manually in order to set the Cache-Control header.
+            for metadata_file in metadata_files:
+                _upload_artifact(
+                    bucket_endpoint=bucket_endpoint,
+                    access_key=args.access_key,
+                    secret_key=args.secret_key,
+                    artifacts_dir=mount_path,
+                    artifact_file_path=metadata_file,
+                    # Metadata files update often
+                    cache_control="no-cache",
+                )
 
         print_color("")
         print_done("Upload")
