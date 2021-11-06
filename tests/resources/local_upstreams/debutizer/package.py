@@ -158,9 +158,9 @@ source_package.changelog.add(
 source_package.changelog.add(
     version="0.5.1-1",
     urgency="medium",
-    changes=["* TODO: Upcoming release"],
+    changes=["* Generate S3-repo metadata using the contents of the bucket"],
     author="Tyler Compton <xaviosx@gmail.com>",
-    date=datetime(2021, 11, 5, 21, 2),
+    date=datetime(2021, 11, 6, 15, 12),
 )
 
 source_package.complete()
