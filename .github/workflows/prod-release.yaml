@@ -6,7 +6,7 @@ on:
       - created
 
 jobs:
-  release:
+  apt-repository:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
@@ -24,6 +24,10 @@ jobs:
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
           GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+  pypi:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
       - uses: ./.github/actions/pypi-release
         name: Release to PyPI
         with:
