@@ -5,6 +5,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Dict, Iterator, List, Set, Union
 
+from xdg.BaseDirectory import save_cache_path
+
 from ..errors import CommandError, UnexpectedError
 from ..package_py import PackagePy
 from ..print_utils import Color, Format, print_color
@@ -440,6 +442,15 @@ def temp_file(content: str) -> Iterator[Path]:
     yield path
 
     path.unlink()
+
+
+def make_build_dir() -> Path:
+    build_dir = save_cache_path("debutizer")
+    if build_dir.is_dir():
+        shutil.rmtree(build_dir)
+    build_dir.mkdir()
+
+    return build_dir
 
 
 def _chroot_tgz_path(distribution: str) -> Path:

@@ -6,8 +6,6 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Callable, Dict, List
 
-from xdg.BaseDirectory import save_cache_path
-
 from debutizer.commands.config import EnvArgumentParser
 from debutizer.print_utils import Color, Format, print_color
 
@@ -74,15 +72,6 @@ class Command(ABC):
             default=Path.cwd() / "packages",
             required=False,
             help="The directory that holds the package directories",
-        )
-
-        default_build_dir = save_cache_path("debutizer")
-        self.parser.add_env_flag(
-            "--build-dir",
-            type=Path,
-            default=default_build_dir,
-            required=False,
-            help="The directory that will hold intermediate build files",
         )
 
         self.parser.add_env_flag(

@@ -1,5 +1,4 @@
 import argparse
-import shutil
 from typing import List
 
 import requests
@@ -20,6 +19,7 @@ from .utils import (
     copy_binary_artifacts,
     copy_source_artifacts,
     find_package_dirs,
+    make_build_dir,
     make_chroot,
     make_source_files,
     process_package_pys,
@@ -69,17 +69,15 @@ class BuildCommand(Command):
         Environment.codename = args.distribution
         Environment.architecture = args.architecture
 
-        if args.build_dir.is_dir():
-            shutil.rmtree(args.build_dir)
-        args.build_dir.mkdir()
+        build_dir = make_build_dir()
 
         Upstream.package_root = args.package_dir
-        Upstream.build_root = args.build_dir
+        Upstream.build_root = build_dir
         SourcePackage.distribution = args.distribution
 
         package_dirs = find_package_dirs(args.package_dir)
         chroot_archive_path = make_chroot(args.distribution)
-        package_pys = process_package_pys(package_dirs, registry, args.build_dir)
+        package_pys = process_package_pys(package_dirs, registry, build_dir)
 
         if args.upstream_repo is not None:
             new_package_pys = []
@@ -134,12 +132,10 @@ class BuildCommand(Command):
                 )
             set_chroot_repos(args.distribution, repositories)
 
-            source_results_dir = make_source_files(
-                args.build_dir, package_py.source_package
-            )
+            source_results_dir = make_source_files(build_dir, package_py.source_package)
             binary_results_dir = build_package(
                 package_py.source_package,
-                args.build_dir,
+                build_dir,
                 chroot_archive_path,
             )
 
