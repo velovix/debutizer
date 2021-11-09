@@ -86,7 +86,10 @@ class UploadCommand(Command):
             metadata_files += add_packages_files(mount_path)
             metadata_files += add_sources_files(mount_path)
             metadata_files += add_release_files(
-                mount_path, config.s3_repo.sign, config.s3_repo.gpg_key_id
+                mount_path,
+                config.s3_repo.sign,
+                config.s3_repo.gpg_key_id,
+                config.s3_repo.gpg_signing_password,
             )
 
             # Upload the files to the bucket. S3FS should take care of this, but we need

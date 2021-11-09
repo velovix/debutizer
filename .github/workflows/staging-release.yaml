@@ -20,6 +20,7 @@ jobs:
           # rebuilt for every new commit before being introduced to production,
           # making development easier.
           echo "upstream_repo: http://apt.debutizer.dev" >> debutizer.yaml
+          echo "upstream_components: [main]" >> debutizer.yaml
           echo "upstream_is_trusted: true" >> debutizer.yaml
         shell: bash
       - uses: ./.github/actions/apt-build
