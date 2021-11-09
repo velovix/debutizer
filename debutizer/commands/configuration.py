@@ -133,7 +133,7 @@ class Configuration:
             s3_repo = None
         else:
             try:
-                s3_repo = S3RepoConfiguration.from_dict(config)
+                s3_repo = S3RepoConfiguration.from_dict(s3_repo_config)
             except DebutizerYAMLError as ex:
                 raise CommandError(f"In {config_file}, in the s3_repo object: {ex}")
 
