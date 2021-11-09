@@ -143,6 +143,7 @@ class BuildCommand(Command):
                 args.artifacts_dir,
                 sign=False,
                 gpg_key_id=None,
+                gpg_signing_key=None,
                 gpg_signing_password=None,
             )
 

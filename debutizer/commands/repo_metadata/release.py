@@ -4,7 +4,6 @@ from contextlib import ExitStack
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
-from debutizer.commands.configuration import S3RepoConfiguration
 from debutizer.commands.utils import temp_file
 from debutizer.errors import CommandError
 from debutizer.print_utils import Color, Format, print_color
@@ -15,6 +14,7 @@ def add_release_files(
     artifacts_dir: Path,
     sign: bool,
     gpg_key_id: Optional[str],
+    gpg_signing_key: Optional[str],
     gpg_signing_password: Optional[str],
 ) -> List[Path]:
     """Adds Release files to the given APT package file tree. Release files provide MD5
@@ -31,6 +31,8 @@ def add_release_files(
     :param artifacts_dir: The root of the APT package file tree
     :param sign: If true, Release files will be signed as InRelease files
     :param gpg_key_id: If provided, the GPG key with this ID will be used to sign
+    :param gpg_signing_key: If provided the GPG key in this string will be imported and
+        used
     :param gpg_signing_password: The password for the GPG signing key, if one is
         necessary
     :return: The newly created Release (and potentially InRelease) files
