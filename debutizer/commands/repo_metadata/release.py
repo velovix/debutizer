@@ -11,7 +11,11 @@ from debutizer.subprocess_utils import run
 
 
 def add_release_files(
-    artifacts_dir: Path, sign: bool, gpg_key_id: Optional[str]
+    artifacts_dir: Path,
+    sign: bool,
+    gpg_key_id: Optional[str],
+    gpg_signing_key: Optional[str],
+    gpg_signing_password: Optional[str],
 ) -> List[Path]:
     """Adds Release files to the given APT package file tree. Release files provide MD5
     hashes for Packages and Sources files, verifying their integrity. They also contain
@@ -27,12 +31,16 @@ def add_release_files(
     :param artifacts_dir: The root of the APT package file tree
     :param sign: If true, Release files will be signed as InRelease files
     :param gpg_key_id: If provided, the GPG key with this ID will be used to sign
+    :param gpg_signing_key: If provided the GPG key in this string will be imported and
+        used
+    :param gpg_signing_password: The password for the GPG signing key, if one is
+        necessary
     :return: The newly created Release (and potentially InRelease) files
     """
     release_files = []
 
-    if sign and gpg_key_id is None:
-        _import_gpg_key(os.environ["GPG_SIGNING_KEY"])
+    if sign and gpg_key_id is None and gpg_signing_key is not None:
+        _import_gpg_key(gpg_signing_key)
 
     dirs = artifacts_dir.glob("dists/*")
     dirs = (d.relative_to(artifacts_dir) for d in dirs)
@@ -74,7 +82,9 @@ def add_release_files(
             )
 
             signed_release_file = release_file.with_name("InRelease")
-            _sign_file(release_file, signed_release_file, gpg_key_id)
+            _sign_file(
+                release_file, signed_release_file, gpg_key_id, gpg_signing_password
+            )
             release_files.append(signed_release_file)
 
     return release_files
@@ -98,7 +108,12 @@ def _import_gpg_key(key: str) -> None:
         raise CommandError("Failed to import the GPG key")
 
 
-def _sign_file(input_: Path, output: Path, gpg_key_id: Optional[str]) -> None:
+def _sign_file(
+    input_: Path,
+    output: Path,
+    gpg_key_id: Optional[str],
+    gpg_signing_password: Optional[str],
+) -> None:
     command: List[Union[str, Path]] = [
         "gpg",
         "--pinentry-mode=loopback",
@@ -112,12 +127,10 @@ def _sign_file(input_: Path, output: Path, gpg_key_id: Optional[str]) -> None:
     if gpg_key_id is not None:
         command += ["--default-key", gpg_key_id]
 
-    gpg_password = os.environ.get("GPG_PASSWORD")
-
     with ExitStack() as stack:
-        if gpg_password is not None:
+        if gpg_signing_password is not None:
             # Add a password if the GPG key uses one
-            password_path = stack.enter_context(temp_file(gpg_password))
+            password_path = stack.enter_context(temp_file(gpg_signing_password))
             command += ["--passphrase-file", password_path]
 
         # Add the actual GPG command, which must be after all options

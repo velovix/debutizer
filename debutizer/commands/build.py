@@ -1,5 +1,4 @@
 import argparse
-import shutil
 from typing import List
 
 import requests
@@ -13,6 +12,7 @@ from ..source_package import SourcePackage
 from ..upstreams import Upstream
 from .command import Command
 from .config import EnvArgumentParser
+from .configuration import Configuration
 from .local_repo import LocalRepository
 from .repo_metadata import add_packages_files, add_release_files, add_sources_files
 from .utils import (
@@ -20,6 +20,7 @@ from .utils import (
     copy_binary_artifacts,
     copy_source_artifacts,
     find_package_dirs,
+    make_build_dir,
     make_chroot,
     make_source_files,
     process_package_pys,
@@ -33,58 +34,39 @@ class BuildCommand(Command):
             prog="debutizer build", description="Builds your APT packages"
         )
 
-        self.add_common_args()
-
-        self.parser.add_env_flag(
-            "--upstream-repo",
-            type=str,
-            required=False,
-            help="An upstream repository to check against before building packages. If "
-            "a package at the current version already exists upstream, it will not be "
-            "built again. Packages can also pull dependencies down from this "
-            "repository where necessary.",
-        )
-        self.parser.add_env_flag(
-            "--upstream-is-trusted",
-            action="store_true",
-            help="If provided, the upstream repository will be set as a trusted "
-            "repository in the build chroot. This allows the repository contents to be "
-            "unsigned.",
-        )
-        self.parser.add_env_flag(
-            "--upstream-components",
-            nargs="+",
-            default=["main"],
-            help="The components to include in the build chroot from the upstream "
-            "repository. By default, the main component is included.",
-        )
+        self.add_artifacts_dir_flag()
+        self.add_config_file_flag()
+        self.add_package_dir_flag()
 
     def behavior(self, args: argparse.Namespace) -> None:
+        config = self.parse_config_file(args)
+        config.check_validity()
+
         args.artifacts_dir.mkdir(exist_ok=True)
         registry = Registry()
         local_repo = LocalRepository(port=8080, artifacts_dir=args.artifacts_dir)
         local_repo.start()
         self.cleanup_hooks.append(local_repo.close)
 
-        Environment.codename = args.distribution
-        Environment.architecture = args.architecture
+        Environment.codename = config.distribution
+        Environment.architecture = config.architecture
 
-        if args.build_dir.is_dir():
-            shutil.rmtree(args.build_dir)
-        args.build_dir.mkdir()
+        build_dir = make_build_dir()
 
         Upstream.package_root = args.package_dir
-        Upstream.build_root = args.build_dir
-        SourcePackage.distribution = args.distribution
+        Upstream.build_root = build_dir
+        SourcePackage.distribution = config.distribution
 
         package_dirs = find_package_dirs(args.package_dir)
-        chroot_archive_path = make_chroot(args.distribution)
-        package_pys = process_package_pys(package_dirs, registry, args.build_dir)
+        chroot_archive_path = make_chroot(config.distribution)
+        package_pys = process_package_pys(package_dirs, registry, build_dir)
 
-        if args.upstream_repo is not None:
+        if config.upstream_repo is not None:
             new_package_pys = []
             for package_py in package_pys:
-                if _exists_upstream(args.upstream_repo, args.distribution, package_py):
+                if _exists_upstream(
+                    config.upstream_repo, config.distribution, package_py
+                ):
                     print_color(
                         f"Package {package_py.source_package.name} already exists "
                         f"upstream, so it will not be built"
@@ -118,48 +100,52 @@ class BuildCommand(Command):
             )
 
             repositories = []
-            if args.upstream_repo is not None:
+            if config.upstream_repo is not None:
                 entry = _make_upstream_source_entry(
-                    upstream_repo=args.upstream_repo,
-                    distribution=args.distribution,
-                    components=args.upstream_components,
-                    trusted=args.upstream_is_trusted,
+                    upstream_repo=config.upstream_repo,
+                    distribution=config.distribution,
+                    components=config.upstream_components,  # type: ignore[arg-type]
+                    trusted=config.upstream_is_trusted,
                 )
                 repositories.append(entry)
             if i > 0:
                 # We can't add the local repo if this is the first package being built
                 # because APT does not like empty repositories
                 repositories.append(
-                    f"deb [trusted=yes] http://localhost:8080 {args.distribution} main"
+                    f"deb [trusted=yes] http://localhost:8080 {config.distribution} main"
                 )
-            set_chroot_repos(args.distribution, repositories)
+            set_chroot_repos(config.distribution, repositories)
 
-            source_results_dir = make_source_files(
-                args.build_dir, package_py.source_package
-            )
+            source_results_dir = make_source_files(build_dir, package_py.source_package)
             binary_results_dir = build_package(
                 package_py.source_package,
-                args.build_dir,
+                build_dir,
                 chroot_archive_path,
             )
 
             copy_source_artifacts(
                 results_dir=source_results_dir,
                 artifacts_dir=args.artifacts_dir,
-                distribution=args.distribution,
+                distribution=config.distribution,
                 component=package_py.component,
             )
             copy_binary_artifacts(
                 results_dir=binary_results_dir,
                 artifacts_dir=args.artifacts_dir,
-                distribution=args.distribution,
+                distribution=config.distribution,
                 component=package_py.component,
-                architecture=args.architecture,
+                architecture=config.architecture,
             )
 
             add_packages_files(args.artifacts_dir)
             add_sources_files(args.artifacts_dir)
-            add_release_files(args.artifacts_dir, sign=False, gpg_key_id=None)
+            add_release_files(
+                args.artifacts_dir,
+                sign=False,
+                gpg_key_id=None,
+                gpg_signing_key=None,
+                gpg_signing_password=None,
+            )
 
         print_color("")
         print_done("Build")

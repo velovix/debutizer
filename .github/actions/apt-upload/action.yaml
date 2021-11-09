@@ -2,31 +2,15 @@ name: Release
 description: Releases to an APT repository
 
 inputs:
-  bucket_name:
-    description: The name of the bucket to upload to
-    required: true
-  access_key:
-    description: The access key for the bucket
-    required: true
-  secret_key:
-    description: The secret key for the bucket
-    required: true
-  cache_control:
-    description: The Cache-Control value to use for package files
+  config_file:
+    description: The Debutizer configuration file to use
     required: false
-    default: 'public, max-age=3600'
+    default: debutizer.yaml
 
 runs:
   using: composite
   steps:
   - uses: ./.github/actions/install-dependencies
   - name: Upload
-    run: >
-      python -m debutizer s3-repo upload
-      --endpoint https://storage.googleapis.com
-      --bucket ${{ inputs.bucket_name }}
-      --access-key ${{ inputs.access_key }}
-      --secret-key ${{ inputs.secret_key }}
-      --sign
-      --cache-control '${{ inputs.cache_control }}'
+    run: python -m debutizer s3-repo upload --config-file ${{ inputs.config_file }}
     shell: bash

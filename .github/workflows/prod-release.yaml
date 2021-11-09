@@ -13,11 +13,14 @@ jobs:
         distribution: [ 'bionic', 'focal', 'hirsute' ]
     steps:
       - uses: actions/checkout@v2
+      - name: Write Configuration
+        run: |
+          echo "distribution: '${{ matrix.distribution }}'" >> debutizer-prod.yaml
+        shell: bash
       - uses: ./.github/actions/apt-build
         name: Build APT Package
         with:
-          distribution: ${{ matrix.distribution }}
-          upstream_repo: http://apt.debutizer.dev
+          config_file: debutizer-prod.yaml
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.distribution }}
@@ -39,15 +42,19 @@ jobs:
         with:
           name: hirsute
           path: artifacts/dists/hirsute
+      - name: Write Configuration
+        run: |
+          echo "distribution: ''" >> debutizer-prod.yaml
+        shell: bash
       - uses: ./.github/actions/apt-upload
         name: Upload APT Packages
         with:
-          bucket_name: apt-debutizer-dev
-          access_key: ${{ secrets.PROD_ACCESS_KEY }}
-          secret_key: ${{ secrets.PROD_SECRET_KEY }}
+          config_file: debutizer-prod.yaml
         env:
-          GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
-          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          DEBUTIZER_ACCESS_KEY: ${{ secrets.PROD_ACCESS_KEY }}
+          DEBUTIZER_SECRET_KEY: ${{ secrets.PROD_SECRET_KEY }}
+          DEBUTIZER_GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          DEBUTIZER_GPG_SIGNING_PASSWORD: ${{ secrets.GPG_PASSWORD }}
   pypi:
     runs-on: ubuntu-20.04
     steps:
