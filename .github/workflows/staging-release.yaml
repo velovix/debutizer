@@ -14,14 +14,17 @@ jobs:
         distribution: [ 'bionic', 'focal', 'hirsute' ]
     steps:
       - uses: actions/checkout@v2
-      - run: |
-          echo "distribution: '${{ matrix.distribution }}'" >> debutizer.yaml
+      - name: Write Configuration
+        run: |
+          cat << EOF > debutizer.yaml
+          distribution: '${{ matrix.distribution }}'
           # We check against the production repo so that new packages will be
           # rebuilt for every new commit before being introduced to production,
           # making development easier.
-          echo "upstream_repo: http://apt.debutizer.dev" >> debutizer.yaml
-          echo "upstream_components: [main]" >> debutizer.yaml
-          echo "upstream_is_trusted: true" >> debutizer.yaml
+          upstream_repo: http://apt.debutizer.dev
+          upstream_components: [main]
+          upstream_is_trusted: true
+          EOF
         shell: bash
       - uses: ./.github/actions/apt-build
         name: Build APT Package
@@ -46,11 +49,16 @@ jobs:
         with:
           name: hirsute
           path: artifacts/dists/hirsute
-      - run: |
-          echo "endpoint: https://storage.googleapis.com" >> debutizer.yaml
-          echo "bucket: apt-staging-debutizer-dev" >> debutizer.yaml
-          echo "cache_control: no-cache" >> debutizer.yaml
-          echo "sign: true" >> debutizer.yaml
+      - name: Write Configuration
+        run: |
+          cat << EOF > debutizer.yaml
+          distribution: '${{ matrix.distribution }}'
+          s3_repo:
+            endpoint: https://storage.googleapis.com
+            bucket: apt-staging-debutizer-dev
+            cache_control: no-cache
+            sign: true
+          EOF
         shell: bash
       - uses: ./.github/actions/apt-upload
         name: Upload APT Packages
