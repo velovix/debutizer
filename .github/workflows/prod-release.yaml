@@ -19,6 +19,8 @@ jobs:
         shell: bash
       - uses: ./.github/actions/apt-build
         name: Build APT Package
+        with:
+          config_file: debutizer-prod.yaml
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.distribution }}
@@ -46,6 +48,8 @@ jobs:
         shell: bash
       - uses: ./.github/actions/apt-upload
         name: Upload APT Packages
+        with:
+          config_file: debutizer-prod.yaml
         env:
           DEBUTIZER_ACCESS_KEY: ${{ secrets.PROD_ACCESS_KEY }}
           DEBUTIZER_SECRET_KEY: ${{ secrets.PROD_SECRET_KEY }}
