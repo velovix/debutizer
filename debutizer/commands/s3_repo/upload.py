@@ -2,7 +2,6 @@ import argparse
 import base64
 import hashlib
 import hmac
-import os
 import sys
 import tempfile
 from contextlib import contextmanager
@@ -11,6 +10,7 @@ from email.utils import format_datetime
 from pathlib import Path
 from time import sleep
 from urllib.parse import urlparse
+from typing import cast
 
 import requests
 
@@ -45,6 +45,10 @@ class UploadCommand(Command):
             raise CommandError("The configuration file must have an s3-repo object")
         config.s3_repo.check_validity()
 
+        # check_validity ensures these aren't null, but mypy can't figure that out
+        access_key: str = cast(str, config.s3_repo.access_key)
+        secret_key: str = cast(str, config.s3_repo.secret_key)
+
         endpoint = urlparse(config.s3_repo.endpoint)
         if endpoint.scheme not in _SUPPORTED_SCHEMES:
             raise CommandError(
@@ -64,8 +68,8 @@ class UploadCommand(Command):
             print_color(f"Uploading {artifact_file_path}...")
             _upload_artifact(
                 bucket_endpoint=bucket_endpoint,
-                access_key=config.s3_repo.access_key,  # type: ignore[arg-type]
-                secret_key=config.s3_repo.secret_key,  # type: ignore[arg-type]
+                access_key=access_key,
+                secret_key=secret_key,
                 artifacts_dir=args.artifacts_dir,
                 artifact_file_path=artifact_file_path,
                 cache_control=config.s3_repo.cache_control,
@@ -74,8 +78,8 @@ class UploadCommand(Command):
         with tempfile.TemporaryDirectory() as mount_path_name, _mount_s3fs(
             endpoint=endpoint.geturl(),
             bucket=config.s3_repo.bucket,
-            access_key=config.s3_repo.access_key,  # type: ignore[arg-type]
-            secret_key=config.s3_repo.secret_key,  # type: ignore[arg-type]
+            access_key=access_key,
+            secret_key=secret_key,
             mount_path=Path(mount_path_name),
         ):
             mount_path = Path(mount_path_name)
@@ -90,8 +94,8 @@ class UploadCommand(Command):
             for metadata_file in metadata_files:
                 _upload_artifact(
                     bucket_endpoint=bucket_endpoint,
-                    access_key=config.s3_repo.access_key,  # type: ignore[arg-type]
-                    secret_key=config.s3_repo.secret_key,  # type: ignore[arg-type]
+                    access_key=access_key,
+                    secret_key=secret_key,
                     artifacts_dir=mount_path,
                     artifact_file_path=metadata_file,
                     # Metadata files update often
