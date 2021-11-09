@@ -15,7 +15,7 @@ from debutizer.upstreams import LocalUpstream
 from debutizer.version import Version
 
 upstream = LocalUpstream(
-    name="debutizer", version=Version.from_string("0.5.1-1"), path=Path(".")
+    name="debutizer", version=Version.from_string("0.6.0-1"), path=Path(".")
 )
 package_dir = upstream.fetch()
 
@@ -162,6 +162,14 @@ source_package.changelog.add(
     changes=["* Generate S3-repo metadata using the contents of the bucket"],
     author="Tyler Compton <xaviosx@gmail.com>",
     date=datetime(2021, 11, 6, 15, 12),
+)
+
+source_package.changelog.add(
+    version="0.6.0-1",
+    urgency="medium",
+    changes=["* Migrate some configuration to a file"],
+    author="Tyler Compton <xaviosx@gmail.com>",
+    date=datetime(2021, 11, 8, 23, 59),
 )
 
 source_package.complete()
