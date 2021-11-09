@@ -1,13 +1,14 @@
 import argparse
-import os
-import platform
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Callable, Dict, List
 
-from debutizer.commands.config import EnvArgumentParser
 from debutizer.print_utils import Color, Format, print_color
+
+from ..errors import CommandError
+from .config import EnvArgumentParser
+from .configuration_file import Configuration
 
 
 class Command(ABC):
@@ -45,6 +46,12 @@ class Command(ABC):
     def parse_args(self) -> argparse.Namespace:
         return self.parser.parse_args(sys.argv[2:])
 
+    def parse_config_file(self, args: argparse.Namespace) -> Configuration:
+        if not args.config_file.is_file():
+            raise CommandError("Missing debutizer.yaml in the current directory")
+
+        return Configuration.from_file(args.config_file)
+
     def run(self) -> None:
         """Runs the command"""
         args = self.parse_args()
@@ -53,19 +60,26 @@ class Command(ABC):
         finally:
             self.clean_up()
 
-    def add_archive_args(self) -> None:
+    def add_artifacts_dir_flag(self) -> None:
         self.parser.add_env_flag(
             "--artifacts-dir",
             type=Path,
-            default=os.environ.get("DEBUTIZER_ARTIFACTS_DIR", Path.cwd() / "artifacts"),
+            default=Path.cwd() / "artifacts",
             required=False,
             help="The directory that will hold the resulting packages and other "
             "artifacts",
         )
 
-    def add_common_args(self) -> None:
-        self.add_archive_args()
+    def add_config_file_flag(self) -> None:
+        self.parser.add_env_flag(
+            "--config-file",
+            type=Path,
+            default="debutizer.yaml",
+            required=False,
+            help="The configuration file to reference",
+        )
 
+    def add_package_dir_flag(self) -> None:
         self.parser.add_env_flag(
             "--package-dir",
             type=Path,
@@ -73,38 +87,3 @@ class Command(ABC):
             required=False,
             help="The directory that holds the package directories",
         )
-
-        self.parser.add_env_flag(
-            "--distribution",
-            type=str,
-            required=True,
-            help="The codename of the distribution to build packages against, like "
-            "'focal' or 'sid'.",
-        )
-
-        # TODO: Update the help text when cross-building is supported. qemubuilder?
-        self.parser.add_env_flag(
-            "--architecture",
-            type=str,
-            required=False,
-            default=_host_architecture(),
-            help="The architecture to build packages against, like 'amd64' or 'arm64'. "
-            "Defaults to the host architecture. Changing this value will currently "
-            "break your build.",
-        )
-
-
-def _host_architecture() -> str:
-    """
-    :return: Debian's name for the host CPU architecture
-    """
-    arch = platform.machine()
-
-    # Python uses the GNU names for architectures, which is sometimes different from
-    # Debian's names. This is documented in /usr/share/dpkg/cputable.
-    if arch == "x86_64":
-        return "amd64"
-    elif arch == "aarch64":
-        return "amd64"
-    else:
-        return arch

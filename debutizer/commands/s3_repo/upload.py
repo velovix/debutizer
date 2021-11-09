@@ -33,81 +33,29 @@ class UploadCommand(Command):
             "bucket",
         )
 
-        self.add_archive_args()
-
-        self.parser.add_env_flag(
-            "--endpoint",
-            type=str,
-            required=True,
-            help="The name of the S3-compatible endpoint. For AWS, this is "
-            "https://s3.amazonaws.com",
-        )
-        self.parser.add_env_flag(
-            "--bucket",
-            type=str,
-            required=True,
-            help="The name of the bucket to upload to",
-        )
-        self.parser.add_env_flag(
-            "--access-key",
-            type=str,
-            required=True,
-            help="The access key for this bucket",
-        )
-        self.parser.add_env_flag(
-            "--secret-key",
-            type=str,
-            required=True,
-            help="The secret key for this bucket",
-        )
-        self.parser.add_env_flag(
-            "--sign",
-            action="store_true",
-            help="If provided, the Release files will be signed. If --gpg-key-id is "
-            "provided, that key will be used. Otherwise, the GPG key stored in the "
-            "$GPG_SIGNING_KEY environment variable will be added to your keyring and "
-            "used. If your key has a password, store it in the $GPG_PASSWORD "
-            "environment variable.",
-        )
-        self.parser.add_env_flag(
-            "--gpg-key-id",
-            type=str,
-            required=False,
-            help="The ID of the GPG key in your keyring to sign Release files with",
-        )
-        self.parser.add_env_flag(
-            "--cache-control",
-            type=str,
-            default="public, max-age=3600",
-            help="The Cache-Control value to use for package files. Metadata files, "
-            "like Package, will always have a value of 'no-cache' since they are "
-            "changed regularly.",
-        )
+        self.add_artifacts_dir_flag()
+        self.add_config_file_flag()
 
     def parse_args(self) -> argparse.Namespace:
         return self.parser.parse_args(sys.argv[3:])
 
     def behavior(self, args: argparse.Namespace) -> None:
-        if (
-            args.sign
-            and args.gpg_key_id is None
-            and "GPG_SIGNING_KEY" not in os.environ
-        ):
-            raise CommandError(
-                "When signing is enabled, either the --gpg-key-id flag or "
-                "$GPG_SIGNING_KEY environment variable must be set"
-            )
+        config = self.parse_config_file(args)
+        if config.s3_repo is None:
+            raise CommandError("The configuration file must have an s3-repo object")
+        config.s3_repo.check_validity()
 
-        endpoint = urlparse(args.endpoint)
+        endpoint = urlparse(config.s3_repo.endpoint)
         if endpoint.scheme not in _SUPPORTED_SCHEMES:
             raise CommandError(
                 f"Unsupported scheme {endpoint.scheme}, must be one of "
                 f"{_SUPPORTED_SCHEMES}"
             )
-        if endpoint.path.endswith("/"):
-            endpoint.path = endpoint.path[:-1]
+        url = endpoint.geturl()
+        if url.endswith("/"):
+            url = url[:-1]
 
-        bucket_endpoint = f"{endpoint.geturl()}/{args.bucket}"
+        bucket_endpoint = f"{url}/{config.s3_repo.bucket}"
 
         artifacts = find_archives(args.artifacts_dir, recursive=True)
 
@@ -116,32 +64,34 @@ class UploadCommand(Command):
             print_color(f"Uploading {artifact_file_path}...")
             _upload_artifact(
                 bucket_endpoint=bucket_endpoint,
-                access_key=args.access_key,
-                secret_key=args.secret_key,
+                access_key=config.s3_repo.access_key,  # type: ignore[arg-type]
+                secret_key=config.s3_repo.secret_key,  # type: ignore[arg-type]
                 artifacts_dir=args.artifacts_dir,
                 artifact_file_path=artifact_file_path,
-                cache_control=args.cache_control,
+                cache_control=config.s3_repo.cache_control,
             )
 
         with tempfile.TemporaryDirectory() as mount_path_name, _mount_s3fs(
             endpoint=endpoint.geturl(),
-            bucket=args.bucket,
-            access_key=args.access_key,
-            secret_key=args.secret_key,
+            bucket=config.s3_repo.bucket,
+            access_key=config.s3_repo.access_key,  # type: ignore[arg-type]
+            secret_key=config.s3_repo.secret_key,  # type: ignore[arg-type]
             mount_path=Path(mount_path_name),
         ):
             mount_path = Path(mount_path_name)
             metadata_files += add_packages_files(mount_path)
             metadata_files += add_sources_files(mount_path)
-            metadata_files += add_release_files(mount_path, args.sign, args.gpg_key_id)
+            metadata_files += add_release_files(
+                mount_path, config.s3_repo.sign, config.s3_repo.gpg_key_id
+            )
 
             # Upload the files to the bucket. S3FS should take care of this, but we need
             # to do it again manually in order to set the Cache-Control header.
             for metadata_file in metadata_files:
                 _upload_artifact(
                     bucket_endpoint=bucket_endpoint,
-                    access_key=args.access_key,
-                    secret_key=args.secret_key,
+                    access_key=config.s3_repo.access_key,  # type: ignore[arg-type]
+                    secret_key=config.s3_repo.secret_key,  # type: ignore[arg-type]
                     artifacts_dir=mount_path,
                     artifact_file_path=metadata_file,
                     # Metadata files update often

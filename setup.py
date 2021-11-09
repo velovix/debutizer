@@ -34,6 +34,7 @@ setup(
         "pyxdg",
         "requests",
         "flask",
+        "PyYAML",
     ],
     extras_require={
         "dev": [

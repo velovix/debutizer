@@ -40,6 +40,7 @@ source_package.control.set_source(
                 "python3-xdg",
                 "python3-requests",
                 "python3-flask",
+                "python3-yaml",
                 "s3fs",
             ]
         ),

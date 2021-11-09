@@ -445,7 +445,7 @@ def temp_file(content: str) -> Iterator[Path]:
 
 
 def make_build_dir() -> Path:
-    build_dir = save_cache_path("debutizer")
+    build_dir = Path(save_cache_path("debutizer"))
     if build_dir.is_dir():
         shutil.rmtree(build_dir)
     build_dir.mkdir()
