@@ -117,7 +117,7 @@ class Configuration:
     @staticmethod
     def from_file(config_file: Path) -> "Configuration":
         with config_file.open("r") as f:
-            config = yaml.parse(f, yaml.Loader)
+            config = yaml.load(f, yaml.Loader)
 
         try:
             distribution = _required(config, "distribution", str)
