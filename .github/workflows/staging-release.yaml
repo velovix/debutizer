@@ -14,14 +14,16 @@ jobs:
         distribution: [ 'bionic', 'focal', 'hirsute' ]
     steps:
       - uses: actions/checkout@v2
-      - uses: ./.github/actions/apt-build
-        name: Build APT Package
-        with:
-          distribution: ${{ matrix.distribution }}
+      - run: |
+          echo "distribution: '${{ matrix.distribution }}'" >> debutizer.yaml
           # We check against the production repo so that new packages will be
           # rebuilt for every new commit before being introduced to production,
           # making development easier.
-          upstream_repo: http://apt.debutizer.dev
+          echo "upstream_repo: http://apt.debutizer.dev" >> debutizer.yaml
+          echo "upstream_is_trusted: true" >> debutizer.yaml
+        shell: bash
+      - uses: ./.github/actions/apt-build
+        name: Build APT Package
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.distribution }}
@@ -43,14 +45,16 @@ jobs:
         with:
           name: hirsute
           path: artifacts/dists/hirsute
+      - run: |
+          echo "endpoint: https://storage.googleapis.com" >> debutizer.yaml
+          echo "bucket: apt-staging-debutizer-dev" >> debutizer.yaml
+          echo "cache_control: no-cache" >> debutizer.yaml
+          echo "sign: true" >> debutizer.yaml
+        shell: bash
       - uses: ./.github/actions/apt-upload
         name: Upload APT Packages
-        with:
-          bucket_name: apt-staging-debutizer-dev
-          access_key: ${{ secrets.STAGING_ACCESS_KEY }}
-          secret_key: ${{ secrets.STAGING_SECRET_KEY }}
-          # Since we re-upload the same version of the package multiple times
-          cache_control: no-cache
         env:
-          GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
-          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          DEBUTIZER_ACCESS_KEY: ${{ secrets.STAGING_ACCESS_KEY }}
+          DEBUTIZER_SECRET_KEY: ${{ secrets.STAGING_SECRET_KEY }}
+          DEBUTIZER_GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          DEBUTIZER_GPG_SIGNING_PASSWORD: ${{ secrets.GPG_PASSWORD }}

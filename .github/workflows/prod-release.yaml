@@ -13,11 +13,13 @@ jobs:
         distribution: [ 'bionic', 'focal', 'hirsute' ]
     steps:
       - uses: actions/checkout@v2
+      - run: |
+          echo "distribution: '${{ matrix.distribution }}'" >> debutizer.yaml
+          echo "upstream_repo: http://apt.debutizer.dev" >> debutizer.yaml
+          echo "upstream_is_trusted: true" >> debutizer.yaml
+        shell: bash
       - uses: ./.github/actions/apt-build
         name: Build APT Package
-        with:
-          distribution: ${{ matrix.distribution }}
-          upstream_repo: http://apt.debutizer.dev
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.distribution }}
@@ -39,15 +41,19 @@ jobs:
         with:
           name: hirsute
           path: artifacts/dists/hirsute
+      - run: |
+          echo "endpoint: https://storage.googleapis.com" >> debutizer.yaml
+          echo "bucket: apt-debutizer-dev" >> debutizer.yaml
+          echo "cache_control: no-cache" >> debutizer.yaml
+          echo "sign: true" >> debutizer.yaml
+        shell: bash
       - uses: ./.github/actions/apt-upload
         name: Upload APT Packages
-        with:
-          bucket_name: apt-debutizer-dev
-          access_key: ${{ secrets.PROD_ACCESS_KEY }}
-          secret_key: ${{ secrets.PROD_SECRET_KEY }}
         env:
-          GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
-          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          DEBUTIZER_ACCESS_KEY: ${{ secrets.PROD_ACCESS_KEY }}
+          DEBUTIZER_SECRET_KEY: ${{ secrets.PROD_SECRET_KEY }}
+          DEBUTIZER_GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          DEBUTIZER_GPG_SIGNING_PASSWORD: ${{ secrets.GPG_PASSWORD }}
   pypi:
     runs-on: ubuntu-20.04
     steps:

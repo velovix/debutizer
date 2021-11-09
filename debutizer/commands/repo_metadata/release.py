@@ -4,6 +4,7 @@ from contextlib import ExitStack
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
+from debutizer.commands.configuration import S3RepoConfiguration
 from debutizer.commands.utils import temp_file
 from debutizer.errors import CommandError
 from debutizer.print_utils import Color, Format, print_color
@@ -98,7 +99,7 @@ def _import_gpg_key(key: str) -> None:
         raise CommandError("Failed to import the GPG key")
 
 
-def _sign_file(input_: Path, output: Path, gpg_key_id: Optional[str]) -> None:
+def _sign_file(input_: Path, output: Path, config: S3RepoConfiguration) -> None:
     command: List[Union[str, Path]] = [
         "gpg",
         "--pinentry-mode=loopback",
@@ -109,15 +110,13 @@ def _sign_file(input_: Path, output: Path, gpg_key_id: Optional[str]) -> None:
         output,
     ]
 
-    if gpg_key_id is not None:
-        command += ["--default-key", gpg_key_id]
-
-    gpg_password = os.environ.get("GPG_PASSWORD")
+    if config.gpg_key_id is not None:
+        command += ["--default-key", config.gpg_key_id]
 
     with ExitStack() as stack:
-        if gpg_password is not None:
+        if config.gpg_signing_password is not None:
             # Add a password if the GPG key uses one
-            password_path = stack.enter_context(temp_file(gpg_password))
+            password_path = stack.enter_context(temp_file(config.gpg_signing_password))
             command += ["--passphrase-file", password_path]
 
         # Add the actual GPG command, which must be after all options
