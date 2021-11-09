@@ -4,7 +4,7 @@ from tempfile import TemporaryDirectory
 from unittest.mock import Mock
 
 from debutizer.commands.build import BuildCommand
-from debutizer.commands.configuration_file import Configuration
+from debutizer.commands.configuration import Configuration
 
 
 def test_build_source_repository_upstream_package():

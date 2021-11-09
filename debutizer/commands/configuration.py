@@ -82,7 +82,7 @@ class S3RepoConfiguration:
 
     def check_validity(self):
         if self.access_key is None or self.secret_key is None:
-            raise CommandError(
+            raise CredentialsYAMLError(
                 f"When using an S3-compatible bucket, an access key and secret key "
                 f"must be provided so that Debutizer can authenticate against the "
                 f"bucket. This can be done either through the DEBUTIZER_ACCESS_KEY and "
@@ -91,7 +91,7 @@ class S3RepoConfiguration:
             )
 
         if self.sign and self.gpg_key_id is None and self.gpg_signing_key is None:
-            raise CommandError(
+            raise DebutizerYAMLError(
                 "When package signing is enabled, either the gpg_key_id field or "
                 "DEBUTIZER_GPG_SIGNING_KEY environment variable must be set"
             )

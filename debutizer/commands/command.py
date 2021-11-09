@@ -8,7 +8,7 @@ from debutizer.print_utils import Color, Format, print_color
 
 from ..errors import CommandError
 from .config import EnvArgumentParser
-from .configuration_file import Configuration
+from .configuration import Configuration
 
 
 class Command(ABC):

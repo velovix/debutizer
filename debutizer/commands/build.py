@@ -12,7 +12,7 @@ from ..source_package import SourcePackage
 from ..upstreams import Upstream
 from .command import Command
 from .config import EnvArgumentParser
-from .configuration_file import Configuration
+from .configuration import Configuration
 from .local_repo import LocalRepository
 from .repo_metadata import add_packages_files, add_release_files, add_sources_files
 from .utils import (
