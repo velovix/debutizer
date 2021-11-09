@@ -16,15 +16,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Write Configuration
         run: |
-          cat << EOF > debutizer.yaml
-          distribution: '${{ matrix.distribution }}'
-          # We check against the production repo so that new packages will be
-          # rebuilt for every new commit before being introduced to production,
-          # making development easier.
-          upstream_repo: http://apt.debutizer.dev
-          upstream_components: [main]
-          upstream_is_trusted: true
-          EOF
+          echo "distribution: '${{ matrix.distribution }}'" >> debutizer-stage.yaml
         shell: bash
       - uses: ./.github/actions/apt-build
         name: Build APT Package
@@ -51,14 +43,7 @@ jobs:
           path: artifacts/dists/hirsute
       - name: Write Configuration
         run: |
-          cat << EOF > debutizer.yaml
-          distribution: '${{ matrix.distribution }}'
-          s3_repo:
-            endpoint: https://storage.googleapis.com
-            bucket: apt-staging-debutizer-dev
-            cache_control: no-cache
-            sign: true
-          EOF
+          echo "distribution: ''" >> debutizer-stage.yaml
         shell: bash
       - uses: ./.github/actions/apt-upload
         name: Upload APT Packages

@@ -1,10 +1,16 @@
 name: Release
 description: Releases to an APT repository
 
+inputs:
+  config_file:
+    description: The Debutizer configuration file to use
+    required: false
+    default: debutizer.yaml
+
 runs:
   using: composite
   steps:
   - uses: ./.github/actions/install-dependencies
   - name: Upload
-    run: python -m debutizer s3-repo upload
+    run: python -m debutizer s3-repo upload --config-file ${{ inputs.config_file }}
     shell: bash
