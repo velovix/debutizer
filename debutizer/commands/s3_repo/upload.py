@@ -9,8 +9,8 @@ from datetime import datetime, timezone
 from email.utils import format_datetime
 from pathlib import Path
 from time import sleep
-from urllib.parse import urlparse
 from typing import cast
+from urllib.parse import urlparse
 
 import requests
 

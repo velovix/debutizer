@@ -1,7 +1,11 @@
 import pytest
 
-from debutizer.commands.configuration import Configuration, DebutizerYAMLError, \
-    S3RepoConfiguration, CredentialsYAMLError
+from debutizer.commands.configuration import (
+    Configuration,
+    CredentialsYAMLError,
+    DebutizerYAMLError,
+    S3RepoConfiguration,
+)
 
 
 def test_configuration_validity():
@@ -9,7 +13,7 @@ def test_configuration_validity():
         distribution="focal",
         architecture="amd64",
         upstream_repo="my_repo",
-        upstream_components=["my_component"]
+        upstream_components=["my_component"],
     )
 
     config.check_validity()
@@ -41,4 +45,3 @@ def test_configuration_s3_repo_validity():
     config.gpg_signing_key = None
     with pytest.raises(DebutizerYAMLError):
         config.check_validity()
-
