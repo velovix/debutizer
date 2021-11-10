@@ -7,7 +7,7 @@ on:
       - feature/38-multi-distribution
 
 jobs:
-  build-packages:
+  deploy-packages:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
