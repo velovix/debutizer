@@ -1,10 +1,11 @@
 import pytest
 
-from debutizer.commands.configuration import (
+from debutizer.commands.config_file import (
     Configuration,
     CredentialsYAMLError,
     DebutizerYAMLError,
     S3RepoConfiguration,
+    S3RepoProfile,
 )
 
 
@@ -23,8 +24,8 @@ def test_configuration_validity():
         config.check_validity()
 
 
-def test_configuration_s3_repo_validity():
-    config = S3RepoConfiguration(
+def test_configuration_s3_profile_validity():
+    config = S3RepoProfile(
         endpoint="my_endpoint",
         bucket="my_bucket",
         access_key="my_access_key",

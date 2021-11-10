@@ -20,7 +20,7 @@ from debutizer.subprocess_utils import run
 
 from ..artifacts import find_archives
 from ..command import Command
-from ..config import EnvArgumentParser
+from ..env_argparse import EnvArgumentParser
 from ..repo_metadata import add_packages_files, add_release_files, add_sources_files
 from ..utils import temp_file
 
@@ -36,6 +36,15 @@ class UploadCommand(Command):
         self.add_artifacts_dir_flag()
         self.add_config_file_flag()
 
+        self.parser.add_env_flag(
+            "--profile",
+            type=str,
+            default="default",
+            required=False,
+            help="The S3 repo profile to use. If no value is provided, the 'default' "
+            "profile will be used.",
+        )
+
     def parse_args(self) -> argparse.Namespace:
         return self.parser.parse_args(sys.argv[3:])
 
@@ -45,11 +54,18 @@ class UploadCommand(Command):
             raise CommandError("The configuration file must have an s3-repo object")
         config.s3_repo.check_validity()
 
-        # check_validity ensures these aren't null, but mypy can't figure that out
-        access_key: str = cast(str, config.s3_repo.access_key)
-        secret_key: str = cast(str, config.s3_repo.secret_key)
+        try:
+            profile = config.s3_repo.profiles[args.profile]
+        except KeyError:
+            raise CommandError(
+                f"Profile '{args.profile}' is not defined in {args.config_file}"
+            )
 
-        endpoint = urlparse(config.s3_repo.endpoint)
+        # check_validity ensures these aren't null, but mypy can't figure that out
+        access_key: str = cast(str, profile.access_key)
+        secret_key: str = cast(str, profile.secret_key)
+
+        endpoint = urlparse(profile.endpoint)
         if endpoint.scheme not in _SUPPORTED_SCHEMES:
             raise CommandError(
                 f"Unsupported scheme {endpoint.scheme}, must be one of "
@@ -59,7 +75,7 @@ class UploadCommand(Command):
         if url.endswith("/"):
             url = url[:-1]
 
-        bucket_endpoint = f"{url}/{config.s3_repo.bucket}"
+        bucket_endpoint = f"{url}/{profile.bucket}"
 
         artifacts = find_archives(args.artifacts_dir, recursive=True)
 
@@ -72,12 +88,12 @@ class UploadCommand(Command):
                 secret_key=secret_key,
                 artifacts_dir=args.artifacts_dir,
                 artifact_file_path=artifact_file_path,
-                cache_control=config.s3_repo.cache_control,
+                cache_control=profile.cache_control,
             )
 
         with tempfile.TemporaryDirectory() as mount_path_name, _mount_s3fs(
             endpoint=endpoint.geturl(),
-            bucket=config.s3_repo.bucket,
+            bucket=profile.bucket,
             access_key=access_key,
             secret_key=secret_key,
             mount_path=Path(mount_path_name),
@@ -87,10 +103,10 @@ class UploadCommand(Command):
             metadata_files += add_sources_files(mount_path)
             metadata_files += add_release_files(
                 mount_path,
-                sign=config.s3_repo.sign,
-                gpg_key_id=config.s3_repo.gpg_key_id,
-                gpg_signing_key=config.s3_repo.gpg_signing_key,
-                gpg_signing_password=config.s3_repo.gpg_signing_password,
+                sign=profile.sign,
+                gpg_key_id=profile.gpg_key_id,
+                gpg_signing_key=profile.gpg_signing_key,
+                gpg_signing_password=profile.gpg_signing_password,
             )
 
             # Upload the files to the bucket. S3FS should take care of this, but we need

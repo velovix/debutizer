@@ -4,7 +4,7 @@ import sys
 from debutizer.errors import CommandError
 
 from ..command import Command
-from ..config import EnvArgumentParser
+from ..env_argparse import EnvArgumentParser
 from .upload import UploadCommand
 
 

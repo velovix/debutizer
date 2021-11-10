@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - feature/40-improve-configuration
+      - feature/43-s3-repo-profiles
 
 jobs:
   build-packages:
@@ -16,12 +16,10 @@ jobs:
       - uses: actions/checkout@v2
       - name: Write Configuration
         run: |
-          echo "distribution: '${{ matrix.distribution }}'" >> debutizer-stage.yaml
+          echo "distribution: '${{ matrix.distribution }}'" >> debutizer.yaml
         shell: bash
       - uses: ./.github/actions/apt-build
         name: Build APT Package
-        with:
-          config_file: debutizer-stage.yaml
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.distribution }}
@@ -45,12 +43,12 @@ jobs:
           path: artifacts/dists/hirsute
       - name: Write Configuration
         run: |
-          echo "distribution: ''" >> debutizer-stage.yaml
+          echo "distribution: ''" >> debutizer.yaml
         shell: bash
       - uses: ./.github/actions/apt-upload
         name: Upload APT Packages
         with:
-          config_file: debutizer-stage.yaml
+          profile: stage
         env:
           DEBUTIZER_ACCESS_KEY: ${{ secrets.STAGING_ACCESS_KEY }}
           DEBUTIZER_SECRET_KEY: ${{ secrets.STAGING_SECRET_KEY }}
