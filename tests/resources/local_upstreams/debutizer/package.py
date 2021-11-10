@@ -15,7 +15,7 @@ from debutizer.upstreams import LocalUpstream
 from debutizer.version import Version
 
 upstream = LocalUpstream(
-    name="debutizer", version=Version.from_string("0.6.0-1"), path=Path(".")
+    name="debutizer", version=Version.from_string("0.7.0-1"), path=Path(".")
 )
 package_dir = upstream.fetch()
 
@@ -168,6 +168,14 @@ source_package.changelog.add(
     version="0.6.0-1",
     urgency="medium",
     changes=["* Migrate some configuration to a file"],
+    author="Tyler Compton <xaviosx@gmail.com>",
+    date=datetime(2021, 11, 8, 23, 59),
+)
+
+source_package.changelog.add(
+    version="0.7.0-1",
+    urgency="medium",
+    changes=["* TODO: Finish changelog"],
     author="Tyler Compton <xaviosx@gmail.com>",
     date=datetime(2021, 11, 8, 23, 59),
 )
