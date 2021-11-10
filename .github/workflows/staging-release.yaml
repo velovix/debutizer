@@ -11,12 +11,11 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: ./.github/actions/apt-build
-        name: Build APT Packages
-      - uses: ./.github/actions/apt-upload
-        name: Upload APT Packages
-        with:
-          profile: stage
+      - uses: ./.github/actions/install-dependencies
+      - name: Build APT Packages
+        run: python -m debutizer build --package-dir tests/resources/local_upstreams
+      - name: Upload APT Packages
+        run: python -m debutizer s3-repo upload --profile stage
         env:
           DEBUTIZER_ACCESS_KEY: ${{ secrets.STAGING_ACCESS_KEY }}
           DEBUTIZER_SECRET_KEY: ${{ secrets.STAGING_SECRET_KEY }}

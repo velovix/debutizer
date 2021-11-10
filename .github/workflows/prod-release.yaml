@@ -10,14 +10,11 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: ./.github/actions/apt-build
-        name: Build APT Packages
-        with:
-          config_file: debutizer.yaml
-      - uses: ./.github/actions/apt-upload
-        name: Upload APT Packages
-        with:
-          profile: prod
+      - uses: ./.github/actions/install-dependencies
+      - name: Build APT Packages
+        run: python -m debutizer build --package-dir tests/resources/local_upstreams
+      - name: Upload APT Packages
+        run: python -m debutizer s3-repo upload --profile prod
         env:
           DEBUTIZER_ACCESS_KEY: ${{ secrets.PROD_ACCESS_KEY }}
           DEBUTIZER_SECRET_KEY: ${{ secrets.PROD_SECRET_KEY }}
