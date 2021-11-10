@@ -5,7 +5,7 @@ from ..registry import Registry
 from ..source_package import SourcePackage
 from ..upstreams import Upstream
 from .command import Command
-from .config import EnvArgumentParser
+from .env_argparse import EnvArgumentParser
 from .utils import (
     copy_source_artifacts,
     find_package_dirs,

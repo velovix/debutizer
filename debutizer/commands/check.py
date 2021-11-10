@@ -4,7 +4,7 @@ import shutil
 from ..errors import CommandError
 from ..print_utils import Color, Format, print_color
 from .command import Command
-from .config import EnvArgumentParser
+from .env_argparse import EnvArgumentParser
 
 
 class CheckCommand(Command):
