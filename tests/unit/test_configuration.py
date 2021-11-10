@@ -10,8 +10,8 @@ from debutizer.commands.configuration import (
 
 def test_configuration_validity():
     config = Configuration(
-        distribution="focal",
-        architecture="amd64",
+        distributions=["focal"],
+        architectures=["amd64"],
         upstream_repo="my_repo",
         upstream_components=["my_component"],
     )

@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Callable, Dict, List
 
-from debutizer.print_utils import Color, Format, print_color
+from debutizer.print_utils import print_warning
 
 from ..errors import CommandError
 from .config import EnvArgumentParser
@@ -37,11 +37,7 @@ class Command(ABC):
             for hook in self.cleanup_hooks:
                 hook()
         except Exception as ex:
-            print_color(
-                f"WARNING: Ignoring exception while cleaning up: {ex}",
-                color=Color.YELLOW,
-                format_=Format.BOLD,
-            )
+            print_warning(f"WARNING: Ignoring exception while cleaning up: {ex}")
 
     def parse_args(self) -> argparse.Namespace:
         return self.parser.parse_args(sys.argv[2:])

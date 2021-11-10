@@ -4,49 +4,17 @@ on:
   push:
     branches:
       - main
-      - feature/40-improve-configuration
+      - feature/38-multi-distribution
 
 jobs:
   build-packages:
     runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        distribution: [ 'bionic', 'focal', 'hirsute' ]
     steps:
       - uses: actions/checkout@v2
-      - name: Write Configuration
-        run: |
-          echo "distribution: '${{ matrix.distribution }}'" >> debutizer-stage.yaml
-        shell: bash
       - uses: ./.github/actions/apt-build
-        name: Build APT Package
+        name: Build APT Packages
         with:
           config_file: debutizer-stage.yaml
-      - uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.distribution }}
-          path: artifacts/dists/${{ matrix.distribution }}
-  upload-packages:
-    needs: build-packages
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-        with:
-          name: bionic
-          path: artifacts/dists/bionic
-      - uses: actions/download-artifact@v2
-        with:
-          name: focal
-          path: artifacts/dists/focal
-      - uses: actions/download-artifact@v2
-        with:
-          name: hirsute
-          path: artifacts/dists/hirsute
-      - name: Write Configuration
-        run: |
-          echo "distribution: ''" >> debutizer-stage.yaml
-        shell: bash
       - uses: ./.github/actions/apt-upload
         name: Upload APT Packages
         with:

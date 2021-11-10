@@ -107,7 +107,7 @@ class UploadCommand(Command):
                 )
 
         print_color("")
-        print_done("Upload")
+        print_done("Upload complete!")
 
 
 def _upload_artifact(

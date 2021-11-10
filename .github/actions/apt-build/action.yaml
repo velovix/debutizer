@@ -1,5 +1,5 @@
 name: Release
-description: Releases to an APT repository
+description: Builds APT packages
 
 inputs:
   config_file:

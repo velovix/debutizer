@@ -100,15 +100,15 @@ class S3RepoConfiguration:
 class Configuration:
     def __init__(
         self,
-        distribution: str,
-        architecture: str,
+        distributions: List[str],
+        architectures: List[str],
         upstream_repo: Optional[str] = None,
         upstream_is_trusted: bool = False,
         upstream_components: Optional[List[str]] = None,
         s3_repo: Optional[S3RepoConfiguration] = None,
     ):
-        self.distribution = distribution
-        self.architecture = architecture
+        self.distributions = distributions
+        self.architectures = architectures
         self.upstream_repo = upstream_repo
         self.upstream_is_trusted = upstream_is_trusted
         self.upstream_components = upstream_components
@@ -120,8 +120,10 @@ class Configuration:
             config = yaml.load(f, yaml.Loader)
 
         try:
-            distribution = _required(config, "distribution", str)
-            architecture = _optional(config, "architecture", str, _host_architecture())
+            distributions = _required(config, "distributions", list)
+            architectures = _optional(
+                config, "architecture", list, [_host_architecture()]
+            )
             upstream_repo = _optional(config, "upstream_repo", str, None)
             upstream_is_trusted = _optional(config, "upstream_is_trusted", bool, False)
             upstream_components = _optional(config, "upstream_components", list, None)
@@ -138,8 +140,8 @@ class Configuration:
                 raise CommandError(f"In {config_file}, in the s3_repo object: {ex}")
 
         return Configuration(
-            distribution=distribution,
-            architecture=architecture,
+            distributions=distributions,
+            architectures=architectures,
             upstream_repo=upstream_repo,
             upstream_is_trusted=upstream_is_trusted,
             upstream_components=upstream_components,

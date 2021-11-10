@@ -4,7 +4,7 @@ from types import ModuleType
 from typing import ClassVar
 
 from .errors import CommandError
-from .print_utils import Color, Format, print_color
+from .print_utils import print_error
 from .source_package import SourcePackage
 
 
@@ -43,11 +43,7 @@ class PackagePy:
             # pass them through unchanged
             raise
         except Exception:
-            print_color(
-                "Unexpected exception while running package.py:",
-                color=Color.RED,
-                format_=Format.BOLD,
-            )
+            print_error("Unexpected exception while running package.py:")
             raise
 
         try:

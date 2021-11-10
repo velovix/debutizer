@@ -40,11 +40,26 @@ def print_color(
     file.flush()
 
 
-def print_done(task: str):
+def print_notify(message: str) -> None:
+    print_color(message, color=Color.MAGENTA, format_=Format.BOLD)
+
+
+def print_header(message: str) -> None:
+    print_color(message, color=Color.MAGENTA, format_=Format.BOLD)
+    print_color("=" * len(message), color=Color.MAGENTA, format_=Format.BOLD)
+
+
+def print_warning(message: str) -> None:
+    print_color(message, color=Color.YELLOW, format_=Format.BOLD)
+
+
+def print_error(message: str) -> None:
+    print_color(message, color=Color.RED, format_=Format.BOLD)
+
+
+def print_done(message: str):
     if "DEBUTIZER_AVRDUDE_MODE" in os.environ:
         message = "debutizer done.  Thank you."
-    else:
-        message = f"{task} complete!"
 
     print_color(message, color=Color.GREEN, format_=Format.BOLD)
 

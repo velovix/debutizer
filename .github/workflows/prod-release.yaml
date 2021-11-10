@@ -8,44 +8,12 @@ on:
 jobs:
   build-packages:
     runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        distribution: [ 'bionic', 'focal', 'hirsute' ]
     steps:
       - uses: actions/checkout@v2
-      - name: Write Configuration
-        run: |
-          echo "distribution: '${{ matrix.distribution }}'" >> debutizer-prod.yaml
-        shell: bash
       - uses: ./.github/actions/apt-build
-        name: Build APT Package
+        name: Build APT Packages
         with:
           config_file: debutizer-prod.yaml
-      - uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.distribution }}
-          path: artifacts/dists/${{ matrix.distribution }}
-  upload-packages:
-    needs: build-packages
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-        with:
-          name: bionic
-          path: artifacts/dists/bionic
-      - uses: actions/download-artifact@v2
-        with:
-          name: focal
-          path: artifacts/dists/focal
-      - uses: actions/download-artifact@v2
-        with:
-          name: hirsute
-          path: artifacts/dists/hirsute
-      - name: Write Configuration
-        run: |
-          echo "distribution: ''" >> debutizer-prod.yaml
-        shell: bash
       - uses: ./.github/actions/apt-upload
         name: Upload APT Packages
         with:

@@ -3,7 +3,7 @@ import sys
 
 from debutizer import commands
 from debutizer.errors import CommandError
-from debutizer.print_utils import Color, Format, print_color
+from debutizer.print_utils import Color, Format, print_color, print_error
 
 
 def main():
@@ -13,15 +13,9 @@ def main():
     except (CommandError, KeyboardInterrupt) as ex:
         print_color("")
         if isinstance(ex, KeyboardInterrupt):
-            print_color(
-                "Interrupted by SIGINT",
-                color=Color.RED,
-                format_=Format.BOLD,
-            )
+            print_error("Interrupted by SIGINT")
         else:
-            print_color(
-                ex.message, color=Color.RED, format_=Format.BOLD, file=sys.stderr
-            )
+            print_error(ex.message)
         if "DEBUTIZER_SHOW_TRACEBACKS" in os.environ:
             raise ex
         else:
