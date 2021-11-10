@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import Dict
 
 from .errors import CommandError, UnexpectedError
@@ -13,7 +14,7 @@ class NoSuchPackageError(CommandError):
 
 class Registry:
     def __init__(self):
-        self._packages: Dict[str, Dict[str, SourcePackage]] = {}
+        self._packages: Dict[str, Dict[str, SourcePackage]] = defaultdict(dict)
         """A package registry, keyed by distro, then keyed by package name"""
 
     def add(self, package: SourcePackage) -> None:
