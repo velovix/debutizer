@@ -8,6 +8,7 @@ from debutizer.source_package import SourcePackage
 def test_registering_duplicate_packages():
     registry = Registry()
 
+    SourcePackage.distribution = "focal"
     registry.add(MockSourcePackage("mypackage1"))
     with pytest.raises(CommandError):
         registry.add(MockSourcePackage("mypackage1"))
