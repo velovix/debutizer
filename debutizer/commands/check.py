@@ -2,7 +2,7 @@ import argparse
 import shutil
 
 from ..errors import CommandError
-from ..print_utils import Color, Format, print_color
+from ..print_utils import Color, Format, print_color, print_done
 from .command import Command
 from .env_argparse import EnvArgumentParser
 
@@ -48,11 +48,8 @@ class CheckCommand(Command):
 
         if success:
             print_color("")
-            print_color(
-                message="All system dependencies are available! You should be good to "
-                "go.",
-                color=Color.GREEN,
-                format_=Format.BOLD,
+            print_done(
+                "All system dependencies are available! You should be good to go."
             )
         else:
             raise CommandError("Some dependencies could not be found")

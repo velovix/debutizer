@@ -1,6 +1,7 @@
+from collections import defaultdict
 from typing import Dict
 
-from .errors import CommandError
+from .errors import CommandError, UnexpectedError
 from .relation import Dependency, Relation
 from .source_package import SourcePackage
 
@@ -13,22 +14,31 @@ class NoSuchPackageError(CommandError):
 
 class Registry:
     def __init__(self):
-        self._packages: Dict[str, SourcePackage] = {}
+        self._packages: Dict[str, Dict[str, SourcePackage]] = defaultdict(dict)
+        """A package registry, keyed by distro, then keyed by package name"""
 
     def add(self, package: SourcePackage) -> None:
-        if package.name in self._packages:
+        distro = SourcePackage.distribution
+        if distro is None:
+            raise UnexpectedError("The distribution field in SourcePackage must be set")
+
+        if package.name in self._packages[distro]:
             raise CommandError(
                 f"A source package with the name {package.name} has already "
                 f"been registered! No two source packages may share the same name."
             )
 
-        self._packages[package.name] = package
+        self._packages[distro][package.name] = package
 
     def make_relation(self, package_name: str) -> Relation:
+        distro = SourcePackage.distribution
+        if distro is None:
+            raise UnexpectedError("The distribution field in SourcePackage must be set")
+
         source_package = None
         binary_package = None
 
-        for source in self._packages.values():
+        for source in self._packages[distro].values():
             for binary in source.control.binaries:
                 if binary.package == package_name:
                     source_package = source

@@ -6,48 +6,15 @@ on:
       - created
 
 jobs:
-  build-packages:
-    runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        distribution: [ 'bionic', 'focal', 'hirsute' ]
-    steps:
-      - uses: actions/checkout@v2
-      - name: Write Configuration
-        run: |
-          echo "distribution: '${{ matrix.distribution }}'" >> debutizer.yaml
-        shell: bash
-      - uses: ./.github/actions/apt-build
-        name: Build APT Package
-      - uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.distribution }}
-          path: artifacts/dists/${{ matrix.distribution }}
-  upload-packages:
-    needs: build-packages
+  deploy-packages:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-        with:
-          name: bionic
-          path: artifacts/dists/bionic
-      - uses: actions/download-artifact@v2
-        with:
-          name: focal
-          path: artifacts/dists/focal
-      - uses: actions/download-artifact@v2
-        with:
-          name: hirsute
-          path: artifacts/dists/hirsute
-      - name: Write Configuration
-        run: |
-          echo "distribution: ''" >> debutizer.yaml
-        shell: bash
-      - uses: ./.github/actions/apt-upload
-        name: Upload APT Packages
-        with:
-          profile: prod
+      - uses: ./.github/actions/install-dependencies
+      - name: Build APT Packages
+        run: python -m debutizer build --package-dir tests/resources/local_upstreams
+      - name: Upload APT Packages
+        run: python -m debutizer s3-repo upload --profile prod
         env:
           DEBUTIZER_ACCESS_KEY: ${{ secrets.PROD_ACCESS_KEY }}
           DEBUTIZER_SECRET_KEY: ${{ secrets.PROD_SECRET_KEY }}

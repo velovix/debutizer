@@ -9,7 +9,7 @@ from xdg.BaseDirectory import save_cache_path
 
 from ..errors import CommandError, UnexpectedError
 from ..package_py import PackagePy
-from ..print_utils import Color, Format, print_color
+from ..print_utils import print_color, print_notify
 from ..registry import Registry
 from ..source_package import SourcePackage
 from ..subprocess_utils import run
@@ -50,11 +50,7 @@ def process_package_pys(
 
     for package_dir in package_dirs:
         print_color("")
-        print_color(
-            f"Reading {PackagePy.FILE_NAME} file for {package_dir.name}...",
-            color=Color.MAGENTA,
-            format_=Format.BOLD,
-        )
+        print_notify(f"Reading {PackagePy.FILE_NAME} file for {package_dir.name}...")
         package_py = PackagePy(package_dir / PackagePy.FILE_NAME, build_dir)
         package_pys.append(package_py)
         registry.add(package_py.source_package)
@@ -62,11 +58,7 @@ def process_package_pys(
     print_color("")
 
     for package_py in package_pys:
-        print_color(
-            f"Running pre-build hook for {package_py.source_package.name}",
-            color=Color.MAGENTA,
-            format_=Format.BOLD,
-        )
+        print_notify(f"Running pre-build hook for {package_py.source_package.name}")
         package_py.pre_build(registry)
         # Save any further changes to the disk
         package_py.source_package.save()
@@ -276,11 +268,7 @@ def make_chroot(distribution: str) -> Path:
 
     if not archive_path.is_file():
         # Create a chroot for builds to be performed in
-        print_color(
-            f"Creating a chroot for distribution '{distribution}'",
-            color=Color.MAGENTA,
-            format_=Format.BOLD,
-        )
+        print_notify(f"Creating a chroot for distribution '{distribution}'")
         try:
             run(
                 [
@@ -308,11 +296,7 @@ def set_chroot_repos(distribution: str, repositories: List[str]) -> None:
     """Sets additional repositories for the chroot corresponding to the given
     distribution
     """
-    print_color(
-        f"Adding APT lists to the '{distribution}' chroot:",
-        color=Color.MAGENTA,
-        format_=Format.BOLD,
-    )
+    print_notify(f"Adding APT lists to the '{distribution}' chroot:")
     apt_list = Path("/etc/apt/sources.list.d/debutizer.list")
 
     script = "#!/bin/sh\n"

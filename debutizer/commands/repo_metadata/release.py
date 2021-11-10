@@ -6,7 +6,7 @@ from typing import Dict, List, Optional, Union
 
 from debutizer.commands.utils import temp_file
 from debutizer.errors import CommandError
-from debutizer.print_utils import Color, Format, print_color
+from debutizer.print_utils import print_notify
 from debutizer.subprocess_utils import run
 
 
@@ -46,11 +46,7 @@ def add_release_files(
     dirs = (d.relative_to(artifacts_dir) for d in dirs)
 
     for dir_ in dirs:
-        print_color(
-            f"Updating the Release file for {dir_}",
-            color=Color.MAGENTA,
-            format_=Format.BOLD,
-        )
+        print_notify(f"Updating the Release file for {dir_}")
 
         metadata = _repo_metadata(artifacts_dir / dir_)
         metadata_flags = []
@@ -75,11 +71,7 @@ def add_release_files(
         release_files.append(release_file)
 
         if sign:
-            print_color(
-                f"Signing the Release file for {dir_}",
-                color=Color.MAGENTA,
-                format_=Format.BOLD,
-            )
+            print_notify(f"Signing the Release file for {dir_}")
 
             signed_release_file = release_file.with_name("InRelease")
             _sign_file(

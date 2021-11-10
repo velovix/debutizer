@@ -2,7 +2,7 @@ import subprocess
 from pathlib import Path
 from typing import List
 
-from debutizer.print_utils import Color, Format, print_color
+from debutizer.print_utils import print_notify
 from debutizer.subprocess_utils import run
 
 from .utils import save_metadata_files
@@ -26,11 +26,7 @@ def add_packages_files(artifacts_dir: Path) -> List[Path]:
     dirs = (d.relative_to(artifacts_dir) for d in dirs)
 
     for dir_ in dirs:
-        print_color(
-            f"Updating the Packages file for packages in {dir_}",
-            color=Color.MAGENTA,
-            format_=Format.BOLD,
-        )
+        print_notify(f"Updating the Packages file for packages in {dir_}")
 
         result = run(
             [

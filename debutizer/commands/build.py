@@ -6,11 +6,12 @@ import requests
 from ..environment import Environment
 from ..errors import CommandError
 from ..package_py import PackagePy
-from ..print_utils import Color, Format, print_color, print_done
+from ..print_utils import print_color, print_done, print_header, print_notify
 from ..registry import Registry
 from ..source_package import SourcePackage
 from ..upstreams import Upstream
 from .command import Command
+from .config_file import Configuration
 from .env_argparse import EnvArgumentParser
 from .local_repo import LocalRepository
 from .repo_metadata import add_packages_files, add_release_files, add_sources_files
@@ -47,107 +48,118 @@ class BuildCommand(Command):
         local_repo.start()
         self.cleanup_hooks.append(local_repo.close)
 
-        Environment.codename = config.distribution
-        Environment.architecture = config.architecture
+        for arch in config.architectures:
+            for distro in config.distributions:
+                _build_packages(
+                    args=args,
+                    config=config,
+                    registry=registry,
+                    architecture=arch,
+                    distribution=distro,
+                )
 
-        build_dir = make_build_dir()
+        print_color("")
+        print_done("Build complete!")
 
-        Upstream.package_root = args.package_dir
-        Upstream.build_root = build_dir
-        SourcePackage.distribution = config.distribution
 
-        package_dirs = find_package_dirs(args.package_dir)
-        chroot_archive_path = make_chroot(config.distribution)
-        package_pys = process_package_pys(package_dirs, registry, build_dir)
+def _build_packages(
+    args: argparse.Namespace,
+    config: Configuration,
+    registry: Registry,
+    distribution: str,
+    architecture: str,
+) -> None:
+    """Builds packages for the given distribution/architecture pair"""
 
+    print_header(
+        f"Building packages for distribution '{distribution}' on architecture "
+        f"'{architecture}'"
+    )
+
+    Environment.codename = distribution
+    Environment.architecture = architecture
+
+    build_dir = make_build_dir()
+
+    Upstream.package_root = args.package_dir
+    Upstream.build_root = build_dir
+    SourcePackage.distribution = distribution
+
+    package_dirs = find_package_dirs(args.package_dir)
+    chroot_archive_path = make_chroot(distribution)
+    package_pys = process_package_pys(package_dirs, registry, build_dir)
+
+    if config.upstream_repo is not None:
+        new_package_pys = []
+        for package_py in package_pys:
+            if _exists_upstream(config.upstream_repo, distribution, package_py):
+                print_color(
+                    f"Package {package_py.source_package.name} already exists "
+                    f"upstream, so it will not be built"
+                )
+            else:
+                new_package_pys.append(package_py)
+        package_pys = new_package_pys
+
+    print_color("")
+    if len(package_pys) > 0:
+        print_notify("Building the following packages in this order:")
+        for package_py in package_pys:
+            print_color(f" * {package_py.source_package.name}")
+    else:
+        print_notify("No packages will be built")
+
+    for i, package_py in enumerate(package_pys):
+        print_color("")
+        print_notify(f"Building {package_py.source_package.name}")
+
+        repositories = []
         if config.upstream_repo is not None:
-            new_package_pys = []
-            for package_py in package_pys:
-                if _exists_upstream(
-                    config.upstream_repo, config.distribution, package_py
-                ):
-                    print_color(
-                        f"Package {package_py.source_package.name} already exists "
-                        f"upstream, so it will not be built"
-                    )
-                else:
-                    new_package_pys.append(package_py)
-            package_pys = new_package_pys
-
-        print_color("")
-        if len(package_pys) > 0:
-            print_color(
-                "Building the following packages in this order:",
-                color=Color.MAGENTA,
-                format_=Format.BOLD,
+            entry = _make_upstream_source_entry(
+                upstream_repo=config.upstream_repo,
+                distribution=distribution,
+                components=config.upstream_components,  # type: ignore[arg-type]
+                trusted=config.upstream_is_trusted,
             )
-            for package_py in package_pys:
-                print_color(f" * {package_py.source_package.name}")
-        else:
-            print_color(
-                "No packages will be built",
-                color=Color.MAGENTA,
-                format_=Format.BOLD,
+            repositories.append(entry)
+        if i > 0:
+            # We can't add the local repo if this is the first package being built
+            # because APT does not like empty repositories
+            repositories.append(
+                f"deb [trusted=yes] http://localhost:8080 {distribution} main"
             )
+        set_chroot_repos(distribution, repositories)
 
-        for i, package_py in enumerate(package_pys):
-            print_color("")
-            print_color(
-                f"Building {package_py.source_package.name}",
-                color=Color.MAGENTA,
-                format_=Format.BOLD,
-            )
+        source_results_dir = make_source_files(build_dir, package_py.source_package)
+        binary_results_dir = build_package(
+            package_py.source_package,
+            build_dir,
+            chroot_archive_path,
+        )
 
-            repositories = []
-            if config.upstream_repo is not None:
-                entry = _make_upstream_source_entry(
-                    upstream_repo=config.upstream_repo,
-                    distribution=config.distribution,
-                    components=config.upstream_components,  # type: ignore[arg-type]
-                    trusted=config.upstream_is_trusted,
-                )
-                repositories.append(entry)
-            if i > 0:
-                # We can't add the local repo if this is the first package being built
-                # because APT does not like empty repositories
-                repositories.append(
-                    f"deb [trusted=yes] http://localhost:8080 {config.distribution} main"
-                )
-            set_chroot_repos(config.distribution, repositories)
+        copy_source_artifacts(
+            results_dir=source_results_dir,
+            artifacts_dir=args.artifacts_dir,
+            distribution=distribution,
+            component=package_py.component,
+        )
+        copy_binary_artifacts(
+            results_dir=binary_results_dir,
+            artifacts_dir=args.artifacts_dir,
+            distribution=distribution,
+            component=package_py.component,
+            architecture=architecture,
+        )
 
-            source_results_dir = make_source_files(build_dir, package_py.source_package)
-            binary_results_dir = build_package(
-                package_py.source_package,
-                build_dir,
-                chroot_archive_path,
-            )
-
-            copy_source_artifacts(
-                results_dir=source_results_dir,
-                artifacts_dir=args.artifacts_dir,
-                distribution=config.distribution,
-                component=package_py.component,
-            )
-            copy_binary_artifacts(
-                results_dir=binary_results_dir,
-                artifacts_dir=args.artifacts_dir,
-                distribution=config.distribution,
-                component=package_py.component,
-                architecture=config.architecture,
-            )
-
-            add_packages_files(args.artifacts_dir)
-            add_sources_files(args.artifacts_dir)
-            add_release_files(
-                args.artifacts_dir,
-                sign=False,
-                gpg_key_id=None,
-                gpg_signing_key=None,
-                gpg_signing_password=None,
-            )
-
-        print_color("")
-        print_done("Build")
+        add_packages_files(args.artifacts_dir)
+        add_sources_files(args.artifacts_dir)
+        add_release_files(
+            args.artifacts_dir,
+            sign=False,
+            gpg_key_id=None,
+            gpg_signing_key=None,
+            gpg_signing_password=None,
+        )
 
 
 def _make_upstream_source_entry(
