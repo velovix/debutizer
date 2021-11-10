@@ -45,6 +45,7 @@ def print_notify(message: str) -> None:
 
 
 def print_header(message: str) -> None:
+    print_color("")
     print_color(message, color=Color.MAGENTA, format_=Format.BOLD)
     print_color("=" * len(message), color=Color.MAGENTA, format_=Format.BOLD)
 
