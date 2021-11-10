@@ -6,7 +6,7 @@ from unittest.mock import Mock
 import pytest
 
 from debutizer.commands import BuildCommand
-from debutizer.commands.configuration import Configuration
+from debutizer.commands.config_file import Configuration
 
 
 @pytest.mark.parametrize(

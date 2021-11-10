@@ -1,6 +1,6 @@
 import argparse
 
-from ..print_utils import print_notify, print_color, print_done, print_header
+from ..print_utils import print_color, print_done, print_header, print_notify
 from ..registry import Registry
 from ..source_package import SourcePackage
 from ..upstreams import Upstream

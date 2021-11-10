@@ -3,15 +3,11 @@ from typing import List
 
 import requests
 
+from .config_file import Configuration
 from ..environment import Environment
 from ..errors import CommandError
 from ..package_py import PackagePy
-from ..print_utils import (
-    print_color,
-    print_done,
-    print_header,
-    print_notify,
-)
+from ..print_utils import print_color, print_done, print_header, print_notify
 from ..registry import Registry
 from ..source_package import SourcePackage
 from ..upstreams import Upstream
