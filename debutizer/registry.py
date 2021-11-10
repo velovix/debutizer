@@ -13,22 +13,23 @@ class NoSuchPackageError(CommandError):
 
 class Registry:
     def __init__(self):
-        self._packages: Dict[str, SourcePackage] = {}
+        self._packages: Dict[str, Dict[str, SourcePackage]] = {}
+        """A package registry, keyed by distro, then keyed by package name"""
 
     def add(self, package: SourcePackage) -> None:
-        if package.name in self._packages:
+        if package.name in self._packages[SourcePackage.distribution]:
             raise CommandError(
                 f"A source package with the name {package.name} has already "
                 f"been registered! No two source packages may share the same name."
             )
 
-        self._packages[package.name] = package
+        self._packages[SourcePackage.distribution][package.name] = package
 
     def make_relation(self, package_name: str) -> Relation:
         source_package = None
         binary_package = None
 
-        for source in self._packages.values():
+        for source in self._packages[SourcePackage.distribution].values():
             for binary in source.control.binaries:
                 if binary.package == package_name:
                     source_package = source
