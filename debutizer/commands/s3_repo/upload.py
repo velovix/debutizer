@@ -15,7 +15,7 @@ from urllib.parse import urlparse
 import requests
 
 from debutizer.errors import CommandError, UnexpectedError
-from debutizer.print_utils import print_color, print_done
+from debutizer.print_utils import print_color, print_done, print_notify
 from debutizer.subprocess_utils import run
 
 from ..artifacts import find_archives
@@ -99,6 +99,7 @@ class UploadCommand(Command):
             mount_path=Path(mount_path_name),
         ):
             mount_path = Path(mount_path_name)
+            print_notify("Updating metadata files...")
             metadata_files += add_packages_files(mount_path)
             metadata_files += add_sources_files(mount_path)
             metadata_files += add_release_files(

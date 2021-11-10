@@ -153,6 +153,7 @@ def _build_packages(
             architecture=architecture,
         )
 
+        print_notify("Updating metadata files...")
         add_packages_files(args.artifacts_dir)
         add_sources_files(args.artifacts_dir)
         add_release_files(

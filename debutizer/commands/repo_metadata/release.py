@@ -46,8 +46,6 @@ def add_release_files(
     dirs = (d.relative_to(artifacts_dir) for d in dirs)
 
     for dir_ in dirs:
-        print_notify(f"Updating the Release file for {dir_}")
-
         metadata = _repo_metadata(artifacts_dir / dir_)
         metadata_flags = []
         for key, value in metadata.items():
