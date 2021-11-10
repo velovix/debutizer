@@ -26,8 +26,6 @@ def add_packages_files(artifacts_dir: Path) -> List[Path]:
     dirs = (d.relative_to(artifacts_dir) for d in dirs)
 
     for dir_ in dirs:
-        print_notify(f"Updating the Packages file for packages in {dir_}")
-
         result = run(
             [
                 "dpkg-scanpackages",

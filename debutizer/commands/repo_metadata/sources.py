@@ -25,8 +25,6 @@ def add_sources_files(artifacts_dir: Path) -> List[Path]:
     dirs = (d.relative_to(artifacts_dir) for d in dirs)
 
     for dir_ in dirs:
-        print_notify(f"Updating the Sources file for packages in {dir_}")
-
         result = run(
             [
                 "dpkg-scansources",
