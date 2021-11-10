@@ -129,6 +129,7 @@ class Configuration:
         self,
         distributions: List[str],
         architectures: List[str],
+        package_sources: List[str],
         upstream_repo: Optional[str] = None,
         upstream_is_trusted: bool = False,
         upstream_components: Optional[List[str]] = None,
@@ -136,6 +137,7 @@ class Configuration:
     ):
         self.distributions = distributions
         self.architectures = architectures
+        self.package_sources = package_sources
         self.upstream_repo = upstream_repo
         self.upstream_is_trusted = upstream_is_trusted
         self.upstream_components = upstream_components
@@ -154,6 +156,7 @@ class Configuration:
             upstream_repo = _optional(config, "upstream_repo", str, None)
             upstream_is_trusted = _optional(config, "upstream_is_trusted", bool, False)
             upstream_components = _optional(config, "upstream_components", list, None)
+            package_sources = _optional(config, "package_sources", list, [])
         except DebutizerYAMLError as ex:
             raise CommandError(f"In {config_file}: {ex}")
 
@@ -169,6 +172,7 @@ class Configuration:
         return Configuration(
             distributions=distributions,
             architectures=architectures,
+            package_sources=package_sources,
             upstream_repo=upstream_repo,
             upstream_is_trusted=upstream_is_trusted,
             upstream_components=upstream_components,

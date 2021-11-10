@@ -292,8 +292,8 @@ def make_chroot(distribution: str) -> Path:
     return archive_path
 
 
-def set_chroot_repos(distribution: str, repositories: List[str]) -> None:
-    """Sets additional repositories for the chroot corresponding to the given
+def set_chroot_package_sources(distribution: str, repositories: List[str]) -> None:
+    """Sets additional package sources for the chroot corresponding to the given
     distribution
     """
     print_notify(f"Adding APT lists to the '{distribution}' chroot:")
