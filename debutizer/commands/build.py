@@ -129,6 +129,10 @@ def _build_packages(
                 entry=f"deb [trusted=yes] http://localhost:8080 {distribution} main"
             )
             package_sources.append(package_source)
+        print_color(
+            f"########### Check this out, it's package sources: "
+            f"{config.package_sources}"
+        )
         package_sources += config.package_sources
         set_chroot_package_sources(distribution, package_sources)
 
