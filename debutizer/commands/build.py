@@ -130,6 +130,7 @@ def _build_packages(
             )
             package_sources.append(package_source)
         package_sources += config.package_sources
+        print_color(f"######## Check out: {config.package_sources}")
         set_chroot_package_sources(distribution, package_sources)
 
         source_results_dir = make_source_files(build_dir, package_py.source_package)
