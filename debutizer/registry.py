@@ -19,9 +19,7 @@ class Registry:
     def add(self, package: SourcePackage) -> None:
         distro = SourcePackage.distribution
         if distro is None:
-            raise UnexpectedError(
-                "The distribution field in SourcePackage must be set"
-            )
+            raise UnexpectedError("The distribution field in SourcePackage must be set")
 
         if package.name in self._packages[distro]:
             raise CommandError(
@@ -34,9 +32,7 @@ class Registry:
     def make_relation(self, package_name: str) -> Relation:
         distro = SourcePackage.distribution
         if distro is None:
-            raise UnexpectedError(
-                "The distribution field in SourcePackage must be set"
-            )
+            raise UnexpectedError("The distribution field in SourcePackage must be set")
 
         source_package = None
         binary_package = None
