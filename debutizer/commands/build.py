@@ -11,7 +11,7 @@ from ..registry import Registry
 from ..source_package import SourcePackage
 from ..upstreams import Upstream
 from .command import Command
-from .config_file import Configuration
+from .config_file import Configuration, PackageSource
 from .env_argparse import EnvArgumentParser
 from .local_repo import LocalRepository
 from .repo_metadata import add_packages_files, add_release_files, add_sources_files
@@ -125,9 +125,10 @@ def _build_packages(
         if i > 0:
             # We can't add the local repo if this is the first package being built
             # because APT does not like empty repositories
-            package_sources.append(
-                f"deb [trusted=yes] http://localhost:8080 {distribution} main"
+            package_source = PackageSource(
+                entry=f"deb [trusted=yes] http://localhost:8080 {distribution} main"
             )
+            package_sources.append(package_source)
         package_sources += config.package_sources
         set_chroot_package_sources(distribution, package_sources)
 
@@ -168,7 +169,7 @@ def _make_upstream_source_entry(
     distribution: str,
     components: List[str],
     trusted: bool,
-) -> str:
+) -> PackageSource:
     """Creates an APT source list entry based on the provided configuration"""
     parameters = ""
     if trusted:
@@ -176,7 +177,9 @@ def _make_upstream_source_entry(
 
     components_str = " ".join(components)
 
-    return f"deb {parameters} {upstream_repo} {distribution} {components_str}"
+    return PackageSource(
+        entry=f"deb {parameters} {upstream_repo} {distribution} {components_str}"
+    )
 
 
 def _exists_upstream(

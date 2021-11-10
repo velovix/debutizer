@@ -23,6 +23,7 @@ from .artifacts import (
     find_debian_source_files,
     find_source_archives,
 )
+from .config_file import PackageSource
 
 
 def find_package_dirs(package_dir: Path) -> List[Path]:
@@ -292,7 +293,9 @@ def make_chroot(distribution: str) -> Path:
     return archive_path
 
 
-def set_chroot_package_sources(distribution: str, repositories: List[str]) -> None:
+def set_chroot_package_sources(
+    distribution: str, package_sources: List[PackageSource]
+) -> None:
     """Sets additional package sources for the chroot corresponding to the given
     distribution
     """
@@ -301,9 +304,13 @@ def set_chroot_package_sources(distribution: str, repositories: List[str]) -> No
 
     script = "#!/bin/sh\n"
     script += f"rm -f {apt_list}\n"
-    for repo in repositories:
-        script += f"echo '{repo}' >> {apt_list}\n"
-        print_color(f" * {repo}")
+    for package_source in package_sources:
+        script += f"echo '{package_source.entry}' >> {apt_list}\n"
+        if package_source.gpg_key_url is not None:
+            # Import the package source's GPG key
+            script += f"curl -SsL '{package_source.gpg_key_url}' | apt-key add -\n"
+
+        print_color(f" * {package_source.entry}")
 
     with temp_file(script) as script_file:
         run(

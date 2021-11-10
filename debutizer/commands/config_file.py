@@ -124,12 +124,25 @@ class S3RepoConfiguration:
             profile.check_validity()
 
 
+class PackageSource:
+    def __init__(self, entry: str, gpg_key_url: Optional[str] = None):
+        self.entry = entry
+        self.gpg_key_url = gpg_key_url
+
+    @staticmethod
+    def from_dict(config: Dict[str, Any]) -> "PackageSource":
+        return PackageSource(
+            entry=_required(config, "entry", str),
+            gpg_key_url=_optional(config, "gpg_key_url", str, None),
+        )
+
+
 class Configuration:
     def __init__(
         self,
         distributions: List[str],
         architectures: List[str],
-        package_sources: List[str],
+        package_sources: List[PackageSource],
         upstream_repo: Optional[str] = None,
         upstream_is_trusted: bool = False,
         upstream_components: Optional[List[str]] = None,
@@ -156,7 +169,11 @@ class Configuration:
             upstream_repo = _optional(config, "upstream_repo", str, None)
             upstream_is_trusted = _optional(config, "upstream_is_trusted", bool, False)
             upstream_components = _optional(config, "upstream_components", list, None)
-            package_sources = _optional(config, "package_sources", list, [])
+
+            package_sources = []
+            package_source_dicts = _optional(config, "package_sources", dict, {})
+            for package_source_dict in package_source_dicts:
+                package_sources.append(PackageSource.from_dict(package_source_dict))
         except DebutizerYAMLError as ex:
             raise CommandError(f"In {config_file}: {ex}")
 
