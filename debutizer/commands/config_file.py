@@ -17,7 +17,7 @@ class CredentialsYAMLError(CommandError):
     """An error as a result of the contents of the credentials.yaml"""
 
 
-class S3RepoConfiguration:
+class S3RepoProfile:
     def __init__(
         self,
         endpoint: str,
@@ -41,7 +41,7 @@ class S3RepoConfiguration:
         self.gpg_signing_password = gpg_signing_password
 
     @staticmethod
-    def from_dict(config: Dict[str, Any]) -> "S3RepoConfiguration":
+    def from_dict(config: Dict[str, Any]) -> "S3RepoProfile":
         endpoint = _required(config, "endpoint", str)
         bucket = _required(config, "bucket", str)
         sign = _optional(config, "sign", bool, False)
@@ -68,7 +68,7 @@ class S3RepoConfiguration:
         gpg_signing_key = os.environ.get("DEBUTIZER_GPG_SIGNING_KEY")
         gpg_signing_password = os.environ.get("DEBUTIZER_GPG_SIGNING_PASSWORD")
 
-        return S3RepoConfiguration(
+        return S3RepoProfile(
             endpoint=endpoint,
             bucket=bucket,
             access_key=access_key,
@@ -95,6 +95,33 @@ class S3RepoConfiguration:
                 "When package signing is enabled, either the gpg_key_id field or "
                 "DEBUTIZER_GPG_SIGNING_KEY environment variable must be set"
             )
+
+
+class S3RepoConfiguration:
+    def __init__(self, profiles: Dict[str, S3RepoProfile]):
+        self.profiles = profiles
+
+    @staticmethod
+    def from_dict(config: Dict[str, Any]) -> "S3RepoConfiguration":
+        profiles = {}
+
+        for profile_name, profile_config in config.items():
+            if not isinstance(profile_config, dict):
+                raise DebutizerYAMLError(
+                    f"Profile {profile_name} must be an object, got type "
+                    f"{type(profile_config)}"
+                )
+
+            try:
+                profiles[profile_name] = S3RepoProfile.from_dict(profile_config)
+            except DebutizerYAMLError as ex:
+                raise DebutizerYAMLError(f"For S3 repo profile {profile_name}: {ex}")
+
+        return S3RepoConfiguration(profiles=profiles)
+
+    def check_validity(self) -> None:
+        for profile in self.profiles.values():
+            profile.check_validity()
 
 
 class Configuration:

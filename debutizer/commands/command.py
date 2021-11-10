@@ -7,8 +7,8 @@ from typing import Callable, Dict, List
 from debutizer.print_utils import print_warning
 
 from ..errors import CommandError
-from .config import EnvArgumentParser
-from .configuration import Configuration
+from .config_file import Configuration
+from .env_argparse import EnvArgumentParser
 
 
 class Command(ABC):
