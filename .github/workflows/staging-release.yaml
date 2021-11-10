@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - feature/40-improve-configuration
+      - feature/43-s3-repo-profiles
 
 jobs:
   build-packages:
