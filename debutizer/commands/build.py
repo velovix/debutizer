@@ -3,7 +3,6 @@ from typing import List
 
 import requests
 
-from .config_file import Configuration
 from ..environment import Environment
 from ..errors import CommandError
 from ..package_py import PackagePy
@@ -12,6 +11,7 @@ from ..registry import Registry
 from ..source_package import SourcePackage
 from ..upstreams import Upstream
 from .command import Command
+from .config_file import Configuration
 from .env_argparse import EnvArgumentParser
 from .local_repo import LocalRepository
 from .repo_metadata import add_packages_files, add_release_files, add_sources_files
