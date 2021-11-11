@@ -303,7 +303,8 @@ def set_chroot_package_sources(
     apt_list = Path("/etc/apt/sources.list.d/debutizer.list")
 
     script = "#!/bin/sh\n"
-    script += "apt-get install gpg curl\n"
+    script += "set -o errexit\n"
+    script += "apt-get install -y gpg curl\n"
 
     script += f"rm -f {apt_list}\n"
     for package_source in package_sources:
