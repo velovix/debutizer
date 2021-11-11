@@ -304,7 +304,8 @@ def set_chroot_package_sources(
 
     script = "#!/bin/sh\n"
     script += "set -o errexit\n"
-    script += "apt-get install -y gpg curl\n"
+    script += "apt-get install -y gpg curl ca-certificates\n"
+    script += "update-ca-certificates\n"
 
     script += f"rm -f {apt_list}\n"
     for package_source in package_sources:
