@@ -171,7 +171,7 @@ class Configuration:
             upstream_components = _optional(config, "upstream_components", list, None)
 
             package_sources = []
-            package_source_dicts = _optional(config, "package_sources", dict, {})
+            package_source_dicts = _optional(config, "package_sources", list, [])
             for package_source_dict in package_source_dicts:
                 package_sources.append(PackageSource.from_dict(package_source_dict))
         except DebutizerYAMLError as ex:
