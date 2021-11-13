@@ -33,6 +33,7 @@ def _build_packages(package_dir: Path):
         config = Configuration(
             distributions=["focal"],
             architectures=["amd64"],
+            package_sources=[],
         )
         command.parse_args = Mock(return_value=args)
         command.parse_config_file = Mock(return_value=config)

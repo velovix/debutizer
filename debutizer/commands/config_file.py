@@ -124,11 +124,25 @@ class S3RepoConfiguration:
             profile.check_validity()
 
 
+class PackageSource:
+    def __init__(self, entry: str, gpg_key_url: Optional[str] = None):
+        self.entry = entry
+        self.gpg_key_url = gpg_key_url
+
+    @staticmethod
+    def from_dict(config: Dict[str, Any]) -> "PackageSource":
+        return PackageSource(
+            entry=_required(config, "entry", str),
+            gpg_key_url=_optional(config, "gpg_key_url", str, None),
+        )
+
+
 class Configuration:
     def __init__(
         self,
         distributions: List[str],
         architectures: List[str],
+        package_sources: List[PackageSource],
         upstream_repo: Optional[str] = None,
         upstream_is_trusted: bool = False,
         upstream_components: Optional[List[str]] = None,
@@ -136,6 +150,7 @@ class Configuration:
     ):
         self.distributions = distributions
         self.architectures = architectures
+        self.package_sources = package_sources
         self.upstream_repo = upstream_repo
         self.upstream_is_trusted = upstream_is_trusted
         self.upstream_components = upstream_components
@@ -154,6 +169,11 @@ class Configuration:
             upstream_repo = _optional(config, "upstream_repo", str, None)
             upstream_is_trusted = _optional(config, "upstream_is_trusted", bool, False)
             upstream_components = _optional(config, "upstream_components", list, None)
+
+            package_sources = []
+            package_source_dicts = _optional(config, "package_sources", list, [])
+            for package_source_dict in package_source_dicts:
+                package_sources.append(PackageSource.from_dict(package_source_dict))
         except DebutizerYAMLError as ex:
             raise CommandError(f"In {config_file}: {ex}")
 
@@ -169,6 +189,7 @@ class Configuration:
         return Configuration(
             distributions=distributions,
             architectures=architectures,
+            package_sources=package_sources,
             upstream_repo=upstream_repo,
             upstream_is_trusted=upstream_is_trusted,
             upstream_components=upstream_components,

@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - feature/38-multi-distribution
+      - feature/39-third-party-repos
 
 jobs:
   deploy-packages:

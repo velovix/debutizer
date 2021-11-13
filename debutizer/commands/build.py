@@ -11,7 +11,7 @@ from ..registry import Registry
 from ..source_package import SourcePackage
 from ..upstreams import Upstream
 from .command import Command
-from .config_file import Configuration
+from .config_file import Configuration, PackageSource
 from .env_argparse import EnvArgumentParser
 from .local_repo import LocalRepository
 from .repo_metadata import add_packages_files, add_release_files, add_sources_files
@@ -24,7 +24,7 @@ from .utils import (
     make_chroot,
     make_source_files,
     process_package_pys,
-    set_chroot_repos,
+    set_chroot_package_sources,
 )
 
 
@@ -113,7 +113,7 @@ def _build_packages(
         print_color("")
         print_notify(f"Building {package_py.source_package.name}")
 
-        repositories = []
+        package_sources = []
         if config.upstream_repo is not None:
             entry = _make_upstream_source_entry(
                 upstream_repo=config.upstream_repo,
@@ -121,14 +121,16 @@ def _build_packages(
                 components=config.upstream_components,  # type: ignore[arg-type]
                 trusted=config.upstream_is_trusted,
             )
-            repositories.append(entry)
+            package_sources.append(entry)
         if i > 0:
             # We can't add the local repo if this is the first package being built
             # because APT does not like empty repositories
-            repositories.append(
-                f"deb [trusted=yes] http://localhost:8080 {distribution} main"
+            package_source = PackageSource(
+                entry=f"deb [trusted=yes] http://localhost:8080 {distribution} main"
             )
-        set_chroot_repos(distribution, repositories)
+            package_sources.append(package_source)
+        package_sources += config.package_sources
+        set_chroot_package_sources(distribution, package_sources)
 
         source_results_dir = make_source_files(build_dir, package_py.source_package)
         binary_results_dir = build_package(
@@ -168,7 +170,7 @@ def _make_upstream_source_entry(
     distribution: str,
     components: List[str],
     trusted: bool,
-) -> str:
+) -> PackageSource:
     """Creates an APT source list entry based on the provided configuration"""
     parameters = ""
     if trusted:
@@ -176,7 +178,9 @@ def _make_upstream_source_entry(
 
     components_str = " ".join(components)
 
-    return f"deb {parameters} {upstream_repo} {distribution} {components_str}"
+    return PackageSource(
+        entry=f"deb {parameters} {upstream_repo} {distribution} {components_str}"
+    )
 
 
 def _exists_upstream(

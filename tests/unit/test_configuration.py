@@ -15,6 +15,7 @@ def test_configuration_validity():
         architectures=["amd64"],
         upstream_repo="my_repo",
         upstream_components=["my_component"],
+        package_sources=[],
     )
 
     config.check_validity()
