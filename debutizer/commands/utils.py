@@ -183,7 +183,7 @@ def make_source_files(
     # We don't support uploading binary packages via dput, because we only use dput with
     # PPAs and they only support uploading source packages. Therefore, no need to create
     # a changes file for every supported architecture.
-    architecture = "any"
+    architecture = "source"
 
     changes_file = (
         results_dir
@@ -402,10 +402,6 @@ def copy_source_artifacts(
     if len(changes_files) == 0:
         raise UnexpectedError(
             f"The build process failed to produces a changes ({CHANGES_GLOB}) file."
-        )
-    elif len(changes_files) > 1:
-        raise UnexpectedError(
-            f"The build process produced more than one changes ({CHANGES_GLOB}) file."
         )
 
     source_path = artifacts_dir / Path("dists") / distribution / component / "source"
