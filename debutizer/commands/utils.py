@@ -262,10 +262,11 @@ def build_package(
             root=True,
         )
     finally:
-        if os.geteuid() != 0:
-            # Give the current user ownership of build output
+        if "SUDO_USER" in os.environ:
+            # If Debutizer is being run with sudo, give the regular user access to
+            # the results dir
             run(
-                ["chown", "--recursive", str(os.getuid()), results_dir],
+                ["chown", "--recursive", os.environ["SUDO_USER"], results_dir],
                 on_failure="Failed to fix permissions for the build path",
                 root=True,
             )

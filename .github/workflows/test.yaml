@@ -15,3 +15,7 @@ jobs:
         shell: bash
       - name: Run tests
         run: pytest --capture=no --verbose .
+        env:
+          # Using sudo to selectively get root permissions works well in CI,
+          # since sudo is configured to be password-less
+          DEBUTIZER_ACQUIRE_ROOT: "1"

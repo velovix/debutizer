@@ -23,10 +23,15 @@ def run(
     command_no_path = [str(c) for c in command]
 
     if root and os.geteuid() != 0:
-        # Use a command (probably sudo) to get root permissions
-        root_command_str = os.environ.get("DEBUTIZER_ROOT_COMMAND", "sudo -E")
-        root_command = shlex.split(root_command_str)
-        command_no_path = root_command + command_no_path
+        if os.environ.get("DEBUTIZER_ACQUIRE_ROOT"):
+            # Use a command (probably sudo) to get root permissions
+            root_command_str = os.environ.get("DEBUTIZER_ROOT_COMMAND", "sudo -E")
+            root_command = shlex.split(root_command_str)
+            command_no_path = root_command + command_no_path
+        else:
+            raise CommandError(
+                f"Command '{' '.join(command_no_path)}' must have root permissions"
+            )
 
     # TODO: Use shlex.join when Python 3.8 is the oldest supported version
     command_str = " ".join(command_no_path)
