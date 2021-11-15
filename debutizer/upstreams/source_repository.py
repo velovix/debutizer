@@ -1,6 +1,7 @@
 import shutil
 from pathlib import Path
 
+from ..commands.utils import make_source_archive
 from ..subprocess_utils import run
 from ..version import Version
 from .base import Upstream
@@ -46,17 +47,11 @@ class SourceRepositoryUpstream(Upstream):
         shutil.rmtree(package_dir / ".git")
 
         # Create the source archive in the previous directory
-        run(
-            [
-                "tar",
-                "--create",
-                "--gzip",
-                f"--file={self.name}_{self.version.upstream_version}.orig.tar.gz",
-                f"--directory={build_dir}",
-                package_dir.relative_to(build_dir),
-            ],
-            on_failure="Failed to compress the upstream source",
-            cwd=build_dir,
+        make_source_archive(
+            package_dir=package_dir,
+            destination_dir=build_dir,
+            name=self.name,
+            version=self.version,
         )
 
         # Copy the debian/ directory, if one is provided

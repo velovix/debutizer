@@ -1,7 +1,8 @@
 import os
 import platform
+from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type, TypeVar
 
 import yaml
 from xdg.BaseDirectory import save_config_path
@@ -17,7 +18,14 @@ class CredentialsYAMLError(CommandError):
     """An error as a result of the contents of the credentials.yaml"""
 
 
-class S3RepoProfile:
+class _ConfigurationSection(ABC):
+    @staticmethod
+    @abstractmethod
+    def from_dict(config: Dict[str, Any]):
+        ...
+
+
+class S3RepoProfile(_ConfigurationSection):
     def __init__(
         self,
         endpoint: str,
@@ -97,26 +105,13 @@ class S3RepoProfile:
             )
 
 
-class S3RepoConfiguration:
+class S3RepoConfiguration(_ConfigurationSection):
     def __init__(self, profiles: Dict[str, S3RepoProfile]):
         self.profiles = profiles
 
     @staticmethod
     def from_dict(config: Dict[str, Any]) -> "S3RepoConfiguration":
-        profiles = {}
-
-        for profile_name, profile_config in config.items():
-            if not isinstance(profile_config, dict):
-                raise DebutizerYAMLError(
-                    f"Profile {profile_name} must be an object, got type "
-                    f"{type(profile_config)}"
-                )
-
-            try:
-                profiles[profile_name] = S3RepoProfile.from_dict(profile_config)
-            except DebutizerYAMLError as ex:
-                raise DebutizerYAMLError(f"For S3 repo profile {profile_name}: {ex}")
-
+        profiles = _parse_profiles(config, S3RepoProfile)
         return S3RepoConfiguration(profiles=profiles)
 
     def check_validity(self) -> None:
@@ -124,7 +119,53 @@ class S3RepoConfiguration:
             profile.check_validity()
 
 
-class PackageSource:
+class PPAProfile(_ConfigurationSection):
+    def __init__(
+        self,
+        repo: str,
+        sign: bool = True,
+        gpg_key_id: Optional[str] = None,
+        gpg_signing_key: Optional[str] = None,
+        gpg_signing_password: Optional[str] = None,
+    ):
+        self.repo = repo
+        self.sign = sign
+        self.gpg_key_id = gpg_key_id
+        self.gpg_signing_key = gpg_signing_key
+        self.gpg_signing_password = gpg_signing_password
+
+    @staticmethod
+    def from_dict(config: Dict[str, Any]) -> "PPAProfile":
+        gpg_signing_key = os.environ.get("DEBUTIZER_GPG_SIGNING_KEY")
+        gpg_signing_password = os.environ.get("DEBUTIZER_GPG_SIGNING_PASSWORD")
+
+        return PPAProfile(
+            repo=_required(config, "repo", str),
+            sign=_optional(config, "sign", bool, True),
+            gpg_key_id=_optional(config, "gpg_key_id", str, None),
+            gpg_signing_key=gpg_signing_key,
+            gpg_signing_password=gpg_signing_password,
+        )
+
+    def check_validity(self):
+        if self.sign and self.gpg_key_id is None and self.gpg_signing_key is None:
+            raise DebutizerYAMLError(
+                "When package signing is enabled, either the gpg_key_id field or "
+                "DEBUTIZER_GPG_SIGNING_KEY environment variable must be set"
+            )
+
+
+class PPAConfiguration(_ConfigurationSection):
+    def __init__(self, profiles: Dict[str, PPAProfile]):
+        self.profiles = profiles
+
+    @staticmethod
+    def from_dict(config: Dict[str, Any]) -> "PPAConfiguration":
+        profiles = _parse_profiles(config, PPAProfile)
+        return PPAConfiguration(profiles=profiles)
+
+
+class PackageSource(_ConfigurationSection):
     def __init__(self, entry: str, gpg_key_url: Optional[str] = None):
         self.entry = entry
         self.gpg_key_url = gpg_key_url
@@ -147,6 +188,7 @@ class Configuration:
         upstream_is_trusted: bool = False,
         upstream_components: Optional[List[str]] = None,
         s3_repo: Optional[S3RepoConfiguration] = None,
+        ppa: Optional[PPAConfiguration] = None,
     ):
         self.distributions = distributions
         self.architectures = architectures
@@ -155,6 +197,7 @@ class Configuration:
         self.upstream_is_trusted = upstream_is_trusted
         self.upstream_components = upstream_components
         self.s3_repo = s3_repo
+        self.ppa = ppa
 
     @staticmethod
     def from_file(config_file: Path) -> "Configuration":
@@ -186,6 +229,15 @@ class Configuration:
             except DebutizerYAMLError as ex:
                 raise CommandError(f"In {config_file}, in the s3_repo object: {ex}")
 
+        ppa_config = config.get("ppa")
+        if ppa_config is None:
+            ppa = None
+        else:
+            try:
+                ppa = PPAConfiguration.from_dict(ppa_config)
+            except DebutizerYAMLError as ex:
+                raise CommandError(f"In {config_file}, in the ppa object: {ex}")
+
         return Configuration(
             distributions=distributions,
             architectures=architectures,
@@ -194,6 +246,7 @@ class Configuration:
             upstream_is_trusted=upstream_is_trusted,
             upstream_components=upstream_components,
             s3_repo=s3_repo,
+            ppa=ppa,
         )
 
     def check_validity(self):
@@ -240,6 +293,29 @@ def _optional(
 def _check_type(key: str, value: Any, type_: Type, error: Type[Exception]) -> None:
     if not isinstance(value, type_):
         raise error(f"Field '{key}' is of type {type(value)}, but must be {type_}")
+
+
+PROFILE = TypeVar("PROFILE", bound=_ConfigurationSection)
+
+
+def _parse_profiles(
+    config: Dict[str, Any], profile_type: Type[PROFILE]
+) -> Dict[str, PROFILE]:
+    profiles = {}
+
+    for profile_name, profile_config in config.items():
+        if not isinstance(profile_config, dict):
+            raise DebutizerYAMLError(
+                f"Profile {profile_name} must be an object, got type "
+                f"{type(profile_config)}"
+            )
+
+        try:
+            profiles[profile_name] = profile_type.from_dict(profile_config)
+        except DebutizerYAMLError as ex:
+            raise DebutizerYAMLError(f"For profile {profile_name}: {ex}")
+
+    return profiles
 
 
 def _credentials_file() -> Path:
