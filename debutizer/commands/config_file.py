@@ -32,6 +32,7 @@ class S3RepoProfile(_ConfigurationSection):
         self,
         endpoint: str,
         bucket: str,
+        prefix: Optional[str] = None,
         access_key: Optional[str] = None,
         secret_key: Optional[str] = None,
         sign: bool = False,
@@ -40,8 +41,16 @@ class S3RepoProfile(_ConfigurationSection):
         gpg_signing_key: Optional[str] = None,
         gpg_signing_password: Optional[str] = None,
     ):
+        if prefix is not None:
+            # Normalize slashes in prefix
+            if prefix.startswith("/"):
+                prefix = prefix[1:]
+            if prefix.endswith("/"):
+                prefix = prefix[:-1]
+
         self.endpoint = endpoint
         self.bucket = bucket
+        self.prefix = prefix
         self.access_key = access_key
         self.secret_key = secret_key
         self.sign = sign
@@ -54,6 +63,7 @@ class S3RepoProfile(_ConfigurationSection):
     def from_dict(config: Dict[str, Any]) -> "S3RepoProfile":
         endpoint = _required(config, "endpoint", str)
         bucket = _required(config, "bucket", str)
+        prefix = _optional(config, "prefix", str, None)
         sign = _optional(config, "sign", bool, False)
         gpg_key_id = _optional(config, "gpg_key_id", str, None)
         cache_control = _optional(config, "cache_control", str, "public, max-age=3600")
@@ -81,6 +91,7 @@ class S3RepoProfile(_ConfigurationSection):
         return S3RepoProfile(
             endpoint=endpoint,
             bucket=bucket,
+            prefix=prefix,
             access_key=access_key,
             secret_key=secret_key,
             sign=sign,
