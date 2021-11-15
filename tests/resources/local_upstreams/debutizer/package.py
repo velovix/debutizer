@@ -98,84 +98,9 @@ source_package.copyright.add_license(
 source_package.set_debhelper_compat_version()
 
 source_package.changelog.add(
-    version="0.2.0-1",
-    urgency="medium",
-    changes=["* Initial packaging"],
-    author="Tyler Compton <xaviosx@gmail.com>",
-    date=datetime(2021, 10, 11, 22, 46),
-)
-
-source_package.changelog.add(
-    version="0.3.0-1",
-    urgency="medium",
-    changes=["* Add support for GPG signing"],
-    author="Tyler Compton <xaviosx@gmail.com>",
-    date=datetime(2021, 10, 25, 22, 58),
-)
-
-source_package.changelog.add(
-    version="0.4.4-1",
-    urgency="medium",
-    changes=[
-        "* Add tools for editing package dependencies",
-        "* Add cross-package dependency support",
-        "* Allow configuration through environment variables",
-    ],
-    author="Tyler Compton <xaviosx@gmail.com>",
-    date=datetime(2021, 11, 4, 13, 21),
-)
-
-source_package.changelog.add(
-    version="0.4.5-1",
-    urgency="medium",
-    changes=["* Persist changes to disk after running pre-build hooks"],
-    author="Tyler Compton <xaviosx@gmail.com>",
-    date=datetime(2021, 11, 4, 16, 8),
-)
-
-source_package.changelog.add(
-    version="0.4.6-1",
-    urgency="medium",
-    changes=["* Log to stderr by default"],
-    author="Tyler Compton <xaviosx@gmail.com>",
-    date=datetime(2021, 11, 5, 12, 42),
-)
-
-source_package.changelog.add(
-    version="0.5.0-1",
-    urgency="medium",
-    changes=[
-        "* Fix Debutizer logs being buffered and coming in after subprocess logs",
-        "* Make the Cache-Control header configurable for 's3-repo upload'",
-        "* Add missing S3FS runtime dependency",
-        "* Add missing pbuilder hook to APT releases",
-        "* Start deploying to PyPI",
-        "* Add a new 'check' subcommand for finding system packages",
-    ],
-    author="Tyler Compton <xaviosx@gmail.com>",
-    date=datetime(2021, 11, 5, 21, 2),
-)
-
-source_package.changelog.add(
-    version="0.5.1-1",
-    urgency="medium",
-    changes=["* Generate S3-repo metadata using the contents of the bucket"],
-    author="Tyler Compton <xaviosx@gmail.com>",
-    date=datetime(2021, 11, 6, 15, 12),
-)
-
-source_package.changelog.add(
-    version="0.6.0-1",
-    urgency="medium",
-    changes=["* Migrate some configuration to a file"],
-    author="Tyler Compton <xaviosx@gmail.com>",
-    date=datetime(2021, 11, 8, 23, 59),
-)
-
-source_package.changelog.add(
     version="0.7.0-1",
     urgency="medium",
-    changes=["* TODO: Finish changelog"],
+    changes=["* Some changelog entry"],
     author="Tyler Compton <xaviosx@gmail.com>",
     date=datetime(2021, 11, 8, 23, 59),
 )
