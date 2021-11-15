@@ -17,6 +17,8 @@ from debutizer.subprocess_utils import run
 
 
 class UploadCommand(Command):
+    """Uploads source packages to a PPA"""
+
     def __init__(self):
         self.parser = EnvArgumentParser(
             prog="debutizer ppa upload",

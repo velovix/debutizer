@@ -19,6 +19,8 @@ class CredentialsYAMLError(CommandError):
 
 
 class _ConfigurationSection(ABC):
+    """A YAML object within the debutizer.yaml"""
+
     @staticmethod
     @abstractmethod
     def from_dict(config: Dict[str, Any]):
