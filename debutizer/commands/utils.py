@@ -1,9 +1,10 @@
 import os
 import shutil
+import subprocess
 import tempfile
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from pathlib import Path
-from typing import Dict, Iterator, List, Set, Union
+from typing import Dict, Iterator, List, Optional, Set, Union
 
 from xdg.BaseDirectory import save_cache_path
 
@@ -13,12 +14,15 @@ from ..print_utils import print_color, print_notify
 from ..registry import Registry
 from ..source_package import SourcePackage
 from ..subprocess_utils import run
+from ..version import Version
 from .artifacts import (
     BINARY_PACKAGE_GLOB,
+    CHANGES_GLOB,
     DEBIAN_ARCHIVE_GLOB,
     DEBIAN_SOURCE_FILE_GLOB,
     SOURCE_ARCHIVE_GLOB,
     find_binary_packages,
+    find_changes_files,
     find_debian_archives,
     find_debian_source_files,
     find_source_archives,
@@ -128,7 +132,10 @@ def _order_package_pys(package_pys: List[PackagePy]) -> List[PackagePy]:
     return ordered
 
 
-def make_source_files(build_dir: Path, source_package: SourcePackage) -> Path:
+def make_source_files(
+    build_dir: Path,
+    source_package: SourcePackage,
+) -> Path:
     """Generates files related to the source package, specifically the Debian source
     file, the Debian archive, the source archive, and the .changes file.
 
@@ -173,7 +180,15 @@ def make_source_files(build_dir: Path, source_package: SourcePackage) -> Path:
         )
     shutil.copy2(str(debian_archive_file), str(results_dir))
 
-    changes_file = results_dir / f"{source_package.name}_source.changes"
+    # We don't support uploading binary packages via dput, because we only use dput with
+    # PPAs and they only support uploading source packages. Therefore, no need to create
+    # a changes file for every supported architecture.
+    architecture = "source"
+
+    changes_file = (
+        results_dir
+        / f"{source_package.name}_{source_package.version}_{architecture}.changes"
+    )
     run(
         [
             "dpkg-genchanges",
@@ -348,6 +363,7 @@ def copy_source_artifacts(
     dsc_files = find_debian_source_files(results_dir)
     orig_tar_files = find_source_archives(results_dir)
     debian_tar_files = find_debian_archives(results_dir)
+    changes_files = find_changes_files(results_dir)
 
     # Check that the expected files are present, but not _too_ present
     if len(dsc_files) == 0:
@@ -373,7 +389,7 @@ def copy_source_artifacts(
             f"one source package can be built at a time."
         )
     if len(debian_tar_files) == 0:
-        raise CommandError(
+        raise UnexpectedError(
             f"The build process failed to produce a Debian archive "
             f"({DEBIAN_ARCHIVE_GLOB}) file."
         )
@@ -383,10 +399,14 @@ def copy_source_artifacts(
             f"({DEBIAN_ARCHIVE_GLOB}) file. This shouldn't be possible as only "
             "one source package can be built at a time."
         )
+    if len(changes_files) == 0:
+        raise UnexpectedError(
+            f"The build process failed to produces a changes ({CHANGES_GLOB}) file."
+        )
 
     source_path = artifacts_dir / Path("dists") / distribution / component / "source"
     source_path.mkdir(parents=True, exist_ok=True)
-    for source_file in dsc_files + orig_tar_files + debian_tar_files:
+    for source_file in dsc_files + orig_tar_files + debian_tar_files + changes_files:
         shutil.copy2(source_file, source_path)
 
 
@@ -446,6 +466,73 @@ def make_build_dir() -> Path:
     build_dir.mkdir()
 
     return build_dir
+
+
+@contextmanager
+def configure_gpg(
+    gpg_key_id: Optional[str], gpg_signing_password: Optional[str]
+) -> Iterator[List[str]]:
+    """
+    :param gpg_key_id: The ID of the GPG key in the keyring to use
+    :param gpg_signing_password: The password of the GPG key
+    :return: An incomplete GPG command, with flags configuring its operation based on
+        the provided arguments
+    """
+    command: List[str] = [
+        "gpg",
+        "--pinentry-mode=loopback",
+        "--batch",
+        "--yes",
+    ]
+
+    if gpg_key_id is not None:
+        command += ["--default-key", gpg_key_id]
+
+    with ExitStack() as stack:
+        if gpg_signing_password is not None:
+            # Add a password if the GPG key uses one
+            password_path = stack.enter_context(temp_file(gpg_signing_password))
+            command += ["--passphrase-file", str(password_path)]
+
+        yield command
+
+
+def import_gpg_key(key: str) -> None:
+    process = subprocess.Popen(
+        [
+            "gpg",
+            "--armor",
+            "--import",
+            "--no-tty",
+            "--batch",
+            "--yes",
+        ],
+        stdout=subprocess.PIPE,
+        stdin=subprocess.PIPE,
+    )
+    process.communicate(input=key.encode())
+    if process.returncode != 0:
+        raise CommandError("Failed to import the GPG key")
+
+
+def make_source_archive(
+    package_dir: Path, destination_dir: Path, name: str, version: Version
+) -> None:
+    run(
+        [
+            "tar",
+            "--create",
+            "--gzip",
+            # Ensures that the tar file will have the same checksum if the contents
+            # are the same
+            "--sort=name",
+            f"--file={name}_{version.upstream_version}.orig.tar.gz",
+            f"--directory={destination_dir}",
+            package_dir.relative_to(destination_dir),
+        ],
+        on_failure="Failed to make the source archive",
+        cwd=destination_dir,
+    )
 
 
 def _chroot_tgz_path(distribution: str) -> Path:

@@ -1,11 +1,8 @@
-import os
 import subprocess
-from contextlib import ExitStack
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, cast
 
-from debutizer.commands.utils import temp_file
-from debutizer.errors import CommandError
+from debutizer.commands.utils import configure_gpg, import_gpg_key
 from debutizer.print_utils import print_notify
 from debutizer.subprocess_utils import run
 
@@ -40,7 +37,7 @@ def add_release_files(
     release_files = []
 
     if sign and gpg_key_id is None and gpg_signing_key is not None:
-        _import_gpg_key(gpg_signing_key)
+        import_gpg_key(gpg_signing_key)
 
     dirs = artifacts_dir.glob("dists/*")
     dirs = (d.relative_to(artifacts_dir) for d in dirs)
@@ -80,49 +77,18 @@ def add_release_files(
     return release_files
 
 
-def _import_gpg_key(key: str) -> None:
-    process = subprocess.Popen(
-        [
-            "gpg",
-            "--armor",
-            "--import",
-            "--no-tty",
-            "--batch",
-            "--yes",
-        ],
-        stdout=subprocess.PIPE,
-        stdin=subprocess.PIPE,
-    )
-    process.communicate(input=key.encode())
-    if process.returncode != 0:
-        raise CommandError("Failed to import the GPG key")
-
-
 def _sign_file(
     input_: Path,
     output: Path,
     gpg_key_id: Optional[str],
     gpg_signing_password: Optional[str],
 ) -> None:
-    command: List[Union[str, Path]] = [
-        "gpg",
-        "--pinentry-mode=loopback",
-        "--batch",
-        "--yes",
-        "--clear-sign",
-        "--output",
-        output,
-    ]
+    with configure_gpg(gpg_key_id, gpg_signing_password) as configuration:
+        command: List[Union[str, Path]] = []
+        command += configuration
 
-    if gpg_key_id is not None:
-        command += ["--default-key", gpg_key_id]
-
-    with ExitStack() as stack:
-        if gpg_signing_password is not None:
-            # Add a password if the GPG key uses one
-            password_path = stack.enter_context(temp_file(gpg_signing_password))
-            command += ["--passphrase-file", password_path]
-
+        command += ["--clear-sign"]
+        command += ["--output", output]
         # Add the actual GPG command, which must be after all options
         command += ["--sign", input_]
 

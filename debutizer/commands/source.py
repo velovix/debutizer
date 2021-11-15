@@ -1,5 +1,6 @@
 import argparse
 
+from ..environment import Environment
 from ..print_utils import print_color, print_done, print_header, print_notify
 from ..registry import Registry
 from ..source_package import SourcePackage
@@ -40,6 +41,8 @@ def _source_packages(
     args: argparse.Namespace, registry: Registry, distribution: str
 ) -> None:
     print_header(f"Sourcing packages for distribution {distribution}")
+
+    Environment.codename = distribution
 
     build_dir = make_build_dir()
 

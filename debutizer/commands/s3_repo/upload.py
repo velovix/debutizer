@@ -18,7 +18,7 @@ from debutizer.errors import CommandError, UnexpectedError
 from debutizer.print_utils import print_color, print_done, print_notify
 from debutizer.subprocess_utils import run
 
-from ..artifacts import find_archives
+from ..artifacts import find_artifacts
 from ..command import Command
 from ..env_argparse import EnvArgumentParser
 from ..repo_metadata import add_packages_files, add_release_files, add_sources_files
@@ -35,15 +35,7 @@ class UploadCommand(Command):
 
         self.add_artifacts_dir_flag()
         self.add_config_file_flag()
-
-        self.parser.add_env_flag(
-            "--profile",
-            type=str,
-            default="default",
-            required=False,
-            help="The S3 repo profile to use. If no value is provided, the 'default' "
-            "profile will be used.",
-        )
+        self.add_profile_flag()
 
     def parse_args(self) -> argparse.Namespace:
         return self.parser.parse_args(sys.argv[3:])
@@ -77,7 +69,7 @@ class UploadCommand(Command):
 
         bucket_endpoint = f"{url}/{profile.bucket}"
 
-        artifacts = find_archives(args.artifacts_dir, recursive=True)
+        artifacts = find_artifacts(args.artifacts_dir, recursive=True)
 
         metadata_files = []
         for artifact_file_path in artifacts:

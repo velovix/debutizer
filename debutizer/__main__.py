@@ -3,7 +3,7 @@ import sys
 
 from debutizer import commands
 from debutizer.errors import CommandError
-from debutizer.print_utils import Color, Format, print_color, print_error
+from debutizer.print_utils import print_color, print_error
 
 
 def main():
@@ -32,6 +32,10 @@ def _main():
     s3_repo_command = commands.S3RepoCommand()
     root.add_subcommand("s3-repo", s3_repo_command)
     s3_repo_command.add_subcommand("upload", commands.s3_repo.UploadCommand())
+
+    ppa_command = commands.PPACommand()
+    root.add_subcommand("ppa", ppa_command)
+    ppa_command.add_subcommand("upload", commands.ppa.UploadCommand())
 
     root.run()
 
