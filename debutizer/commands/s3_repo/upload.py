@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from email.utils import format_datetime
 from pathlib import Path
 from time import sleep
-from typing import cast
+from typing import Optional, cast
 from urllib.parse import urlparse
 
 import requests
@@ -76,6 +76,7 @@ class UploadCommand(Command):
         for artifact_file_path in artifacts:
             print_color(f"Uploading {artifact_file_path}...")
             _upload_artifact(
+                prefix=profile.prefix,
                 bucket_endpoint=bucket_endpoint,
                 access_key=access_key,
                 secret_key=secret_key,
@@ -107,6 +108,7 @@ class UploadCommand(Command):
             # to do it again manually in order to set the Cache-Control header.
             for metadata_file in metadata_files:
                 _upload_artifact(
+                    prefix=profile.prefix,
                     bucket_endpoint=bucket_endpoint,
                     access_key=access_key,
                     secret_key=secret_key,
@@ -121,6 +123,7 @@ class UploadCommand(Command):
 
 
 def _upload_artifact(
+    prefix: Optional[str],
     bucket_endpoint: str,
     access_key: str,
     secret_key: str,
@@ -129,6 +132,8 @@ def _upload_artifact(
     cache_control: str,
 ) -> None:
     key = str(artifact_file_path.relative_to(artifacts_dir))
+    if prefix is not None:
+        key = f"{prefix}/{key}"
 
     artifact_bytes = artifact_file_path.read_bytes()
     md5_hash = base64.b64encode(hashlib.md5(artifact_bytes).digest()).decode()
