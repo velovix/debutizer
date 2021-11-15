@@ -36,6 +36,7 @@ class NoArgsCommand(Command, ABC):
     """
 
     def __init__(self):
+        super().__init__()
         self.parser = None
 
     def parse_args(self) -> argparse.Namespace:

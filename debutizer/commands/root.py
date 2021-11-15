@@ -13,6 +13,7 @@ class RootCommand(Command):
     """
 
     def __init__(self):
+        super().__init__()
         self.parser = EnvArgumentParser(
             prog="debutizer",
             description="A tool for managing APT packages",

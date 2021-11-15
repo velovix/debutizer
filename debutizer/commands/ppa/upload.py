@@ -20,6 +20,7 @@ class UploadCommand(Command):
     """Uploads source packages to a PPA"""
 
     def __init__(self):
+        super().__init__()
         self.parser = EnvArgumentParser(
             prog="debutizer ppa upload",
             description="Uploads source packages to a PPA",

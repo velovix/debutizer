@@ -18,6 +18,7 @@ from .utils import (
 
 class SourceCommand(Command):
     def __init__(self):
+        super().__init__()
         self.parser = EnvArgumentParser(
             prog="debutizer source", description="Fetches and sources APT packages"
         )

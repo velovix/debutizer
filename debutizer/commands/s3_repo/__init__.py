@@ -10,6 +10,7 @@ from .upload import UploadCommand
 
 class S3RepoCommand(Command):
     def __init__(self):
+        super().__init__()
         self.parser = EnvArgumentParser(
             prog="debutizer s3-repo",
             description="Manages repositories backed by an S3-compatible bucket",
@@ -23,8 +24,8 @@ class S3RepoCommand(Command):
     def behavior(self, args: argparse.Namespace) -> None:
         if args.command is None:
             self.parser.print_usage()
-        elif args.command in S3RepoCommand.subcommands:
-            command = S3RepoCommand.subcommands[args.command]
+        elif args.command in self.subcommands:
+            command = self.subcommands[args.command]
             command.run()
         else:
             raise CommandError(f"Unknown subcommand: {args.command}")

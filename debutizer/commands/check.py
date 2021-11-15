@@ -11,6 +11,7 @@ class CheckCommand(Command):
     """Checks if all of Debutizer's system dependencies are available"""
 
     def __init__(self):
+        super().__init__()
         self.parser = EnvArgumentParser(
             prog="debutizer check",
             description="Checks if all required system dependencies are provided",

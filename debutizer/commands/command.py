@@ -15,9 +15,13 @@ class Command(ABC):
     """A Debutizer CLI command"""
 
     parser: EnvArgumentParser
-    subcommands: Dict[str, "Command"] = {}
-    cleanup_hooks: List[Callable[[], None]] = []
+    subcommands: Dict[str, "Command"]
+    cleanup_hooks: List[Callable[[], None]]
     """Hooks that run after a command is finished, even in the case of an error"""
+
+    def __init__(self):
+        self.subcommands = {}
+        self.cleanup_hooks = []
 
     def add_subcommand(self, name: str, command: "Command") -> None:
         """Registers the command under the given name.

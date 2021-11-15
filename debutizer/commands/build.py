@@ -30,6 +30,7 @@ from .utils import (
 
 class BuildCommand(Command):
     def __init__(self):
+        super().__init__()
         self.parser = EnvArgumentParser(
             prog="debutizer build", description="Builds your APT packages"
         )

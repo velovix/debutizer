@@ -27,6 +27,7 @@ from ..utils import temp_file
 
 class UploadCommand(Command):
     def __init__(self):
+        super().__init__()
         self.parser = EnvArgumentParser(
             prog="debutizer s3-repo upload",
             description="Uploads files in the archive directory to the S3-compatible "
