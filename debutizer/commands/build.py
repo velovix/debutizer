@@ -32,7 +32,7 @@ class BuildCommand(Command):
     def __init__(self):
         super().__init__()
         self.parser = EnvArgumentParser(
-            prog="debutizer build", description="Builds your APT packages"
+            prog="debutizer build", description="Makes source and binary packages"
         )
 
         self.add_artifacts_dir_flag()

@@ -14,6 +14,7 @@ class PPACommand(Command):
         self.parser = EnvArgumentParser(
             prog="debutizer ppa",
             description="Manages Ubuntu PPAs",
+            usage=_USAGE,
         )
 
         self.parser.add_argument("command", nargs="?", help="The command to run")
@@ -29,3 +30,10 @@ class PPACommand(Command):
             command.run()
         else:
             raise CommandError(f"Unknown subcommand: {args.command}")
+
+
+_USAGE = """debutizer ppa <command> [<args>]
+
+Commands:
+  upload    Uploads source packages to a PPA
+"""
