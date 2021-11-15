@@ -20,7 +20,7 @@ class SourceCommand(Command):
     def __init__(self):
         super().__init__()
         self.parser = EnvArgumentParser(
-            prog="debutizer source", description="Fetches and sources APT packages"
+            prog="debutizer source", description="Makes source packages"
         )
 
         self.add_artifacts_dir_flag()

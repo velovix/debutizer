@@ -14,6 +14,7 @@ class S3RepoCommand(Command):
         self.parser = EnvArgumentParser(
             prog="debutizer s3-repo",
             description="Manages repositories backed by an S3-compatible bucket",
+            usage=_USAGE,
         )
 
         self.parser.add_argument("command", nargs="?", help="The command to run")
@@ -29,3 +30,10 @@ class S3RepoCommand(Command):
             command.run()
         else:
             raise CommandError(f"Unknown subcommand: {args.command}")
+
+
+_USAGE = """debutizer s3-repo <command> [<args>]
+
+Commands:
+  upload    Uploads packages to S3
+"""
