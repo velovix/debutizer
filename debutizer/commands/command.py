@@ -87,13 +87,3 @@ class Command(ABC):
             required=False,
             help="The directory that holds the package directories",
         )
-
-    def add_profile_flag(self) -> None:
-        self.parser.add_env_flag(
-            "--profile",
-            type=str,
-            default="default",
-            required=False,
-            help="The S3 repo profile to use. If no value is provided, the 'default' "
-            "profile will be used.",
-        )
