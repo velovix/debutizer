@@ -302,7 +302,7 @@ def _check_type(key: str, value: Any, type_: Type, error: Type[Exception]) -> No
 
 
 def _credentials_file() -> Path:
-    return Path(save_config_path("debutizer")) / "s3-repo" / "credentials.yaml"
+    return Path(save_config_path("debutizer")) / "s3" / "credentials.yaml"
 
 
 def _host_architecture() -> str:
