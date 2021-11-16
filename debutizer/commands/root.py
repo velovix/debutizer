@@ -41,9 +41,8 @@ class RootCommand(Command):
 _USAGE = """debutizer <command> [<args>]
 
 Commands:
-  source     Makes source packages
-  build      Makes source and binary packages
-  check      Checks for system dependencies
-  s3-repo    Manages APT repositories backed by S3
-  ppa        Manages Ubuntu PPAs
+  source    Makes source packages
+  build     Makes source and binary packages
+  check     Checks for system dependencies
+  upload    Uploads packages
 """

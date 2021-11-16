@@ -1,8 +1,6 @@
-import argparse
 import base64
 import hashlib
 import hmac
-import sys
 import tempfile
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -14,51 +12,32 @@ from urllib.parse import urlparse
 
 import requests
 
+from debutizer.commands.artifacts import find_artifacts
+from debutizer.commands.config_file import S3Configuration
+from debutizer.commands.repo_metadata import (
+    add_packages_files,
+    add_release_files,
+    add_sources_files,
+)
+from debutizer.commands.upload_targets import UploadTarget
+from debutizer.commands.utils import temp_file
 from debutizer.errors import CommandError, UnexpectedError
-from debutizer.print_utils import print_color, print_done, print_notify
+from debutizer.print_utils import print_color, print_notify
 from debutizer.subprocess_utils import run
 
-from ..artifacts import find_artifacts
-from ..command import Command
-from ..env_argparse import EnvArgumentParser
-from ..repo_metadata import add_packages_files, add_release_files, add_sources_files
-from ..utils import temp_file
 
+class S3UploadTarget(UploadTarget):
+    """Uploads source and binary packages to an S3-compatible bucket"""
 
-class UploadCommand(Command):
-    def __init__(self):
-        super().__init__()
-        self.parser = EnvArgumentParser(
-            prog="debutizer s3-repo upload",
-            description="Uploads files in the archive directory to the S3-compatible "
-            "bucket",
-        )
+    def __init__(self, config: S3Configuration):
+        self._config = config
 
-        self.add_artifacts_dir_flag()
-        self.add_config_file_flag()
-        self.add_profile_flag()
-
-    def parse_args(self) -> argparse.Namespace:
-        return self.parser.parse_args(sys.argv[3:])
-
-    def behavior(self, args: argparse.Namespace) -> None:
-        config = self.parse_config_file(args)
-        if config.s3_repo is None:
-            raise CommandError("The configuration file must have an s3-repo object")
-        config.s3_repo.check_validity()
-
-        try:
-            profile = config.s3_repo.profiles[args.profile]
-        except KeyError:
-            raise CommandError(
-                f"Profile '{args.profile}' is not defined in {args.config_file}"
-            )
-
+    def upload(self, artifacts_dir: Path) -> None:
         # check_validity ensures these aren't null, but mypy can't figure that out
-        access_key: str = cast(str, profile.access_key)
-        secret_key: str = cast(str, profile.secret_key)
+        access_key: str = cast(str, self._config.access_key)
+        secret_key: str = cast(str, self._config.secret_key)
 
-        endpoint = urlparse(profile.endpoint)
+        endpoint = urlparse(self._config.endpoint)
         if endpoint.scheme not in _SUPPORTED_SCHEMES:
             raise CommandError(
                 f"Unsupported scheme {endpoint.scheme}, must be one of "
@@ -68,26 +47,26 @@ class UploadCommand(Command):
         if url.endswith("/"):
             url = url[:-1]
 
-        bucket_endpoint = f"{url}/{profile.bucket}"
+        bucket_endpoint = f"{url}/{self._config.bucket}"
 
-        artifacts = find_artifacts(args.artifacts_dir, recursive=True)
+        artifacts = find_artifacts(artifacts_dir, recursive=True)
 
         metadata_files = []
         for artifact_file_path in artifacts:
             print_color(f"Uploading {artifact_file_path}...")
             _upload_artifact(
-                prefix=profile.prefix,
+                prefix=self._config.prefix,
                 bucket_endpoint=bucket_endpoint,
                 access_key=access_key,
                 secret_key=secret_key,
-                artifacts_dir=args.artifacts_dir,
+                artifacts_dir=artifacts_dir,
                 artifact_file_path=artifact_file_path,
-                cache_control=profile.cache_control,
+                cache_control=self._config.cache_control,
             )
 
         with tempfile.TemporaryDirectory() as mount_path_name, _mount_s3fs(
             endpoint=endpoint.geturl(),
-            bucket=profile.bucket,
+            bucket=self._config.bucket,
             access_key=access_key,
             secret_key=secret_key,
             mount_path=Path(mount_path_name),
@@ -98,17 +77,17 @@ class UploadCommand(Command):
             metadata_files += add_sources_files(mount_path)
             metadata_files += add_release_files(
                 mount_path,
-                sign=profile.sign,
-                gpg_key_id=profile.gpg_key_id,
-                gpg_signing_key=profile.gpg_signing_key,
-                gpg_signing_password=profile.gpg_signing_password,
+                sign=self._config.sign,
+                gpg_key_id=self._config.gpg_key_id,
+                gpg_signing_key=self._config.gpg_signing_key,
+                gpg_signing_password=self._config.gpg_signing_password,
             )
 
             # Upload the files to the bucket. S3FS should take care of this, but we need
             # to do it again manually in order to set the Cache-Control header.
             for metadata_file in metadata_files:
                 _upload_artifact(
-                    prefix=profile.prefix,
+                    prefix=self._config.prefix,
                     bucket_endpoint=bucket_endpoint,
                     access_key=access_key,
                     secret_key=secret_key,
@@ -117,9 +96,6 @@ class UploadCommand(Command):
                     # Metadata files update often
                     cache_control="no-cache",
                 )
-
-        print_color("")
-        print_done("Upload complete!")
 
 
 def _upload_artifact(

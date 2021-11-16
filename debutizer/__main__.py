@@ -28,14 +28,7 @@ def _main():
     root.add_subcommand("source", commands.SourceCommand())
     root.add_subcommand("build", commands.BuildCommand())
     root.add_subcommand("check", commands.CheckCommand())
-
-    s3_repo_command = commands.S3RepoCommand()
-    root.add_subcommand("s3-repo", s3_repo_command)
-    s3_repo_command.add_subcommand("upload", commands.s3_repo.UploadCommand())
-
-    ppa_command = commands.PPACommand()
-    root.add_subcommand("ppa", ppa_command)
-    ppa_command.add_subcommand("upload", commands.ppa.UploadCommand())
+    root.add_subcommand("upload", commands.UploadCommand())
 
     root.run()
 
