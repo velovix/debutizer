@@ -48,7 +48,7 @@ class Command(ABC):
 
     def parse_config_file(self, args: argparse.Namespace) -> Configuration:
         if not args.config_file.is_file():
-            raise CommandError("Missing debutizer.yaml in the current directory")
+            raise CommandError(f"Configuration file '{args.config_file}' not found")
 
         return Configuration.from_file(args.config_file)
 
