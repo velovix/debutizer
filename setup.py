@@ -7,7 +7,7 @@ long_description = (repository_root / "README.md").read_text()
 
 setup(
     name="debutizer",
-    version="0.9.0",
+    version="0.9.1",
     description="A tool for managing APT packages",
     long_description=long_description,
     long_description_content_type="text/markdown",
