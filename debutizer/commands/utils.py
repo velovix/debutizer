@@ -531,6 +531,7 @@ def make_source_archive(
             "--owner=0",
             "--group=0",
             "--mtime=2021-11-16 08:32:44",
+            "--pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime",
             f"--file={name}_{version.upstream_version}.orig.tar.gz",
             f"--directory={destination_dir}",
             package_dir.relative_to(destination_dir),
