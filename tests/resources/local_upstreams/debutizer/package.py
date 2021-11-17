@@ -15,7 +15,7 @@ from debutizer.upstreams import LocalUpstream
 from debutizer.version import Version
 
 upstream = LocalUpstream(
-    name="debutizer", version=Version.from_string("0.9.2-1"), path=Path(".")
+    name="debutizer", version=Version.from_string("0.9.3-1"), path=Path(".")
 )
 package_dir = upstream.fetch()
 
@@ -98,7 +98,7 @@ source_package.copyright.add_license(
 source_package.set_debhelper_compat_version()
 
 source_package.changelog.add(
-    version="0.9.2-1",
+    version="0.9.3-1",
     urgency="medium",
     changes=["* Some changelog entry"],
     author="Tyler Compton <xaviosx@gmail.com>",
