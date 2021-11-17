@@ -527,6 +527,10 @@ def make_source_archive(
             # Ensures that the tar file will have the same checksum if the contents
             # are the same
             "--sort=name",
+            "--numeric-owner",
+            "--owner=0",
+            "--group=0",
+            "--mtime=2021-11-16 08:32:44",
             f"--file={name}_{version.upstream_version}.orig.tar.gz",
             f"--directory={destination_dir}",
             package_dir.relative_to(destination_dir),
