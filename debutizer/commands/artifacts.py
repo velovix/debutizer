@@ -30,7 +30,6 @@ def find_artifacts(path: Path, recursive: bool = False) -> List[Path]:
         + find_debian_source_files(path, recursive)
         + find_source_archives(path, recursive)
         + find_debian_archives(path, recursive)
-        + find_changes_files(path, recursive)
     )
 
 

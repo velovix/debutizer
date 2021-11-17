@@ -50,8 +50,6 @@ class S3UploadTarget(UploadTarget):
         bucket_endpoint = f"{url}/{self._config.bucket}"
 
         artifacts = find_artifacts(artifacts_dir, recursive=True)
-
-        metadata_files = []
         for artifact_file_path in artifacts:
             print_color(f"Uploading {artifact_file_path}...")
             _upload_artifact(
@@ -73,7 +71,7 @@ class S3UploadTarget(UploadTarget):
         ):
             mount_path = Path(mount_path_name)
             print_notify("Updating metadata files...")
-            metadata_files += add_packages_files(mount_path)
+            metadata_files = add_packages_files(mount_path)
             metadata_files += add_sources_files(mount_path)
             metadata_files += add_release_files(
                 mount_path,
