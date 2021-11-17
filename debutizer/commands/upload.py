@@ -28,7 +28,7 @@ class UploadCommand(Command):
         self.add_config_file_flag()
 
     def parse_args(self) -> argparse.Namespace:
-        return self.parser.parse_args(sys.argv[3:])
+        return self.parser.parse_args(sys.argv[2:])
 
     def behavior(self, args: argparse.Namespace) -> None:
         config = self.parse_config_file(args)
