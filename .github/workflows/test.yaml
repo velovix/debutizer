@@ -13,6 +13,16 @@ jobs:
         # allows Pip to skip packages that are already installed via apt.
         run: sudo pip3 install ".[dev]"
         shell: bash
+      - name: Give Cache Access to Chroots
+        shell: bash
+        run: |
+          sudo mkdir -p /var/cache/pbuilder
+          sudo chown $(whoami) /var/cache/pbuilder
+      - name: Cache Chroots
+        uses: actions/cache@v2
+        with:
+          path: /var/cache/pbuilder/debutizer-*.tgz
+          key: chroots-v4
       - name: Run tests
         run: pytest --capture=no --verbose .
         env:
