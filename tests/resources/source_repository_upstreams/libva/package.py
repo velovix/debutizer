@@ -6,7 +6,7 @@ from debutizer.version import Version
 
 upstream = SourceRepositoryUpstream(
     name="libva",
-    version=Version.from_string("2.7.0-2"),
+    version=Version.from_string("2.7.0"),
     repository_url="https://github.com/intel/libva",
     revision_format="{upstream_version}",
 )
