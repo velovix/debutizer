@@ -1,4 +1,5 @@
 import argparse
+import shutil
 from typing import List
 
 import requests
@@ -42,7 +43,10 @@ class BuildCommand(Command):
     def behavior(self, args: argparse.Namespace) -> None:
         config = self.parse_config_file(args)
 
-        args.artifacts_dir.mkdir(exist_ok=True)
+        if args.artifacts_dir.is_dir():
+            shutil.rmtree(args.artifacts_dir)
+        args.artifacts_dir.mkdir()
+
         registry = Registry()
         local_repo = LocalRepository(port=8080, artifacts_dir=args.artifacts_dir)
         local_repo.start()
