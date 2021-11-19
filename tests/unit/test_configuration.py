@@ -1,27 +1,10 @@
 import pytest
 
 from debutizer.commands.config_file import (
-    Configuration,
     CredentialsYAMLError,
     DebutizerYAMLError,
     S3Configuration,
 )
-
-
-def test_configuration_validity():
-    config = Configuration(
-        distributions=["focal"],
-        architectures=["amd64"],
-        upstream_repo="my_repo",
-        upstream_components=["my_component"],
-        package_sources=[],
-    )
-
-    config.check_validity()
-
-    config.upstream_components = None
-    with pytest.raises(DebutizerYAMLError):
-        config.check_validity()
 
 
 def test_s3_configuration_validity():

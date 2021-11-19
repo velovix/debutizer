@@ -36,7 +36,6 @@ class UploadCommand(Command):
             raise CommandError(
                 "The configuration file must have an upload target object"
             )
-        config.check_validity()
         config.upload_target.check_validity()
 
         upload_target: UploadTarget
