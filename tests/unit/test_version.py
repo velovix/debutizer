@@ -43,14 +43,44 @@ from debutizer.version import Version
                 full_version="1.4.3",
             ),
         ),
+        (
+            "5:4.9.2",
+            Version(
+                epoch="5",
+                upstream_version="4.9.2",
+                debian_revision=None,
+                full_version="5:4.9.2",
+            ),
+        ),
+        (
+            "epochlookingthing:",
+            Version(
+                epoch=None,
+                upstream_version="epochlookingthing:",
+                debian_revision=None,
+                full_version="epochlookingthing:",
+            ),
+        ),
+        (
+            ":8.7.2",
+            Version(
+                epoch=None,
+                upstream_version=":8.7.2",
+                debian_revision=None,
+                full_version=":8.7.2",
+            ),
+        ),
+        (
+            "-revisionlookingthing",
+            Version(
+                epoch=None,
+                upstream_version="-revisionlookingthing",
+                debian_revision=None,
+                full_version="-revisionlookingthing",
+            ),
+        ),
     ],
 )
-def test_valid_version_parsing(input_: str, expected: Version) -> None:
+def test_version_parsing(input_: str, expected: Version) -> None:
     actual = Version.from_string(input_)
     assert actual == expected
-
-
-@pytest.mark.parametrize("input_", ["epochonly:", "5:4.9.2", ":8.7.2", "-revisiononly"])
-def test_invalid_version_parsing(input_: str) -> None:
-    with pytest.raises(CommandError):
-        Version.from_string(input_)
