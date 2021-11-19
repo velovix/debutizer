@@ -34,6 +34,15 @@ from debutizer.version import Version
                 full_version="7:3.4.8-0ubuntu0.2",
             ),
         ),
+        (
+            "1.4.3",
+            Version(
+                epoch=None,
+                upstream_version="1.4.3",
+                debian_revision=None,
+                full_version="1.4.3",
+            ),
+        ),
     ],
 )
 def test_valid_version_parsing(input_: str, expected: Version) -> None:
@@ -41,9 +50,7 @@ def test_valid_version_parsing(input_: str, expected: Version) -> None:
     assert actual == expected
 
 
-@pytest.mark.parametrize(
-    "input_", ["1.4.3", "epochonly:", "5:4.9.2", ":8.7.2", "-revisiononly"]
-)
+@pytest.mark.parametrize("input_", ["epochonly:", "5:4.9.2", ":8.7.2", "-revisiononly"])
 def test_invalid_version_parsing(input_: str) -> None:
     with pytest.raises(CommandError):
         Version.from_string(input_)
