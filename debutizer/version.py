@@ -6,17 +6,12 @@ from .errors import CommandError
 
 
 class Version:
-    epoch: Optional[str]
-    upstream_version: str
-    debian_revision: str
-    full_version: str
-
     def __init__(
         self,
         *,
         epoch: Optional[str],
         upstream_version: str,
-        debian_revision: str,
+        debian_revision: Optional[str],
         full_version: str,
     ):
         self.epoch = epoch
@@ -33,22 +28,15 @@ class Version:
                 f"{_FORMAT_DESCRIPTION}"
             )
 
-        epoch = match.group("epoch")
         upstream_version = match.group("upstream_version")
         if upstream_version is None:
             raise CommandError(
                 f"Version string '{version}' is missing an upstream version section. "
                 f"{_FORMAT_DESCRIPTION}"
             )
-        debian_revision = match.group("debian_revision")
-        if debian_revision is None:
-            raise CommandError(
-                f"Version string '{version}' is missing a Debian revision section. "
-                f"{_FORMAT_DESCRIPTION}"
-            )
 
         return Version(
-            epoch=epoch,
+            epoch=match.group("epoch"),
             upstream_version=upstream_version,
             debian_revision=match.group("debian_revision"),
             full_version=version,
@@ -81,5 +69,5 @@ class Version:
 
 _FORMAT_DESCRIPTION = (
     "Versions must follow the format: "
-    "[optional epoch]:[upstream version]-[debian revision]"
+    "[optional epoch]:[upstream version]-[optional debian revision]"
 )
