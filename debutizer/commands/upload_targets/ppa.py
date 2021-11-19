@@ -21,6 +21,9 @@ class PPAUploadTarget(UploadTarget):
         self._config = ppa_config
 
     def upload(self, artifacts_dir: Path) -> None:
+        if self._config.gpg_key_id is None and self._config.gpg_signing_key is not None:
+            import_gpg_key(self._config.gpg_signing_key)
+
         changes_files = find_changes_files(artifacts_dir, recursive=True)
 
         for changes_file in changes_files:
@@ -34,11 +37,6 @@ class PPAUploadTarget(UploadTarget):
                 dsc_file = dsc_files[0]
 
                 print_color(f"Signing {changes_file} and {dsc_file}...")
-                if (
-                    self._config.gpg_key_id is None
-                    and self._config.gpg_signing_key is not None
-                ):
-                    import_gpg_key(self._config.gpg_signing_key)
 
                 _debsign_file(
                     changes_file,
