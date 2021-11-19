@@ -11,7 +11,7 @@ from ..registry import Registry
 from ..source_package import SourcePackage
 from ..upstreams import Upstream
 from .command import Command
-from .config_file import Configuration, PackageSource
+from .config_file import Configuration, PackageSource, UpstreamConfiguration
 from .env_argparse import EnvArgumentParser
 from .local_repo import LocalRepository
 from .repo_metadata import add_packages_files, add_release_files, add_sources_files
@@ -41,7 +41,6 @@ class BuildCommand(Command):
 
     def behavior(self, args: argparse.Namespace) -> None:
         config = self.parse_config_file(args)
-        config.check_validity()
 
         args.artifacts_dir.mkdir(exist_ok=True)
         registry = Registry()
@@ -90,10 +89,10 @@ def _build_packages(
     chroot_archive_path = make_chroot(distribution)
     package_pys = process_package_pys(package_dirs, registry, build_dir)
 
-    if config.upstream_repo is not None:
+    if config.upstream is not None:
         new_package_pys = []
         for package_py in package_pys:
-            if _exists_upstream(config.upstream_repo, distribution, package_py):
+            if _exists_upstream(config.upstream.url, distribution, package_py):
                 print_color(
                     f"Package {package_py.source_package.name} already exists "
                     f"upstream, so it will not be built"
@@ -115,13 +114,8 @@ def _build_packages(
         print_notify(f"Building {package_py.source_package.name}")
 
         package_sources = []
-        if config.upstream_repo is not None:
-            entry = _make_upstream_source_entry(
-                upstream_repo=config.upstream_repo,
-                distribution=distribution,
-                components=config.upstream_components,  # type: ignore[arg-type]
-                trusted=config.upstream_is_trusted,
-            )
+        if config.upstream is not None:
+            entry = _make_upstream_source_entry(config.upstream, distribution)
             package_sources.append(entry)
         if i > 0:
             # We can't add the local repo if this is the first package being built
@@ -167,34 +161,31 @@ def _build_packages(
 
 
 def _make_upstream_source_entry(
-    upstream_repo: str,
-    distribution: str,
-    components: List[str],
-    trusted: bool,
+    upstream: UpstreamConfiguration, distribution: str
 ) -> PackageSource:
     """Creates an APT source list entry based on the provided configuration"""
     parameters = ""
-    if trusted:
+    if upstream.is_trusted:
         parameters = "[trusted=yes]"
 
-    components_str = " ".join(components)
+    components_str = " ".join(upstream.components)
 
     return PackageSource(
-        entry=f"deb {parameters} {upstream_repo} {distribution} {components_str}"
+        entry=f"deb {parameters} {upstream.url} {distribution} {components_str}"
     )
 
 
 def _exists_upstream(
-    upstream_repo: str, distribution: str, package_py: PackagePy
+    upstream_url: str, distribution: str, package_py: PackagePy
 ) -> bool:
     """Check if the package already exists upstream at the current version by seeing if
     the Debian upstream source file is already uploaded.
     """
-    if upstream_repo[:-1] == "/":
-        upstream_repo = upstream_repo[:-1]
+    if upstream_url[:-1] == "/":
+        upstream_url = upstream_url[:-1]
 
     url = (
-        f"{upstream_repo}"
+        f"{upstream_url}"
         f"/dists"
         f"/{distribution}"
         f"/{package_py.component}"

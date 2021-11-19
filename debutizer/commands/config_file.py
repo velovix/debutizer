@@ -2,7 +2,7 @@ import os
 import platform
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Type, TypeVar
+from typing import Any, Dict, List, Optional, Type
 
 import yaml
 from xdg.BaseDirectory import save_config_path
@@ -187,23 +187,39 @@ class PackageSource(_ConfigurationSection):
         )
 
 
+class UpstreamConfiguration(_ConfigurationSection):
+    def __init__(
+        self,
+        url: str,
+        components: List[str],
+        is_trusted: Optional[bool] = False,
+    ):
+        self.url = url
+        self.components = components
+        self.is_trusted = is_trusted
+
+    @staticmethod
+    def from_dict(config: Dict[str, Any]) -> "UpstreamConfiguration":
+        return UpstreamConfiguration(
+            url=_required(config, "url", str),
+            components=_optional(config, "components", list, ["main"]),
+            is_trusted=_optional(config, "is_trusted", bool, False),
+        )
+
+
 class Configuration:
     def __init__(
         self,
         distributions: List[str],
         architectures: List[str],
         package_sources: List[PackageSource],
-        upstream_repo: Optional[str] = None,
-        upstream_is_trusted: bool = False,
-        upstream_components: Optional[List[str]] = None,
+        upstream: Optional[UpstreamConfiguration] = None,
         upload_target: Optional[UploadTargetConfiguration] = None,
     ):
         self.distributions = distributions
         self.architectures = architectures
         self.package_sources = package_sources
-        self.upstream_repo = upstream_repo
-        self.upstream_is_trusted = upstream_is_trusted
-        self.upstream_components = upstream_components
+        self.upstream = upstream
         self.upload_target = upload_target
 
     @staticmethod
@@ -216,9 +232,11 @@ class Configuration:
             architectures = _optional(
                 config, "architecture", list, [_host_architecture()]
             )
-            upstream_repo = _optional(config, "upstream_repo", str, None)
-            upstream_is_trusted = _optional(config, "upstream_is_trusted", bool, False)
-            upstream_components = _optional(config, "upstream_components", list, None)
+
+            upstream = None
+            upstream_config = _optional(config, "upstream", dict, None)
+            if upstream_config is not None:
+                upstream = UpstreamConfiguration.from_dict(upstream_config)
 
             package_sources = []
             package_source_dicts = _optional(config, "package_sources", list, [])
@@ -249,17 +267,15 @@ class Configuration:
             distributions=distributions,
             architectures=architectures,
             package_sources=package_sources,
-            upstream_repo=upstream_repo,
-            upstream_is_trusted=upstream_is_trusted,
-            upstream_components=upstream_components,
+            upstream=upstream,
             upload_target=upload_target,
         )
 
     def check_validity(self):
-        if self.upstream_repo is not None and self.upstream_components is None:
+        if self.upstream is not None and self.upstream.components is None:
             raise DebutizerYAMLError(
-                "If the upstream_repo field is set, the upstream_components field must "
-                "be set as well"
+                "If the 'upstream' field is set, that object must have a 'components' "
+                "field"
             )
 
 
