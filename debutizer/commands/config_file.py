@@ -193,10 +193,12 @@ class UpstreamConfiguration(_ConfigurationSection):
         url: str,
         components: List[str],
         is_trusted: Optional[bool] = False,
+        gpg_key_url: Optional[str] = None,
     ):
         self.url = url
         self.components = components
         self.is_trusted = is_trusted
+        self.gpg_key_url = gpg_key_url
 
     @staticmethod
     def from_dict(config: Dict[str, Any]) -> "UpstreamConfiguration":
@@ -204,6 +206,7 @@ class UpstreamConfiguration(_ConfigurationSection):
             url=_required(config, "url", str),
             components=_optional(config, "components", list, ["main"]),
             is_trusted=_optional(config, "is_trusted", bool, False),
+            gpg_key_url=_optional(config, "gpg_key_url", str, None),
         )
 
 

@@ -175,7 +175,8 @@ def _make_upstream_source_entry(
     components_str = " ".join(upstream.components)
 
     return PackageSource(
-        entry=f"deb {parameters} {upstream.url} {distribution} {components_str}"
+        entry=f"deb {parameters} {upstream.url} {distribution} {components_str}",
+        gpg_key_url=upstream.gpg_key_url,
     )
 
 

@@ -1,6 +1,6 @@
 import subprocess
 from pathlib import Path
-from typing import Dict, List, Optional, Union, cast
+from typing import Dict, List, Optional, Union
 
 from debutizer.commands.utils import configure_gpg, import_gpg_key
 from debutizer.print_utils import print_notify

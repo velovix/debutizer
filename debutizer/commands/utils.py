@@ -318,8 +318,9 @@ def set_chroot_package_sources(
     print_notify(f"Adding APT lists to the '{distribution}' chroot:")
     apt_list = Path("/etc/apt/sources.list.d/debutizer.list")
 
-    script = "#!/bin/sh\n"
+    script = "#!/bin/bash\n"
     script += "set -o errexit\n"
+    script += "set -o pipefail\n"
     script += "apt-get install -y gnupg curl ca-certificates\n"
     script += "update-ca-certificates\n"
 
