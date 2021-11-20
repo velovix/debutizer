@@ -36,7 +36,7 @@ def add_release_files(
     """
     release_files = []
 
-    if sign and gpg_key_id is None and gpg_signing_key is not None:
+    if sign and gpg_signing_key is not None:
         import_gpg_key(gpg_signing_key)
 
     dirs = artifacts_dir.glob("dists/*")

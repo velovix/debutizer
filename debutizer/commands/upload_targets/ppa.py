@@ -21,7 +21,7 @@ class PPAUploadTarget(UploadTarget):
         self._config = ppa_config
 
     def upload(self, artifacts_dir: Path) -> None:
-        if self._config.gpg_key_id is None and self._config.gpg_signing_key is not None:
+        if self._config.gpg_signing_key is not None:
             import_gpg_key(self._config.gpg_signing_key)
 
         changes_files = find_changes_files(artifacts_dir, recursive=True)
