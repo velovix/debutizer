@@ -51,7 +51,7 @@ class S3UploadTarget(UploadTarget):
 
         artifacts = find_artifacts(artifacts_dir, recursive=True)
         for artifact_file_path in artifacts:
-            print_color(f"Uploading {artifact_file_path}...")
+            print_color(f"Uploading {artifact_file_path.relative_to(artifacts_dir)}...")
             _upload_artifact(
                 prefix=self._config.prefix,
                 bucket_endpoint=bucket_endpoint,
