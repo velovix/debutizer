@@ -6,6 +6,7 @@ __pycache__/
 .mypy_cache/
 dist/
 *.egg-info/
+.venv/
 
 # GNU gettext
 *.mo

@@ -8,13 +8,12 @@ minimal boilerplate and modern continuous integration tooling.
 
 ### APT Repository (Recommended)
 
-Naturally, Debutizer is available for installation as an APT repository. If
-you're running on a Debian-based distribution, Debutizer can be installed with
-the following commands:
+Naturally, Debutizer is available for installation as an APT repository, through
+a PPA. If you're running on a Debian-based distribution, Debutizer can be
+installed with the following commands:
 
 ```bash
-curl -SsL https://raw.githubusercontent.com/velovix/debutizer/main/debutizer.key | sudo apt-key add -
-echo "deb http://apt.debutizer.dev $(lsb_release -s -c) main" | sudo tee /etc/apt/sources.list.d/debutizer.list
+sudo add-apt-repository ppa:velovix/debutizer
 sudo apt update
 sudo apt install debutizer
 ```
