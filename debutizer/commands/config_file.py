@@ -124,10 +124,9 @@ class S3Configuration(UploadTargetConfiguration):
                 f"{_credentials_file()} file"
             )
 
-        if self.sign and self.gpg_key_id is None and self.gpg_signing_key is None:
+        if self.sign and self.gpg_key_id is None:
             raise DebutizerYAMLError(
-                "When package signing is enabled, either the gpg_key_id field or "
-                "DEBUTIZER_GPG_SIGNING_KEY environment variable must be set"
+                "When package signing is enabled, the gpg_key_id field must be set"
             )
 
 
@@ -167,10 +166,9 @@ class PPAConfiguration(UploadTargetConfiguration):
         )
 
     def check_validity(self):
-        if self.sign and self.gpg_key_id is None and self.gpg_signing_key is None:
+        if self.sign and self.gpg_key_id is None:
             raise DebutizerYAMLError(
-                "When package signing is enabled, either the gpg_key_id field or "
-                "DEBUTIZER_GPG_SIGNING_KEY environment variable must be set"
+                "When package signing is enabled, the gpg_key_id field must be set"
             )
 
 
