@@ -3,8 +3,8 @@ from pathlib import Path
 from typing import List, Optional
 
 from ..commands.utils import make_source_archive
+from ..environment import Environment
 from ..errors import CommandError
-from ..subprocess_utils import run
 from ..version import Version
 from .base import Upstream
 
@@ -17,12 +17,13 @@ class LocalUpstream(Upstream):
     def __init__(
         self,
         *,
+        env: Environment,
         name: str,
         version: Version,
         path: Path,
         excluded_paths: Optional[List[Path]] = None,
     ):
-        super().__init__(name=name, version=version)
+        super().__init__(env=env, name=name, version=version)
 
         if excluded_paths is None:
             excluded_paths = []
@@ -33,7 +34,7 @@ class LocalUpstream(Upstream):
         self.excluded_paths = excluded_paths
 
     def fetch(self) -> Path:
-        build_dir = self.build_root / self.name
+        build_dir = self.env.build_root / self.name
         build_dir.mkdir()
         package_dir = self._package_dir()
 
@@ -54,7 +55,7 @@ class LocalUpstream(Upstream):
         )
 
         # Copy the debian/ directory, if one is provided
-        debian_path = self.package_root / self.name / "debian"
+        debian_path = self.env.package_root / self.name / "debian"
         if debian_path.is_dir():
             shutil.copytree(debian_path, package_dir / "debian")
 

@@ -1,20 +1,18 @@
 from pathlib import Path
-from typing import ClassVar, Optional
+from typing import Optional
 
 from .changelog import Changelog
 from .compat import Compat
 from .control import Control
 from .copyright import Copyright
 from .environment import Environment
-from .errors import CommandError, UnexpectedError
+from .errors import CommandError
 from .relation import Relation
 from .subprocess_utils import run
 
 
 class SourcePackage:
     """A Python representation of a source package definition"""
-
-    distribution: ClassVar[Optional[str]] = None
 
     changelog: Changelog
     control: Control
@@ -23,7 +21,7 @@ class SourcePackage:
     compat: Compat
     _complete: bool
 
-    def __init__(self, directory: Path, complete: bool = True):
+    def __init__(self, env: Environment, directory: Path, complete: bool = True):
         """Creates a SourcePackage configured using files found in the given directory.
 
         :param directory: The directory containing the upstream source and debian/
@@ -31,11 +29,10 @@ class SourcePackage:
         :param complete: If True, configuration in the package directory is expected
             to be finished and static checks will be performed against it
         """
-        if self.distribution is None:
-            raise UnexpectedError("The distribution field must be set!")
+        self._env = env
 
         self.directory = directory
-        self.changelog = Changelog(directory, self.distribution, self.name)
+        self.changelog = Changelog(directory, env.codename, self.name)
         self.control = Control(directory, self.name)
         self.copyright = Copyright(directory)
         self.compat = Compat(directory)
@@ -109,7 +106,7 @@ class SourcePackage:
             automatically selected based on the current distribution
         """
         if version is None:
-            version = _compat_version_from_environment()
+            version = self._env.compat_version()
 
         set_in_build_depends = False
         if (
@@ -135,18 +132,3 @@ class SourcePackage:
 
     def __repr__(self) -> str:
         return f"SourcePackage(name={self.name}, version={self.version})"
-
-
-def _compat_version_from_environment() -> str:
-    """Use the debhelper compatibility version used by the current distribution"""
-    if Environment.codename is None:
-        raise UnexpectedError("The Environment.codename field must be set")
-
-    if Environment.codename in ["bionic"]:
-        return "11"
-    elif Environment.codename in ["focal", "buster"]:
-        return "12"
-    elif Environment.codename in ["groovy", "hirsute", "impish", "bullseye"]:
-        return "13"
-    else:
-        raise UnexpectedError(f"Unknown distribution: {Environment.codename}")

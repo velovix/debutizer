@@ -2,6 +2,7 @@ import shutil
 from pathlib import Path
 
 from ..commands.utils import make_source_archive
+from ..environment import Environment
 from ..subprocess_utils import run
 from ..version import Version
 from .base import Upstream
@@ -14,9 +15,15 @@ class SourceRepositoryUpstream(Upstream):
     revision_format: str
 
     def __init__(
-        self, *, name: str, version: Version, repository_url: str, revision_format: str
+        self,
+        *,
+        env: Environment,
+        name: str,
+        version: Version,
+        repository_url: str,
+        revision_format: str,
     ):
-        super().__init__(name=name, version=version)
+        super().__init__(env=env, name=name, version=version)
         self.repository_url = repository_url
         self.revision_format = revision_format
 
@@ -25,7 +32,7 @@ class SourceRepositoryUpstream(Upstream):
             upstream_version=self.version.upstream_version
         )
 
-        build_dir = self.build_root / self.name
+        build_dir = self.env.build_root / self.name
         build_dir.mkdir()
         package_dir = self._package_dir()
 
@@ -55,7 +62,7 @@ class SourceRepositoryUpstream(Upstream):
         )
 
         # Copy the debian/ directory, if one is provided
-        debian_path = self.package_root / self.name / "debian"
+        debian_path = self.env.package_root / self.name / "debian"
         if debian_path.is_dir():
             shutil.copytree(debian_path, package_dir / "debian")
 

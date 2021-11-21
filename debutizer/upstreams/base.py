@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import ClassVar
 
+from ..environment import Environment
 from ..version import Version
 
 
@@ -10,13 +10,11 @@ class Upstream(ABC):
     source.
     """
 
-    package_root: ClassVar[Path]
-    build_root: ClassVar[Path]
-
     name: str
     version: Version
 
-    def __init__(self, *, name: str, version: Version):
+    def __init__(self, *, env: Environment, name: str, version: Version):
+        self.env = env
         self.name = name
         self.version = version
 
@@ -30,5 +28,7 @@ class Upstream(ABC):
 
     def _package_dir(self) -> Path:
         return (
-            self.build_root / self.name / f"{self.name}-{self.version.upstream_version}"
+            self.env.build_root
+            / self.name
+            / f"{self.name}-{self.version.upstream_version}"
         )

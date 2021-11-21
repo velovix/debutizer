@@ -1,8 +1,8 @@
-import sys
 from pathlib import Path
 from types import ModuleType
 from typing import ClassVar
 
+from .environment import Environment
 from .errors import CommandError
 from .print_utils import print_error
 from .source_package import SourcePackage
@@ -21,13 +21,13 @@ class PackagePy:
     build_dir: Path
     """The directory where scratch work will be done for this configuration"""
 
-    def __init__(self, package_py: Path, build_dir: Path):
+    def __init__(self, env: Environment, package_py: Path):
         if not package_py.is_file():
             raise CommandError(
                 f"Package {package_py.parent.name} is missing a "
                 f"{PackagePy.FILE_NAME} file"
             )
-        self.build_dir = build_dir / package_py.parent.name
+        self.build_dir = env.build_root / package_py.parent.name
 
         package_module = ModuleType(package_py.name)
         # Put the module in a package so it can do relative imports
@@ -47,7 +47,7 @@ class PackagePy:
             raise
 
         try:
-            self.source_package = package_module.source_package  # type: ignore
+            self.source_package = package_module.create_source_package(env)  # type: ignore
         except AttributeError:
             raise CommandError(
                 "The package.py file must define a global variable named "
@@ -58,8 +58,8 @@ class PackagePy:
                 f"The source_package variable must be of type {SourcePackage.__name__}"
             )
 
-        # Apply any changes to the disk
-        self.source_package.save()
+        # Commit changes to disk
+        self.source_package.complete()
 
         # TODO: Type annotate this attribute when this PR makes it into a MyPy release
         #       https://github.com/python/mypy/pull/10548

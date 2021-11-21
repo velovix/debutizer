@@ -8,6 +8,7 @@ from typing import Dict, Iterator, List, Optional, Set, Union
 
 from xdg.BaseDirectory import save_cache_path
 
+from ..environment import Environment
 from ..errors import CommandError, UnexpectedError
 from ..package_py import PackagePy
 from ..print_utils import print_color, print_notify
@@ -44,9 +45,9 @@ def find_package_dirs(package_dir: Path) -> List[Path]:
 
 
 def process_package_pys(
+    env: Environment,
     package_dirs: List[Path],
     registry: Registry,
-    build_dir: Path,
 ) -> List[PackagePy]:
     """Runs the package.py file in each package directory, extracting the configuration
     provided by that file
@@ -56,9 +57,9 @@ def process_package_pys(
     for package_dir in package_dirs:
         print_color("")
         print_notify(f"Reading {PackagePy.FILE_NAME} file for {package_dir.name}...")
-        package_py = PackagePy(package_dir / PackagePy.FILE_NAME, build_dir)
+        package_py = PackagePy(env, package_dir / PackagePy.FILE_NAME)
         package_pys.append(package_py)
-        registry.add(package_py.source_package)
+        registry.add(env, package_py.source_package)
 
     print_color("")
 

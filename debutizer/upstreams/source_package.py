@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from ..environment import Environment
 from ..errors import UnexpectedError
 from ..subprocess_utils import run
 from ..version import Version
@@ -11,12 +12,12 @@ class SourcePackageUpstream(Upstream):
 
     dsc_url: str
 
-    def __init__(self, *, name: str, version: Version, dsc_url: str):
-        super().__init__(name=name, version=version)
+    def __init__(self, *, env: Environment, name: str, version: Version, dsc_url: str):
+        super().__init__(env=env, name=name, version=version)
         self.dsc_url = dsc_url
 
     def fetch(self) -> Path:
-        build_dir = self.build_root / self.name
+        build_dir = self.env.build_root / self.name
         build_dir.mkdir()
 
         run(

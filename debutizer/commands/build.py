@@ -1,6 +1,5 @@
 import argparse
 import shutil
-from typing import List
 
 import requests
 
@@ -9,8 +8,6 @@ from ..errors import CommandError
 from ..package_py import PackagePy
 from ..print_utils import print_color, print_done, print_header, print_notify
 from ..registry import Registry
-from ..source_package import SourcePackage
-from ..upstreams import Upstream
 from .command import Command
 from .config_file import Configuration, PackageSource, UpstreamConfiguration
 from .env_argparse import EnvArgumentParser
@@ -54,49 +51,40 @@ class BuildCommand(Command):
 
         for arch in config.architectures:
             for distro in config.distributions:
-                _build_packages(
-                    args=args,
-                    config=config,
-                    registry=registry,
+                build_dir = make_build_dir()
+
+                env = Environment(
+                    codename=distro,
                     architecture=arch,
-                    distribution=distro,
+                    package_root=args.package_dir,
+                    build_root=build_dir,
+                    artifacts_root=args.artifacts_dir,
                 )
+
+                _build_packages(env, config, registry)
 
         print_color("")
         print_done("Build complete!")
 
 
 def _build_packages(
-    args: argparse.Namespace,
-    config: Configuration,
-    registry: Registry,
-    distribution: str,
-    architecture: str,
+    env: Environment, config: Configuration, registry: Registry
 ) -> None:
     """Builds packages for the given distribution/architecture pair"""
 
     print_header(
-        f"Building packages for distribution '{distribution}' on architecture "
-        f"'{architecture}'"
+        f"Building packages for distribution '{env.codename}' on architecture "
+        f"'{env.architecture}'"
     )
 
-    Environment.codename = distribution
-    Environment.architecture = architecture
-
-    build_dir = make_build_dir()
-
-    Upstream.package_root = args.package_dir
-    Upstream.build_root = build_dir
-    SourcePackage.distribution = distribution
-
-    package_dirs = find_package_dirs(args.package_dir)
-    chroot_archive_path = make_chroot(distribution)
-    package_pys = process_package_pys(package_dirs, registry, build_dir)
+    package_dirs = find_package_dirs(env.package_root)
+    chroot_archive_path = make_chroot(env.codename)
+    package_pys = process_package_pys(env, package_dirs, registry)
 
     if config.upstream is not None:
         new_package_pys = []
         for package_py in package_pys:
-            if _exists_upstream(config.upstream.url, distribution, package_py):
+            if _exists_upstream(config.upstream.url, env.codename, package_py):
                 print_color(
                     f"Package {package_py.source_package.name} already exists "
                     f"upstream, so it will not be built"
@@ -119,44 +107,46 @@ def _build_packages(
 
         package_sources = []
         if config.upstream is not None:
-            entry = _make_upstream_source_entry(config.upstream, distribution)
+            entry = _make_upstream_source_entry(config.upstream, env.codename)
             package_sources.append(entry)
         if i > 0:
             # We can't add the local repo if this is the first package being built
             # because APT does not like empty repositories
             package_source = PackageSource(
-                entry=f"deb [trusted=yes] http://localhost:8080 {distribution} main"
+                entry=f"deb [trusted=yes] http://localhost:8080 {env.codename} main"
             )
             package_sources.append(package_source)
         package_sources += config.package_sources
-        set_chroot_package_sources(distribution, package_sources)
+        set_chroot_package_sources(env.codename, package_sources)
 
-        source_results_dir = make_source_files(build_dir, package_py.source_package)
+        source_results_dir = make_source_files(
+            env.build_root, package_py.source_package
+        )
         binary_results_dir = build_package(
             package_py.source_package,
-            build_dir,
+            env.build_root,
             chroot_archive_path,
         )
 
         copy_source_artifacts(
             results_dir=source_results_dir,
-            artifacts_dir=args.artifacts_dir,
-            distribution=distribution,
+            artifacts_dir=env.artifacts_root,
+            distribution=env.codename,
             component=package_py.component,
         )
         copy_binary_artifacts(
             results_dir=binary_results_dir,
-            artifacts_dir=args.artifacts_dir,
-            distribution=distribution,
+            artifacts_dir=env.artifacts_root,
+            distribution=env.codename,
             component=package_py.component,
-            architecture=architecture,
+            architecture=env.architecture,
         )
 
         print_notify("Updating metadata files...")
-        add_packages_files(args.artifacts_dir)
-        add_sources_files(args.artifacts_dir)
+        add_packages_files(env.artifacts_root)
+        add_sources_files(env.artifacts_root)
         add_release_files(
-            args.artifacts_dir,
+            env.artifacts_root,
             sign=False,
             gpg_key_id=None,
             gpg_signing_key=None,
