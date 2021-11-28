@@ -1,4 +1,5 @@
 import argparse
+import shutil
 
 from ..environment import Environment
 from ..print_utils import print_color, print_done, print_header, print_notify
@@ -28,6 +29,10 @@ class SourceCommand(Command):
     def behavior(self, args: argparse.Namespace) -> None:
         config = self.parse_config_file(args)
         registry = Registry()
+
+        if args.artifacts_dir.is_dir():
+            shutil.rmtree(args.artifacts_dir)
+        args.artifacts_dir.mkdir()
 
         build_dir = make_build_dir()
 
