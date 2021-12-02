@@ -1,7 +1,11 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Makes pbuilder update the package list before installing build dependencies.
 # This is necessary since we add a local APT repository to the source list.
+
+set -o errexit
+set -o pipefail
+set -o nounset
 
 echo "Updating the package list..."
 apt-get update

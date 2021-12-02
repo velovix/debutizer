@@ -37,6 +37,13 @@ class BuildCommand(Command):
         self.add_config_file_flag()
         self.add_package_dir_flag()
 
+        self.parser.add_argument(
+            "--shell-on-failure",
+            action="store_true",
+            help="If provided, a shell will be started in the build chroot if the "
+            "build fails",
+        )
+
     def behavior(self, args: argparse.Namespace) -> None:
         config = self.parse_config_file(args)
 
@@ -61,14 +68,19 @@ class BuildCommand(Command):
                     artifacts_root=args.artifacts_dir,
                 )
 
-                _build_packages(env, config, registry)
+                _build_packages(
+                    env=env,
+                    config=config,
+                    registry=registry,
+                    shell_on_failure=args.shell_on_failure,
+                )
 
         print_color("")
         print_done("Build complete!")
 
 
 def _build_packages(
-    env: Environment, config: Configuration, registry: Registry
+    env: Environment, config: Configuration, registry: Registry, shell_on_failure: bool
 ) -> None:
     """Builds packages for the given distribution/architecture pair"""
 
@@ -127,6 +139,7 @@ def _build_packages(
             build_dir=env.build_root,
             chroot_archive_path=chroot_archive_path,
             network_access=env.network_access,
+            shell_on_failure=shell_on_failure,
         )
 
         copy_source_artifacts(

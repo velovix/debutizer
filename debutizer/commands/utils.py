@@ -223,6 +223,7 @@ def build_package(
     build_dir: Path,
     chroot_archive_path: Path,
     network_access: bool = False,
+    shell_on_failure: bool = False,
 ) -> Path:
     """Builds binary packages for the given source package.
 
@@ -230,6 +231,7 @@ def build_package(
     :param build_dir: The directory to do work in
     :param chroot_archive_path: A path to the pbuilder chroot archive
     :param network_access: If True, the build will be allowed to access the internet
+    :param shell_on_failure: If True, a shell will be started if the build fails
     :return: The directory under the build directory where the new files are placed
     """
     working_dir = source_package.directory.parent
@@ -240,41 +242,47 @@ def build_package(
 
     command: List[Union[Path, str]] = ["pbuilder", "build"]
 
-    hook_dir = Path(__file__).parent / "pbuilder_hooks"
-    if not hook_dir.is_dir():
+    if not _HOOK_SOURCE_DIR.is_dir():
         raise UnexpectedError(
-            f"The pbuilder hook dir does not exist at {hook_dir}. This suggests a "
-            f"broken installation of Debutizer."
+            f"The pbuilder hook dir does not exist at {_HOOK_SOURCE_DIR}. This "
+            f"suggests a broken installation of Debutizer."
         )
 
-    command += [
-        "--use-network",
-        "yes" if network_access else "no",
-        "--hookdir",
-        Path(__file__).parent / "pbuilder_hooks",
-        "--buildresult",
-        results_dir,
-        "--basetgz",
-        chroot_archive_path,
-        dsc_file,
-    ]
+    with tempfile.NamedTemporaryFile() as hook_dir:
+        # Copy the package list updating hook
+        shutil.copy2(str(_HOOK_SOURCE_DIR / "D70results"), str(hook_dir))
 
-    try:
-        run(
-            command,
-            on_failure="Failed to build the package",
-            cwd=working_dir,
-            root=True,
-        )
-    finally:
-        if "SUDO_USER" in os.environ:
-            # If Debutizer is being run with sudo, give the regular user access to
-            # the results dir
+        if shell_on_failure:
+            shutil.copy2(str(_HOOK_SOURCE_DIR / "C10shell"), str(hook_dir))
+
+        command += [
+            "--use-network",
+            "yes" if network_access else "no",
+            "--hookdir",
+            str(hook_dir),
+            "--buildresult",
+            results_dir,
+            "--basetgz",
+            chroot_archive_path,
+            dsc_file,
+        ]
+
+        try:
             run(
-                ["chown", "--recursive", os.environ["SUDO_USER"], results_dir],
-                on_failure="Failed to fix permissions for the build path",
+                command,
+                on_failure="Failed to build the package",
+                cwd=working_dir,
                 root=True,
             )
+        finally:
+            if "SUDO_USER" in os.environ:
+                # If Debutizer is being run with sudo, give the regular user access to
+                # the results dir
+                run(
+                    ["chown", "--recursive", os.environ["SUDO_USER"], results_dir],
+                    on_failure="Failed to fix permissions for the build path",
+                    root=True,
+                )
 
     return results_dir
 
@@ -553,3 +561,6 @@ def _chroot_tgz_path(distribution: str) -> Path:
     )
     pbuilder_cache_path = Path(pbuilder_cache_str)
     return pbuilder_cache_path / f"debutizer-{distribution}.tgz"
+
+
+_HOOK_SOURCE_DIR = Path(__file__).parent / "pbuilder_hooks"
