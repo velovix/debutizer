@@ -123,9 +123,10 @@ def _build_packages(
             env.build_root, package_py.source_package
         )
         binary_results_dir = build_package(
-            package_py.source_package,
-            env.build_root,
-            chroot_archive_path,
+            source_package=package_py.source_package,
+            build_dir=env.build_root,
+            chroot_archive_path=chroot_archive_path,
+            network_access=env.network_access,
         )
 
         copy_source_artifacts(
