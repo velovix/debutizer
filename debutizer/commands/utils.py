@@ -222,12 +222,14 @@ def build_package(
     source_package: SourcePackage,
     build_dir: Path,
     chroot_archive_path: Path,
+    network_access: bool = False,
 ) -> Path:
     """Builds binary packages for the given source package.
 
     :param source_package: The source package object to build binary packages for
     :param build_dir: The directory to do work in
     :param chroot_archive_path: A path to the pbuilder chroot archive
+    :param network_access: If True, the build will be allowed to access the internet
     :return: The directory under the build directory where the new files are placed
     """
     working_dir = source_package.directory.parent
@@ -246,6 +248,8 @@ def build_package(
         )
 
     command += [
+        "--use-network",
+        "yes" if network_access else "no",
         "--hookdir",
         Path(__file__).parent / "pbuilder_hooks",
         "--buildresult",
