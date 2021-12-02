@@ -65,7 +65,7 @@ def process_package_pys(
 
     for package_py in package_pys:
         print_notify(f"Running pre-build hook for {package_py.source_package.name}")
-        package_py.pre_build(registry)
+        package_py.pre_build(env, registry, package_py.source_package)
         # Save any further changes to the disk
         package_py.source_package.save()
 
