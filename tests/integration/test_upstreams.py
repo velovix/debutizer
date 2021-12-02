@@ -29,6 +29,7 @@ def _build_packages(package_dir: Path):
             package_dir=package_dir,
             artifacts_dir=Path(artifacts_dir),
             config_file=Path("unused"),
+            shell_on_failure=False,
         )
         config = Configuration(
             distributions=["focal"],
