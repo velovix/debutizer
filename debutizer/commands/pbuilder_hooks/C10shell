@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+# Starts a shell if the build fails.
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+BUILDDIR="${BUILDDIR:-/tmp/buildd}"
+
+apt-get install -y "${APTGETOPT[@]}" vim less
+cd "$BUILDDIR"/*/debian/..
+
+/bin/bash < /dev/tty > /dev/tty 2> /dev/tty
