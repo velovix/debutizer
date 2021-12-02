@@ -34,9 +34,9 @@ class SourceCommand(Command):
             shutil.rmtree(args.artifacts_dir)
         args.artifacts_dir.mkdir()
 
-        build_dir = make_build_dir()
-
         for distro in config.distributions:
+            build_dir = make_build_dir()
+
             env = Environment(
                 codename=distro,
                 architecture="",
