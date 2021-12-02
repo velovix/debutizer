@@ -248,7 +248,7 @@ def build_package(
             f"suggests a broken installation of Debutizer."
         )
 
-    with tempfile.NamedTemporaryFile() as hook_dir:
+    with tempfile.TemporaryDirectory() as hook_dir:
         # Copy the package list updating hook
         shutil.copy2(str(_HOOK_SOURCE_DIR / "D70results"), str(hook_dir))
 
