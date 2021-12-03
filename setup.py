@@ -2,14 +2,12 @@ from pathlib import Path
 
 from setuptools import find_packages, setup
 
-from debutizer import __version__
-
 repository_root = Path(__file__).parent
 long_description = (repository_root / "README.md").read_text()
 
 setup(
     name="debutizer",
-    version=__version__,
+    version="0.12.1",
     description="A tool for managing APT packages",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -47,6 +45,7 @@ setup(
             "mypy~=0.910",
             "types-requests",
             "build",
+            "types-setuptools",
         ],
     },
     entry_points={

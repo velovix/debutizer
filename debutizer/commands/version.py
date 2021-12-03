@@ -1,6 +1,7 @@
 import argparse
 
-from debutizer import __version__
+import pkg_resources
+
 from debutizer.commands import Command
 from debutizer.commands.env_argparse import EnvArgumentParser
 
@@ -14,4 +15,5 @@ class VersionCommand(Command):
         )
 
     def behavior(self, args: argparse.Namespace) -> None:
-        print(__version__)
+        debutizer = pkg_resources.get_distribution("debutizer")
+        print(debutizer.version)
