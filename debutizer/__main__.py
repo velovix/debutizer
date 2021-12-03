@@ -29,6 +29,7 @@ def _main():
     root.add_subcommand("build", commands.BuildCommand())
     root.add_subcommand("check", commands.CheckCommand())
     root.add_subcommand("upload", commands.UploadCommand())
+    root.add_subcommand("version", commands.VersionCommand())
 
     root.run()
 

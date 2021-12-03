@@ -4,6 +4,7 @@ from .command import Command
 from .root import RootCommand
 from .source import SourceCommand
 from .upload import UploadCommand
+from .version import VersionCommand
 
 __all__ = [
     "Command",
@@ -12,4 +13,5 @@ __all__ = [
     "BuildCommand",
     "CheckCommand",
     "UploadCommand",
+    "VersionCommand",
 ]
