@@ -1,5 +1,6 @@
 import shutil
 from pathlib import Path
+from typing import List, Union
 
 from ..commands.utils import make_source_archive
 from ..environment import Environment
@@ -22,10 +23,25 @@ class SourceRepositoryUpstream(Upstream):
         version: Version,
         repository_url: str,
         revision_format: str,
+        recurse_submodules: bool = True,
     ):
+        """
+        :param env: The current build environment
+        :param name: The name of the source package this repository is for
+        :param version: The version this clone corresponds to. Only the upstream version
+            portion needs to be specified
+        :param repository_url: The URL to the Git repository to clone
+        :param revision_format: The Git tag to clone. You can add {upstream_version} to
+            this string, and it will be replaced by the upstream version given by the
+            "version" argument. This is commonly "v{upstream_version}". It may also be
+            a commit hash or branch name.
+        :param recurse_submodules: If True, the repository's submodules will be cloned
+            as well
+        """
         super().__init__(env=env, name=name, version=version)
         self.repository_url = repository_url
         self.revision_format = revision_format
+        self.recurse_submodules = recurse_submodules
 
     def fetch(self) -> Path:
         revision = self.revision_format.format(
@@ -36,17 +52,21 @@ class SourceRepositoryUpstream(Upstream):
         build_dir.mkdir()
         package_dir = self._package_dir()
 
+        clone_command: List[Union[str, Path]] = [
+            "git",
+            "clone",
+            "--depth=1",
+            f"--branch={revision}",
+        ]
+
+        if self.recurse_submodules:
+            clone_command.append("--recurse-submodules")
+
+        clone_command += [self.repository_url, package_dir]
+
         # Clone the upstream source
         run(
-            [
-                "git",
-                "clone",
-                "--depth=1",
-                "--recurse-submodules",
-                f"--branch={revision}",
-                self.repository_url,
-                package_dir,
-            ],
+            clone_command,
             on_failure="Failed to clone the upstream source",
         )
 
