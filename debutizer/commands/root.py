@@ -12,7 +12,7 @@ class RootCommand(Command):
     'debutizer build', are a subcommand of this command.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.parser = EnvArgumentParser(
             prog="debutizer",

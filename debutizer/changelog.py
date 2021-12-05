@@ -58,7 +58,7 @@ class Changelog:
         changes: List[str],
         author: str,
         date: datetime,
-    ):
+    ) -> None:
         """Adds an entry to the top of the changelog. This is a small wrapper around
         Changelog.new_block, filling in some fields automatically and excluding unused
         ones, then persists the changes to the disk. Unlike Changelog.new_block, this

@@ -67,7 +67,7 @@ class SourcePackage:
         self.copyright.load(self._complete)
         self.compat.load(self._complete)
 
-    def complete(self):
+    def complete(self) -> None:
         """Mark the SourcePackage as complete, which will load the latest from the disk
         and do static checks.
         """

@@ -28,11 +28,13 @@ class Control:
 
         return self.source.source
 
-    def set_source(self, source: SourceParagraph):
+    def set_source(self, source: SourceParagraph) -> None:
         self.source = source
         self.save()
 
-    def add_binary(self, binary: BinaryParagraph, replace_if_exists: bool = False):
+    def add_binary(
+        self, binary: BinaryParagraph, replace_if_exists: bool = False
+    ) -> None:
         for i, other in enumerate(self.binaries):
             if other.package == binary.package:
                 if replace_if_exists:
@@ -48,7 +50,7 @@ class Control:
         self.binaries.append(binary)
         self.save()
 
-    def save(self):
+    def save(self) -> None:
         if self.source is not None:
             control_file = self._package_dir / "debian" / "control"
 
@@ -59,7 +61,7 @@ class Control:
 
             control_file.write_text(output)
 
-    def load(self, complete: bool):
+    def load(self, complete: bool) -> None:
         control_file = self._package_dir / "debian" / "control"
         if control_file.is_file():
             with control_file.open("r") as f:
@@ -70,7 +72,7 @@ class Control:
             self.source = None
             self.binaries = []
 
-    def _from_file(self, file_: TextIO):
+    def _from_file(self, file_: TextIO) -> None:
         text = file_.read()
 
         paragraphs = list(Sources.iter_paragraphs(text))

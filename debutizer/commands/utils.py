@@ -431,7 +431,7 @@ def copy_binary_artifacts(
     distribution: str,
     component: str,
     architecture: str,
-):
+) -> None:
     """Copies binary package files to their proper location in the artifacts directory.
 
     :param results_dir: The path where the binary package files are

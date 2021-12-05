@@ -14,7 +14,7 @@ class NoSuchPackageError(CommandError):
 
 
 class Registry:
-    def __init__(self):
+    def __init__(self) -> None:
         self._packages: Dict[str, Dict[str, SourcePackage]] = defaultdict(dict)
         """A package registry, keyed by distro, then keyed by package name"""
 

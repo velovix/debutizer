@@ -11,7 +11,7 @@ class Compat:
         self.version = None
         self._package_dir = package_dir
 
-    def load(self, complete: bool):
+    def load(self, complete: bool) -> None:
         compat_file = self._package_dir / "debian" / "compat"
 
         if compat_file.is_file():
@@ -21,7 +21,7 @@ class Compat:
             except ValueError as ex:
                 raise CommandError(f"While parsing the compat file: {ex}") from ex
 
-    def save(self):
+    def save(self) -> None:
         if self.version is not None:
             compat_file = self._package_dir / "debian" / "compat"
             compat_file.write_text(self.version)

@@ -10,7 +10,7 @@ from .env_argparse import EnvArgumentParser
 class CheckCommand(Command):
     """Checks if all of Debutizer's system dependencies are available"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.parser = EnvArgumentParser(
             prog="debutizer check",

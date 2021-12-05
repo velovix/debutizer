@@ -6,7 +6,7 @@ from debutizer.errors import CommandError
 from debutizer.print_utils import print_color, print_error
 
 
-def main():
+def main() -> None:
     """An exception handling wrapper around the real entrypoint, _main"""
     try:
         _main()
@@ -22,7 +22,7 @@ def main():
             sys.exit(1)
 
 
-def _main():
+def _main() -> None:
     root = commands.RootCommand()
 
     root.add_subcommand("source", commands.SourceCommand())

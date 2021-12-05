@@ -27,7 +27,7 @@ from .utils import (
 
 
 class BuildCommand(Command):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.parser = EnvArgumentParser(
             prog="debutizer build", description="Makes source and binary packages"

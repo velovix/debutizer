@@ -1,5 +1,6 @@
 import os
 from argparse import ArgumentParser
+from typing import Any
 
 from debutizer.errors import UnexpectedError
 
@@ -12,7 +13,7 @@ class EnvArgumentParser(ArgumentParser):
     read.
     """
 
-    def add_env_flag(self, *args, **kwargs):
+    def add_env_flag(self, *args: Any, **kwargs: Any) -> None:
         if len(args) != 1:
             raise UnexpectedError(
                 "Environment arguments must have exactly one flag name"
@@ -24,10 +25,11 @@ class EnvArgumentParser(ArgumentParser):
 
         if env_var_value is not None:
             # Convert the environment variable as necessary
+            default: Any
             if kwargs.get("action") == "store_true":
                 default = True
             elif kwargs.get("type") is not None:
-                type_callback = kwargs.get("type")
+                type_callback = kwargs["type"]
                 default = type_callback(env_var_value)
             else:
                 default = env_var_value

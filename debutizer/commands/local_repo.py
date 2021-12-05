@@ -35,10 +35,10 @@ class LocalRepository:
             daemon=True,
         )
 
-    def start(self):
+    def start(self) -> None:
         self._thread.start()
 
-    def close(self):
+    def close(self) -> None:
         self._server.shutdown()
         self._server.server_close()
         self._thread.join()

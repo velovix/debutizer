@@ -31,7 +31,7 @@ class SourceParagraph(Deb822Schema):
         vcs_type: Optional[str] = None,
         vcs_type_value: Optional[str] = None,
         vcs_browser: Optional[str] = None,
-        testsuite: List[str] = None,
+        testsuite: Optional[List[str]] = None,
         rules_requires_root: Optional[str] = None,
     ):
         super().__init__(Sources)

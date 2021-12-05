@@ -75,8 +75,8 @@ class Relation:
     def __getitem__(self, key: int) -> Dependency:
         return self._dependencies[key]
 
-    def __contains__(self, key: int) -> bool:
-        return key in self._dependencies
+    def __contains__(self, item: Dependency) -> bool:
+        return item in self._dependencies
 
     def __iter__(self) -> "Relation":
         self._iter_index = 0
@@ -148,8 +148,8 @@ class PackageRelations:
     def __getitem__(self, key: int) -> Relation:
         return self._relations[key]
 
-    def __contains__(self, key: int) -> bool:
-        return key in self._relations
+    def __contains__(self, item: Relation) -> bool:
+        return item in self._relations
 
     def __iter__(self) -> "PackageRelations":
         self._iter_index = 0

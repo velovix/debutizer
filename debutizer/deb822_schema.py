@@ -5,6 +5,7 @@ from debian.deb822 import Deb822
 from debutizer.deb822_utils import Field
 
 T = TypeVar("T", bound=Deb822)
+CLS = TypeVar("CLS", bound="Deb822Schema")
 
 
 class Deb822Schema:
@@ -36,6 +37,6 @@ class Deb822Schema:
         return inputs
 
     @classmethod
-    def deserialize(cls, deb822: T):
+    def deserialize(cls: Type[CLS], deb822: T) -> CLS:
         inputs = cls._deserialize_fields(deb822)
         return cls(**inputs)

@@ -17,7 +17,7 @@ from debutizer.print_utils import print_color, print_done
 class UploadCommand(Command):
     """Uploads packages to the configured target"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.parser = EnvArgumentParser(
             prog="debutizer upload",

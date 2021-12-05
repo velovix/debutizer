@@ -42,7 +42,7 @@ class Version:
             full_version=version,
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"Version("
             f"epoch={self.epoch}, "

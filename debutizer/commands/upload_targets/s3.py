@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from email.utils import format_datetime
 from pathlib import Path
 from time import sleep
-from typing import Optional, cast
+from typing import Iterator, Optional, cast
 from urllib.parse import urlparse
 
 import requests
@@ -166,7 +166,7 @@ def _upload_artifact(
 @contextmanager
 def _mount_s3fs(
     endpoint: str, bucket: str, access_key: str, secret_key: str, mount_path: Path
-):
+) -> Iterator[None]:
     with temp_file(f"{access_key}:{secret_key}") as password_path:
         run(
             [

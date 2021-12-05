@@ -2,7 +2,7 @@ import os
 import shlex
 import subprocess
 from pathlib import Path
-from typing import List, Union
+from typing import Any, List, Union
 
 from .errors import CommandError, UnexpectedError
 from .print_utils import Format, print_color
@@ -13,8 +13,8 @@ def run(
     *,
     on_failure: str,
     root: bool = False,
-    **kwargs,
-) -> subprocess.CompletedProcess:
+    **kwargs: Any,
+) -> subprocess.CompletedProcess[str]:
     for i, arg in enumerate(command):
         if not isinstance(arg, (str, Path)):
             raise UnexpectedError(

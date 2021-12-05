@@ -2,12 +2,15 @@ import os
 import platform
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type, Union
 
 import yaml
 from xdg.BaseDirectory import save_config_path
 
 from debutizer.errors import CommandError
+
+_YAML_TYPES = Union[str, list, dict, int, bool, float]
+"""Python types that a YAML field can represent"""
 
 
 class DebutizerYAMLError(CommandError):
@@ -23,7 +26,7 @@ class _ConfigurationSection(ABC):
 
     @staticmethod
     @abstractmethod
-    def from_dict(config: Dict[str, Any]):
+    def from_dict(config: Dict[str, Any]) -> "_ConfigurationSection":
         ...
 
 
@@ -32,7 +35,7 @@ class UploadTargetConfiguration(_ConfigurationSection):
         self.type = type_
 
     @abstractmethod
-    def check_validity(self):
+    def check_validity(self) -> None:
         ...
 
 
@@ -114,7 +117,7 @@ class S3Configuration(UploadTargetConfiguration):
             gpg_signing_password=gpg_signing_password,
         )
 
-    def check_validity(self):
+    def check_validity(self) -> None:
         if self.access_key is None or self.secret_key is None:
             raise CredentialsYAMLError(
                 f"When using an S3-compatible bucket, an access key and secret key "
@@ -165,7 +168,7 @@ class PPAConfiguration(UploadTargetConfiguration):
             force=_optional(config, "force", bool, False),
         )
 
-    def check_validity(self):
+    def check_validity(self) -> None:
         if self.sign and self.gpg_key_id is None:
             raise DebutizerYAMLError(
                 "When package signing is enabled, the gpg_key_id field must be set"
@@ -272,7 +275,7 @@ class Configuration:
             upload_target=upload_target,
         )
 
-    def check_validity(self):
+    def check_validity(self) -> None:
         if self.upstream is not None and self.upstream.components is None:
             raise DebutizerYAMLError(
                 "If the 'upstream' field is set, that object must have a 'components' "
@@ -283,7 +286,7 @@ class Configuration:
 def _required(
     config: Dict[str, Any],
     key: str,
-    type_: Type,
+    type_: Type[_YAML_TYPES],
     error: Type[Exception] = DebutizerYAMLError,
 ) -> Any:
     try:
@@ -299,7 +302,7 @@ def _required(
 def _optional(
     config: Dict[str, Any],
     key: str,
-    type_: Type,
+    type_: Type[_YAML_TYPES],
     default: Any,
     error: Type[Exception] = DebutizerYAMLError,
 ) -> Any:
@@ -313,7 +316,9 @@ def _optional(
     return value
 
 
-def _check_type(key: str, value: Any, type_: Type, error: Type[Exception]) -> None:
+def _check_type(
+    key: str, value: Any, type_: Type[_YAML_TYPES], error: Type[Exception]
+) -> None:
     if not isinstance(value, type_):
         raise error(f"Field '{key}' is of type {type(value)}, but must be {type_}")
 

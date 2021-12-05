@@ -96,12 +96,16 @@ class Copyright:
         self.deb_obj = None
         self._package_dir = package_dir
 
-    def save(self):
+    def save(self) -> None:
         if self.deb_obj is not None:
             copyright_file = self._package_dir / "debian" / "copyright"
-            copyright_file.write_text(self.deb_obj.dump())
+            contents = self.deb_obj.dump()
+            if contents is None:
+                contents = ""
 
-    def load(self, complete: bool):
+            copyright_file.write_text(contents)
+
+    def load(self, complete: bool) -> None:
         copyright_file = self._package_dir / "debian" / "copyright"
         if copyright_file.is_file():
             with copyright_file.open("r") as f:
@@ -113,7 +117,7 @@ class Copyright:
         else:
             self.deb_obj = None
 
-    def _from_file(self, file_: TextIO):
+    def _from_file(self, file_: TextIO) -> None:
         try:
             self.deb_obj = deb_copyright.Copyright(file_)
         except deb_copyright.NotMachineReadableError as ex:

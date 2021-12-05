@@ -1,6 +1,8 @@
 import os
 import sys
 from enum import Enum
+from io import TextIOWrapper
+from typing import Any, TextIO
 
 
 class Color(Enum):
@@ -26,8 +28,8 @@ def print_color(
     message: str,
     color: Color = Color.WHITE,
     format_: Format = Format.NORMAL,
-    file=sys.stderr,
-    **kwargs,
+    file: TextIO = sys.stderr,
+    **kwargs: Any,
 ) -> None:
     color = _check_no_color(color)
     format_ = _check_no_formatting(format_)
@@ -58,7 +60,7 @@ def print_error(message: str) -> None:
     print_color(message, color=Color.RED, format_=Format.BOLD)
 
 
-def print_done(message: str):
+def print_done(message: str) -> None:
     if "DEBUTIZER_AVRDUDE_MODE" in os.environ:
         message = "debutizer done.  Thank you."
 

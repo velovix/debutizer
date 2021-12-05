@@ -19,7 +19,7 @@ class Command(ABC):
     cleanup_hooks: List[Callable[[], None]]
     """Hooks that run after a command is finished, even in the case of an error"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.subcommands = {}
         self.cleanup_hooks = []
 

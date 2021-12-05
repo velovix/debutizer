@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any, List, TypeVar
+from typing import Any, List, Optional, TypeVar
 
 from .errors import UnexpectedError
 from .relation import PackageRelations
@@ -90,7 +90,7 @@ class Field:
         def deserialize(self, value: str) -> PackageRelations:
             return PackageRelations.deserialize(value)
 
-    def __init__(self, name: str, type_: _FieldType = None):
+    def __init__(self, name: str, type_: Optional[_FieldType] = None):
         self.name = name
         self.type = type_ if type_ else Field.String()
 
