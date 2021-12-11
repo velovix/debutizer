@@ -45,6 +45,7 @@ setup(
             "mypy~=0.910",
             "types-requests",
             "build",
+            "types-setuptools",
         ],
     },
     entry_points={
