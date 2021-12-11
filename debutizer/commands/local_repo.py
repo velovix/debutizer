@@ -1,3 +1,4 @@
+import typing
 from pathlib import Path
 from threading import Thread
 from wsgiref import simple_server
@@ -17,7 +18,7 @@ class LocalRepository:
         self._artifacts_dir = artifacts_dir
         self._app = flask.Flask(__name__)
 
-        # type: ignore
+        @typing.no_type_check
         @self._app.route("/<path:path>")
         def static_files(path: str) -> flask.Response:
             return flask.send_from_directory(self._artifacts_dir, path)
