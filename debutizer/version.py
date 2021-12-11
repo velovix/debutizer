@@ -13,7 +13,7 @@ class Version:
         upstream_version: str,
         debian_revision: Optional[str],
         full_version: str,
-    ):
+    ) -> None:
         self.epoch = epoch
         self.upstream_version = upstream_version
         self.debian_revision = debian_revision
