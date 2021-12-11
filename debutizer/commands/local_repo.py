@@ -17,6 +17,7 @@ class LocalRepository:
         self._artifacts_dir = artifacts_dir
         self._app = flask.Flask(__name__)
 
+        # type: ignore
         @self._app.route("/<path:path>")
         def static_files(path: str) -> flask.Response:
             return flask.send_from_directory(self._artifacts_dir, path)
