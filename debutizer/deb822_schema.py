@@ -1,4 +1,4 @@
-from typing import Any, Dict, Type, TypeVar
+from typing import Any, Dict, Type, TypeVar, cast
 
 from debian.deb822 import Deb822
 
@@ -22,7 +22,7 @@ class Deb822Schema:
             if value is not None:
                 deb822[field.name] = field.serialize(value)
 
-        return deb822
+        return cast(T, deb822)
 
     @classmethod
     def _deserialize_fields(cls, deb822: T) -> Dict[str, Any]:

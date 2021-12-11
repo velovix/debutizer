@@ -14,7 +14,7 @@ def run(
     on_failure: str,
     root: bool = False,
     **kwargs: Any,
-) -> subprocess.CompletedProcess[str]:
+) -> "subprocess.CompletedProcess[str]":
     for i, arg in enumerate(command):
         if not isinstance(arg, (str, Path)):
             raise UnexpectedError(

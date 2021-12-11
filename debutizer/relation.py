@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, cast
 
 from debian.deb822 import PkgRelation
 
@@ -183,7 +183,8 @@ class PackageRelations:
         return PackageRelations(relations)
 
     def serialize(self) -> str:
-        return PkgRelation.str([v.serialize() for v in self._relations])
+        relation = PkgRelation.str([v.serialize() for v in self._relations])
+        return cast(str, relation)
 
     @classmethod
     def from_strings(cls, strings: List[str]) -> "PackageRelations":
