@@ -7,7 +7,7 @@ from debutizer.commands.env_argparse import EnvArgumentParser
 
 
 class VersionCommand(Command):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.parser = EnvArgumentParser(
             prog="debutizer version",
