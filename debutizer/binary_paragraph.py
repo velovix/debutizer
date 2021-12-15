@@ -24,6 +24,7 @@ class BinaryParagraph(Deb822Schema):
         recommends: Optional[PackageRelations] = None,
         suggests: Optional[PackageRelations] = None,
         enhances: Optional[PackageRelations] = None,
+        conflicts: Optional[PackageRelations] = None,
         pre_depends: Optional[PackageRelations] = None,
         homepage: Optional[str] = None,
         built_using: Optional[List[str]] = None,
@@ -42,6 +43,7 @@ class BinaryParagraph(Deb822Schema):
         self.recommends = recommends
         self.suggests = suggests
         self.enhances = enhances
+        self.conflicts = conflicts
         self.pre_depends = pre_depends
         self.homepage = homepage
         self.built_using = built_using
@@ -58,6 +60,7 @@ class BinaryParagraph(Deb822Schema):
         "recommends": Field("Recommends", Field.PackageRelations()),
         "suggests": Field("Suggests", Field.PackageRelations()),
         "enhances": Field("Enhances", Field.PackageRelations()),
+        "conflicts": Field("conflicts", Field.PackageRelations()),
         "pre_depends": Field("Pre-Depends", Field.PackageRelations()),
         "homepage": Field("Homepage"),
         "built_using": Field("Built-Using"),
