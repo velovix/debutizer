@@ -11,11 +11,11 @@ jobs:
       - name: Install Python dependencies
         # This is done with sudo so that packages are installed system-wide. This
         # allows Pip to skip packages that are already installed via apt.
-        run: sudo pip3 install ".[dev]"
+        run: sudo pip3 install --constraint constraints.txt ".[dev]"
         shell: bash
       - name: Run isort
         run: isort --check --dont-follow-links .
       - name: Run black
         run: black --check .
       - name: Run MyPy
-        run: mypy --strict -p debutizer
+        run: mypy -p debutizer
