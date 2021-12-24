@@ -30,7 +30,6 @@ pre-commit==2.16.0
 py==1.11.0
 pyparsing==3.0.6
 pytest==6.2.5
-python-debian==0.1.42
 pyxdg==0.27
 PyYAML==6.0
 regex==2021.11.10
