@@ -33,3 +33,22 @@ pipx install debutizer
 
 You can check if Debutizer's system dependencies are available by running
 `debutizer check`.
+
+### From Source
+
+Start by cloning the repository:
+
+```bash
+git clone https://github.com/velovix/debutizer
+```
+
+Then, assuming you have Python 3.6+ and Pip installed, run the following
+command in the directory you cloned into:
+
+```bash
+pip3 install --constraint constraints.txt .
+```
+
+This will take care of installing Python dependencies through Pip, but system
+dependencies will have to be installed manually. Use `debutizer check` to see
+which, if any, system dependencies are missing.
