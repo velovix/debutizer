@@ -105,15 +105,11 @@ class Copyright:
 
             copyright_file.write_text(contents)
 
-    def load(self, complete: bool) -> None:
+    def load(self) -> None:
         copyright_file = self._package_dir / "debian" / "copyright"
         if copyright_file.is_file():
             with copyright_file.open("r") as f:
                 self._from_file(f)
-        elif complete:
-            raise CommandError(
-                f"Package is missing a copyright file at {copyright_file}"
-            )
         else:
             self.deb_obj = None
 
@@ -128,7 +124,6 @@ class Copyright:
             self.deb_obj = deb_copyright.Copyright()
 
         self.deb_obj.header = deb_copyright.Header(data=header.serialize())
-        self.save()
 
     def add_files(self, files: CopyrightFiles) -> None:
         if self.deb_obj is None:
@@ -137,7 +132,6 @@ class Copyright:
         self.deb_obj.add_files_paragraph(
             deb_copyright.FilesParagraph(data=files.serialize())
         )
-        self.save()
 
     def add_license(self, license_: CopyrightLicense) -> None:
         if self.deb_obj is None:
@@ -146,7 +140,6 @@ class Copyright:
         self.deb_obj.add_license_paragraph(
             deb_copyright.LicenseParagraph(data=license_.serialize())
         )
-        self.save()
 
     @staticmethod
     def full_license_text(spdx_identifier: str) -> str:

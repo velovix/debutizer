@@ -32,15 +32,11 @@ class Changelog:
             changelog_file = self._package_dir / "debian" / "changelog"
             changelog_file.write_text(str(self.deb_obj))
 
-    def load(self, complete: bool) -> None:
+    def load(self) -> None:
         changelog_file = self._package_dir / "debian" / "changelog"
         if changelog_file.is_file():
             with changelog_file.open("r") as f:
                 self._from_file(f)
-        elif complete:
-            raise CommandError(
-                f"Package is missing a changelog file at {changelog_file}"
-            )
         else:
             self.deb_obj = None
 
@@ -97,4 +93,3 @@ class Changelog:
             date=format_datetime(date),
             encoding="utf-8",
         )
-        self.save()
