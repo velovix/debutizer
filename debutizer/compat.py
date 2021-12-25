@@ -11,7 +11,7 @@ class Compat:
         self.version = None
         self._package_dir = package_dir
 
-    def load(self, complete: bool) -> None:
+    def load(self) -> None:
         compat_file = self._package_dir / "debian" / "compat"
 
         if compat_file.is_file():

@@ -30,7 +30,6 @@ class Control:
 
     def set_source(self, source: SourceParagraph) -> None:
         self.source = source
-        self.save()
 
     def add_binary(
         self, binary: BinaryParagraph, replace_if_exists: bool = False
@@ -48,7 +47,6 @@ class Control:
                     )
 
         self.binaries.append(binary)
-        self.save()
 
     def save(self) -> None:
         if self.source is not None:
@@ -61,13 +59,11 @@ class Control:
 
             control_file.write_text(output)
 
-    def load(self, complete: bool) -> None:
+    def load(self) -> None:
         control_file = self._package_dir / "debian" / "control"
         if control_file.is_file():
             with control_file.open("r") as f:
                 self._from_file(f)
-        elif complete:
-            raise CommandError(f"Package is missing a control file at {control_file}")
         else:
             self.source = None
             self.binaries = []

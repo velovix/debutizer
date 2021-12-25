@@ -22,7 +22,7 @@ def create_source_package(env: Environment) -> SourcePackage:
     )
     package_dir = upstream.fetch()
 
-    source_package = SourcePackage(env, package_dir, complete=False)
+    source_package = SourcePackage(env, package_dir)
 
     source_package.set_source_format()
 

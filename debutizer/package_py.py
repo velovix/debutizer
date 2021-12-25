@@ -59,7 +59,7 @@ class PackagePy:
             )
 
         # Commit changes to disk
-        self.source_package.complete()
+        self.source_package.save()
 
         # TODO: Type annotate this attribute when this PR makes it into a MyPy release
         #       https://github.com/python/mypy/pull/10548

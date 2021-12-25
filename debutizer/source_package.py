@@ -19,15 +19,12 @@ class SourcePackage:
     copyright: Copyright
     directory: Path
     compat: Compat
-    _complete: bool
 
-    def __init__(self, env: Environment, directory: Path, complete: bool = True):
+    def __init__(self, env: Environment, directory: Path):
         """Creates a SourcePackage configured using files found in the given directory.
 
         :param directory: The directory containing the upstream source and debian/
             folder
-        :param complete: If True, configuration in the package directory is expected
-            to be finished and static checks will be performed against it
         """
         self._env = env
 
@@ -36,7 +33,6 @@ class SourcePackage:
         self.control = Control(directory, self.name)
         self.copyright = Copyright(directory)
         self.compat = Compat(directory)
-        self._complete = complete
         self.load()
 
     @property
@@ -62,18 +58,10 @@ class SourcePackage:
 
     def load(self) -> None:
         """Applies changes from the disk to this object"""
-        self.copyright.load(self._complete)
-        self.control.load(self._complete)
-        self.copyright.load(self._complete)
-        self.compat.load(self._complete)
-
-    def complete(self) -> None:
-        """Mark the SourcePackage as complete, which will load the latest from the disk
-        and do static checks.
-        """
-        self._complete = True
-        self.save()
-        self.load()
+        self.copyright.load()
+        self.control.load()
+        self.copyright.load()
+        self.compat.load()
 
     def set_source_format(self, format_: str = "3.0 (quilt)") -> None:
         source_format_file = self.directory / "debian" / "source" / "format"
