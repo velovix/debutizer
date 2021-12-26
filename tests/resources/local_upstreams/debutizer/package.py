@@ -24,7 +24,7 @@ def create_source_package(env: Environment) -> SourcePackage:
 
     source_package = SourcePackage(env, package_dir)
 
-    source_package.set_source_format()
+    source_package.source_format = "3.0 (quilt)"
 
     source_package.control.set_source(
         SourceParagraph(

@@ -33,6 +33,7 @@ class SourcePackage:
         self.control = Control(directory, self.name)
         self.copyright = Copyright(directory)
         self.compat = Compat(directory)
+        self.source_format: Optional[str] = None
         self.load()
 
     @property
@@ -56,6 +57,11 @@ class SourcePackage:
         self.copyright.save()
         self.compat.save()
 
+        if self.source_format is not None:
+            source_format_file = self.directory / self._SOURCE_FORMAT_PATH
+            source_format_file.parent.mkdir(parents=True, exist_ok=True)
+            source_format_file.write_text(self.source_format)
+
     def load(self) -> None:
         """Applies changes from the disk to this object"""
         self.copyright.load()
@@ -63,10 +69,9 @@ class SourcePackage:
         self.copyright.load()
         self.compat.load()
 
-    def set_source_format(self, format_: str = "3.0 (quilt)") -> None:
-        source_format_file = self.directory / "debian" / "source" / "format"
-        source_format_file.parent.mkdir(parents=True, exist_ok=True)
-        source_format_file.write_text(format_)
+        source_format_file = self.directory / self._SOURCE_FORMAT_PATH
+        if source_format_file.is_file():
+            self.source_format = source_format_file.read_text().strip()
 
     def apply_patches(self) -> None:
         """Applies Quilt patch files found in the patches/ directory"""
@@ -120,3 +125,5 @@ class SourcePackage:
 
     def __repr__(self) -> str:
         return f"SourcePackage(name={self.name}, version={self.version})"
+
+    _SOURCE_FORMAT_PATH = Path("debian/source/format")
