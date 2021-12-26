@@ -18,6 +18,7 @@ class SourceParagraph(Deb822Schema):
         source: str,
         maintainer: str,
         standards_version: str = "4.5.0",
+        description: Optional[str] = None,
         section: Optional[str] = None,
         priority: Optional[str] = None,
         build_depends: Optional[PackageRelations] = None,
@@ -28,10 +29,13 @@ class SourceParagraph(Deb822Schema):
         build_conflicts_arch: Optional[PackageRelations] = None,
         uploaders: Optional[List[str]] = None,
         homepage: Optional[str] = None,
+        bugs: Optional[str] = None,
         vcs_type: Optional[str] = None,
         vcs_type_value: Optional[str] = None,
         vcs_browser: Optional[str] = None,
+        origin: Optional[str] = None,
         testsuite: Optional[List[str]] = None,
+        testsuite_triggers: Optional[List[str]] = None,
         rules_requires_root: Optional[str] = None,
     ):
         super().__init__(Sources)
@@ -39,6 +43,7 @@ class SourceParagraph(Deb822Schema):
         self.source = source
         self.maintainer = maintainer
         self.standards_version = standards_version
+        self.description = description
         self.section = section
         self.priority = priority
         self.build_depends = build_depends
@@ -49,10 +54,13 @@ class SourceParagraph(Deb822Schema):
         self.build_conflicts_arch = build_conflicts_arch
         self.uploaders = uploaders
         self.homepage = homepage
+        self.bugs = bugs
         self.vcs_type = vcs_type
         self.vcs_type_value = vcs_type_value
         self.vcs_browser = vcs_browser
+        self.origin = origin
         self.testsuite = testsuite
+        self.testsuite_triggers = testsuite_triggers
         self.rules_requires_root = rules_requires_root
 
     def serialize(self) -> T:
@@ -99,6 +107,7 @@ class SourceParagraph(Deb822Schema):
         "source": Field("Source"),
         "maintainer": Field("Maintainer"),
         "standards_version": Field("Standards-Version"),
+        "description": Field("Description"),
         "section": Field("Section"),
         "priority": Field("Priority"),
         "build_depends": Field("Build-Depends", Field.PackageRelations()),
@@ -111,7 +120,13 @@ class SourceParagraph(Deb822Schema):
         "build_conflicts_arch": Field("Build-Conflicts-Arch", Field.PackageRelations()),
         "uploaders": Field("Uploaders", Field.Array(Field.Array.Separator.COMMAS)),
         "homepage": Field("Homepage"),
+        "bugs": Field("Bugs"),
         "vcs_browser": Field("Vcs-Browser"),
+        "origin": Field("Origin"),
         "testsuite": Field("Testsuite"),
+        "testsuite_triggers": Field(
+            "Testsuite-Triggers",
+            Field.Array(Field.Array.Separator.WHITESPACE_SEPARATED),
+        ),
         "rules_requires_root": Field("Rules-Requires-Root"),
     }
