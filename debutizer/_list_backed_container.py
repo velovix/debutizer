@@ -1,4 +1,4 @@
-from typing import Generic, List, TypeVar
+from typing import Any, Generic, List, TypeVar
 
 T = TypeVar("T")
 
@@ -7,6 +7,9 @@ class ListBackedContainer(Generic[T]):
     def __init__(self) -> None:
         self._data: List[T] = []
         self._iter_index = 0
+
+    def __eq__(self, other: Any) -> bool:
+        return isinstance(other, ListBackedContainer) and self._data == other._data
 
     def __len__(self) -> int:
         return len(self._data)
@@ -30,4 +33,11 @@ class ListBackedContainer(Generic[T]):
 
         output = self._data[self._iter_index]
         self._iter_index += 1
+        return output
+
+    def __repr__(self) -> str:
+        output = f"{type(self).__name__}(["
+        output += ", ".join(str(d) for d in self._data)
+        output += "])"
+
         return output

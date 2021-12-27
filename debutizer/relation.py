@@ -1,4 +1,5 @@
-from typing import List, Optional, cast
+import re
+from typing import Any, List, Optional, Union, cast
 
 from debian.deb822 import PkgRelation
 
@@ -24,12 +25,18 @@ class Dependency:
         self.restrictions = restrictions
 
     def __repr__(self) -> str:
-        value = f"Dependency({self.name}"
-        if self.version is not None and self.relationship is not None:
-            value += f", version=({self.relationship} {self.version})"
+        output = f"Dependency("
 
-        value += ")"
-        return value
+        fields = []
+        for key, value in self.__dict__.items():
+            fields.append(f"{key}={value}")
+        output += ", ".join(fields)
+
+        output += ")"
+        return output
+
+    def __eq__(self, other: Any) -> bool:
+        return isinstance(other, Dependency) and self.__dict__ == other.__dict__
 
     @classmethod
     def deserialize(cls, relation: "PkgRelation.ParsedRelation") -> "Dependency":
@@ -67,11 +74,6 @@ class Relation(ListBackedContainer[Dependency]):
         super().__init__()
         self._data = dependencies
         self._iter_index = 0
-
-    def __repr__(self) -> str:
-        dependency_list = ", ".join(str(d) for d in self._data)
-
-        return f"Relation({dependency_list})"
 
     def intersects(self, other: "Relation") -> bool:
         dependency_names = set(d.name for d in self._data)
@@ -112,58 +114,89 @@ class Relation(ListBackedContainer[Dependency]):
         return cls.deserialize(pkg_relations[0])
 
 
-class PackageRelations:
-    def __init__(self, relations: List[Relation]):
-        self._relations = relations
-        self._iter_index = 0
+class SubstitutionRelation:
+    """A relation that contains a substitution variable, like '${shlibs:Depends}'.
+    Substitution variables are filled in at build-time, so these relations can not be
+    parsed statically beforehand.
+    """
 
-    def __len__(self) -> int:
-        return len(self._relations)
+    def __init__(self, raw_value: str) -> None:
+        self.raw_value = raw_value
 
-    def __setitem__(self, key: int, value: Relation) -> None:
-        self._relations[key] = value
+    def __repr__(self) -> str:
+        return f"SubstitutionRelation({self.raw_value})"
 
-    def __getitem__(self, key: int) -> Relation:
-        return self._relations[key]
+    def __eq__(self, other: Any) -> bool:
+        return (
+            isinstance(other, SubstitutionRelation) and self.__dict__ == other.__dict__
+        )
 
-    def __contains__(self, item: Relation) -> bool:
-        return item in self._relations
+    def serialize(self) -> List["PkgRelation.ParsedRelation"]:
+        # Relations with substitutions are represented internally as
+        # PkgRelation.ParsedRelation objects with the raw string as the name
+        dependency = Dependency(name=self.raw_value)
+        return [dependency.serialize()]
 
-    def __iter__(self) -> "PackageRelations":
-        self._iter_index = 0
-        return self
 
-    def __next__(self) -> Relation:
-        if self._iter_index >= len(self._relations):
-            raise StopIteration
-        value = self._relations[self._iter_index]
-        self._iter_index += 1
-        return value
+RELATION_ITEM = Union[Relation, SubstitutionRelation]
 
-    def add_relation(self, new: Relation, replace: bool = False) -> None:
-        conflicting = [r for r in self._relations if r.intersects(new)]
-        if len(conflicting) > 0:
-            if replace:
-                for conflict in conflicting:
-                    self._relations.remove(conflict)
-            else:
-                raise CommandError(
-                    f"New relation {new} conflicts with existing dependencies: "
-                    f"{conflicting}"
-                )
 
-        self._relations.append(new)
+class PackageRelations(ListBackedContainer[RELATION_ITEM]):
+    def __init__(self, relations: List[RELATION_ITEM]):
+        super().__init__()
+        self._data = relations
+
+    def parsed(self) -> List[Relation]:
+        """
+        :return: A list of Relation objects, with SubstitutionRelations excluded
+        """
+        return [r for r in self._data if isinstance(r, Relation)]
+
+    def add_relation(self, new: RELATION_ITEM, replace: bool = False) -> None:
+        if isinstance(new, Relation):
+            # Check if the relation conflicts with another. We can't check
+            # SubstitutionRelations for conflicts since they can't be statically parsed.
+            conflicting = [
+                r for r in self._data if isinstance(r, Relation) and r.intersects(new)
+            ]
+            if len(conflicting) > 0:
+                if replace:
+                    for conflict in conflicting:
+                        self._data.remove(conflict)
+                else:
+                    raise CommandError(
+                        f"New relation {new} conflicts with existing dependencies: "
+                        f"{conflicting}"
+                    )
+
+        self._data.append(new)
 
     @classmethod
     def deserialize(cls, value: str) -> "PackageRelations":
-        pkg_relations = PkgRelation.parse_relations(value)
-        relations = [Relation.deserialize(r) for r in pkg_relations]
+        relations: List[RELATION_ITEM] = []
+
+        # We need to do some parsing of our own here to check each relation for
+        # substitution variables. If any exist, we avoid trying to parse them as a
+        # PkgRelation.ParsedRelation.
+        relation: RELATION_ITEM
+        relation_strs = cls._SEPARATOR.split(value.strip())
+        for relation_str in relation_strs:
+            if cls._SUBSTITUTION.search(relation_str):
+                relation = SubstitutionRelation(relation_str)
+            else:
+                pkg_relation = PkgRelation.parse_relations(relation_str)[0]
+                relation = Relation.deserialize(pkg_relation)
+            relations.append(relation)
+
         return PackageRelations(relations)
 
     def serialize(self) -> str:
-        relation = PkgRelation.str([v.serialize() for v in self._relations])
+        relation = PkgRelation.str([v.serialize() for v in self._data])
         return cast(str, relation)
 
     @classmethod
     def from_strings(cls, strings: List[str]) -> "PackageRelations":
-        return PackageRelations([Relation.from_string(s) for s in strings])
+        return PackageRelations.deserialize(",".join(strings))
+
+    _SEPARATOR = re.compile(r"\s*,\s*")
+    _SUBSTITUTION = re.compile(r"\${.*?}")

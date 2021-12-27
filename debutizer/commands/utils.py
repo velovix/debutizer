@@ -93,8 +93,11 @@ def _order_package_pys(package_pys: List[PackagePy]) -> List[PackagePy]:
                 f"paragraph in the control file"
             )
 
+        relations = (
+            package_py.source_package.control.source.all_build_depends().parsed()
+        )
         depends_names = []
-        for relation in package_py.source_package.control.source.all_build_depends():
+        for relation in relations:
             for dependency in relation:
                 depends_names.append(dependency.name)
 
