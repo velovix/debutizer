@@ -3,6 +3,7 @@ from typing import Optional
 
 from .changelog import Changelog
 from .compat import Compat
+from .conffiles import ConfFiles
 from .control import Control
 from .copyright import Copyright
 from .environment import Environment
@@ -34,6 +35,7 @@ class SourcePackage:
         self.copyright = Copyright(directory)
         self.compat = Compat(directory)
         self.source_format: Optional[str] = None
+        self.conffiles = ConfFiles(directory)
         self.load()
 
     @property
@@ -56,6 +58,7 @@ class SourcePackage:
         self.control.save()
         self.copyright.save()
         self.compat.save()
+        self.conffiles.save()
 
         if self.source_format is not None:
             source_format_file = self.directory / self._SOURCE_FORMAT_PATH
@@ -68,6 +71,7 @@ class SourcePackage:
         self.control.load()
         self.copyright.load()
         self.compat.load()
+        self.conffiles.load()
 
         source_format_file = self.directory / self._SOURCE_FORMAT_PATH
         if source_format_file.is_file():

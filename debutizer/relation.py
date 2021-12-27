@@ -2,6 +2,7 @@ from typing import List, Optional, cast
 
 from debian.deb822 import PkgRelation
 
+from debutizer._list_backed_container import ListBackedContainer
 from debutizer.errors import CommandError
 
 
@@ -61,43 +62,20 @@ class Dependency:
         }
 
 
-class Relation:
+class Relation(ListBackedContainer[Dependency]):
     def __init__(self, dependencies: List[Dependency]):
-        self._dependencies = dependencies
+        super().__init__()
+        self._data = dependencies
         self._iter_index = 0
-
-    def __len__(self) -> int:
-        return len(self._dependencies)
-
-    def __setitem__(self, key: int, value: Dependency) -> None:
-        self._dependencies[key] = value
-
-    def __getitem__(self, key: int) -> Dependency:
-        return self._dependencies[key]
-
-    def __contains__(self, item: Dependency) -> bool:
-        return item in self._dependencies
-
-    def __iter__(self) -> "Relation":
-        self._iter_index = 0
-        return self
-
-    def __next__(self) -> Dependency:
-        if self._iter_index >= len(self._dependencies):
-            raise StopIteration
-
-        output = self._dependencies[self._iter_index]
-        self._iter_index += 1
-        return output
 
     def __repr__(self) -> str:
-        dependency_list = ", ".join(str(d) for d in self._dependencies)
+        dependency_list = ", ".join(str(d) for d in self._data)
 
         return f"Relation({dependency_list})"
 
     def intersects(self, other: "Relation") -> bool:
-        dependency_names = set(d.name for d in self._dependencies)
-        other_dependency_names = set(d.name for d in other._dependencies)
+        dependency_names = set(d.name for d in self._data)
+        other_dependency_names = set(d.name for d in other._data)
 
         intersection = dependency_names & other_dependency_names
         return len(intersection) > 0
@@ -119,7 +97,7 @@ class Relation:
     def serialize(self) -> List["PkgRelation.ParsedRelation"]:
         dependencies = []
 
-        for dependency in self._dependencies:
+        for dependency in self._data:
             dependencies.append(dependency.serialize())
 
         return dependencies
