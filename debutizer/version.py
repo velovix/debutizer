@@ -60,7 +60,8 @@ class Version:
             return NotImplemented
 
         return (
-            self.epoch == other.epoch
+            isinstance(other, Version)
+            and self.epoch == other.epoch
             and self.upstream_version == other.upstream_version
             and self.debian_revision == other.debian_revision
             and self.full_version == other.full_version

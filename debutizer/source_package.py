@@ -110,7 +110,7 @@ class SourcePackage:
             self.control.source is not None
             and self.control.source.build_depends is not None
         ):
-            for relation in self.control.source.build_depends:
+            for relation in self.control.source.build_depends.parsed():
                 for dependency in relation:
                     if (
                         dependency.name == "debhelper-compat"
