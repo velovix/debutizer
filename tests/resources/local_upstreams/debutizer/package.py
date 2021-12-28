@@ -2,6 +2,7 @@ from datetime import datetime
 from pathlib import Path
 
 from debutizer.binary_paragraph import BinaryParagraph
+from debutizer.changelog import ChangeBlock
 from debutizer.copyright import (
     Copyright,
     CopyrightFiles,
@@ -101,11 +102,13 @@ def create_source_package(env: Environment) -> SourcePackage:
     source_package.set_debhelper_compat_version()
 
     source_package.changelog.add(
-        version="0.12.1-1",
-        urgency="medium",
-        changes=["* Some changelog entry"],
-        author="Tyler Compton <xaviosx@gmail.com>",
-        date=datetime(2021, 11, 8, 23, 59),
+        ChangeBlock(
+            version="0.12.1-1",
+            urgency="medium",
+            changes=["* Some changelog entry"],
+            author="Tyler Compton <xaviosx@gmail.com>",
+            date=datetime(2021, 11, 8, 23, 59),
+        )
     )
 
     return source_package

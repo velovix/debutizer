@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from debutizer.changelog import ChangeBlock
 from debutizer.environment import Environment
 from debutizer.source_package import SourcePackage
 from debutizer.upstreams import SourcePackageUpstream
@@ -18,16 +19,18 @@ def create_source_package(env: Environment) -> SourcePackage:
     source_package = SourcePackage(env, package_dir)
 
     source_package.changelog.add(
-        version="2.2.0-1myorg1",
-        urgency="medium",
-        changes=[
-            "* Repackaged this in my repository!",
-            "  * Example of an indented bullet point",
-            "* This method will add indentation if you leave it out",
-            "* You don't need to worry about adding spacing on the top and bottom",
-        ],
-        author="Tyler Compton <xaviosx@gmail.com>",
-        date=datetime(2021, 10, 7, 14, 24),
+        ChangeBlock(
+            version="2.2.0-1myorg1",
+            urgency="medium",
+            changes=[
+                "* Repackaged this in my repository!",
+                "  * Example of an indented bullet point",
+                "* This method will add indentation if you leave it out",
+                "* You don't need to worry about adding spacing on the top and bottom",
+            ],
+            author="Tyler Compton <xaviosx@gmail.com>",
+            date=datetime(2021, 10, 7, 14, 24),
+        )
     )
 
     return source_package
