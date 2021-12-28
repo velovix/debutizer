@@ -10,9 +10,6 @@ class Upstream(ABC):
     source.
     """
 
-    name: str
-    version: Version
-
     def __init__(self, *, env: Environment, name: str, version: Version):
         self.env = env
         self.name = name

@@ -2,17 +2,17 @@ from datetime import datetime
 
 from debutizer.environment import Environment
 from debutizer.source_package import SourcePackage
-from debutizer.upstreams import SourceRepositoryUpstream
+from debutizer.upstreams import GitUpstream
 from debutizer.version import Version
 
 
 def create_source_package(env: Environment) -> SourcePackage:
-    upstream = SourceRepositoryUpstream(
+    upstream = GitUpstream(
         env=env,
         name="libva",
         version=Version.from_string("2.7.0"),
         repository_url="https://github.com/intel/libva",
-        revision_format="{upstream_version}",
+        revision="{upstream_version}",
     )
     package_dir = upstream.fetch()
 
