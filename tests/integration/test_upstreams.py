@@ -14,7 +14,7 @@ from debutizer.commands.config_file import Configuration
     [
         Path("tests/resources/local_upstreams"),
         Path("tests/resources/source_package_upstreams"),
-        Path("tests/resources/source_repository_upstreams"),
+        Path("tests/resources/git_upstreams"),
     ],
 )
 def test_building_packages_from_upstreams(package_dir: Path):

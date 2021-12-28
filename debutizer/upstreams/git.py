@@ -9,11 +9,8 @@ from ..version import Version
 from .base import Upstream
 
 
-class SourceRepositoryUpstream(Upstream):
+class GitUpstream(Upstream):
     """An upstream that clones source code from Git"""
-
-    repository_url: str
-    revision_format: str
 
     def __init__(
         self,
@@ -22,7 +19,7 @@ class SourceRepositoryUpstream(Upstream):
         name: str,
         version: Version,
         repository_url: str,
-        revision_format: str,
+        revision: str,
         recurse_submodules: bool = True,
     ):
         """
@@ -31,43 +28,49 @@ class SourceRepositoryUpstream(Upstream):
         :param version: The version this clone corresponds to. Only the upstream version
             portion needs to be specified
         :param repository_url: The URL to the Git repository to clone
-        :param revision_format: The Git tag to clone. You can add {upstream_version} to
-            this string, and it will be replaced by the upstream version given by the
-            "version" argument. This is commonly "v{upstream_version}". It may also be
-            a commit hash or branch name.
+        :param revision: The revision in the repository's history to use. This can be a
+            tag name, commit hash, or branch name (not recommended).
+
+            For tag names, you can add {upstream_version} to the value, and it will
+            be replaced by the upstream version given by the "version" argument. This is
+            commonly "v{upstream_version}".
+
+            For commit hashes, either the short-form or long-form hash may be used.
+
+            Branch names are not recommended since branches do not pin a specific
+            revision of the source.
         :param recurse_submodules: If True, the repository's submodules will be cloned
             as well
         """
         super().__init__(env=env, name=name, version=version)
+
         self.repository_url = repository_url
-        self.revision_format = revision_format
+        self.revision = revision
         self.recurse_submodules = recurse_submodules
 
     def fetch(self) -> Path:
-        revision = self.revision_format.format(
-            upstream_version=self.version.upstream_version
-        )
-
         build_dir = self.env.build_root / self.name
         build_dir.mkdir()
         package_dir = self._package_dir()
 
-        clone_command: List[Union[str, Path]] = [
-            "git",
-            "clone",
-            "--depth=1",
-            f"--branch={revision}",
-        ]
-
+        clone_command: List[Union[str, Path]] = ["git", "clone"]
         if self.recurse_submodules:
             clone_command.append("--recurse-submodules")
-
         clone_command += [self.repository_url, package_dir]
 
         # Clone the upstream source
         run(
             clone_command,
             on_failure="Failed to clone the upstream source",
+        )
+        # Switch to the specified revision
+        revision_formatted = self.revision.format(
+            upstream_version=self.version.upstream_version
+        )
+        run(
+            ["git", "checkout", revision_formatted],
+            cwd=package_dir,
+            on_failure=f"Failed to switch to revision {revision_formatted}",
         )
 
         # Remove the Git metadata so it doesn't get packaged
