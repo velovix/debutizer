@@ -90,56 +90,53 @@ class CopyrightLicense(Deb822Schema):
 
 
 class Copyright:
-    deb_obj: Optional[deb_copyright.Copyright]
-
     def __init__(self, package_dir: Path):
-        self.deb_obj = None
+        self.header: Optional[CopyrightHeader] = None
+        self.files: List[CopyrightFiles] = []
+        self.licenses: List[CopyrightLicense] = []
+
         self._package_dir = package_dir
 
     def save(self) -> None:
-        if self.deb_obj is not None:
-            copyright_file = self._package_dir / "debian" / "copyright"
-            contents = self.deb_obj.dump()
+        if self.header is not None or len(self.files) > 0 or len(self.licenses) > 0:
+            copyright_file = self._package_dir / self.FILE_PATH
+
+            deb_obj = deb_copyright.Copyright()
+            if self.header is not None:
+                deb_obj.header = deb_copyright.Header(data=self.header.serialize())
+
+            for file_ in self.files:
+                deb_obj.add_files_paragraph(
+                    deb_copyright.FilesParagraph(data=file_.serialize())
+                )
+            for license_ in self.licenses:
+                deb_obj.add_license_paragraph(
+                    deb_copyright.LicenseParagraph(data=license_.serialize())
+                )
+
+            contents = deb_obj.dump()
             if contents is None:
                 contents = ""
 
             copyright_file.write_text(contents)
 
     def load(self) -> None:
-        copyright_file = self._package_dir / "debian" / "copyright"
+        copyright_file = self._package_dir / self.FILE_PATH
         if copyright_file.is_file():
             with copyright_file.open("r") as f:
                 self._from_file(f)
-        else:
-            self.deb_obj = None
 
     def _from_file(self, file_: TextIO) -> None:
         try:
-            self.deb_obj = deb_copyright.Copyright(file_)
+            deb_obj = deb_copyright.Copyright(file_)
         except deb_copyright.NotMachineReadableError as ex:
             raise CommandError(f"While parsing the copyright file: {ex}") from ex
 
-    def set_header(self, header: CopyrightHeader) -> None:
-        if self.deb_obj is None:
-            self.deb_obj = deb_copyright.Copyright()
-
-        self.deb_obj.header = deb_copyright.Header(data=header.serialize())
-
-    def add_files(self, files: CopyrightFiles) -> None:
-        if self.deb_obj is None:
-            self.deb_obj = deb_copyright.Copyright()
-
-        self.deb_obj.add_files_paragraph(
-            deb_copyright.FilesParagraph(data=files.serialize())
-        )
-
-    def add_license(self, license_: CopyrightLicense) -> None:
-        if self.deb_obj is None:
-            self.deb_obj = deb_copyright.Copyright()
-
-        self.deb_obj.add_license_paragraph(
-            deb_copyright.LicenseParagraph(data=license_.serialize())
-        )
+        self.header = CopyrightHeader.deserialize(deb_obj.header)
+        for file_para in deb_obj.all_files_paragraphs():
+            self.files.append(CopyrightFiles.deserialize(file_para))
+        for license_para in deb_obj.all_license_paragraphs():
+            self.licenses.append(CopyrightLicense.deserialize(license_para))
 
     @staticmethod
     def full_license_text(spdx_identifier: str) -> str:
@@ -170,3 +167,5 @@ class Copyright:
             full_text_formatted = full_text_formatted[:-1]
 
         return f"{spdx_identifier}\n{full_text_formatted}"
+
+    FILE_PATH = Path("debian/copyright")

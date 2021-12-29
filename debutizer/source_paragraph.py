@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from debian.deb822 import Sources
 
-from .deb822_schema import Deb822Schema, T
+from .deb822_schema import SOURCE, Deb822Schema, T
 from .deb822_utils import Field
 from .relation import PackageRelations
 
@@ -72,14 +72,15 @@ class SourceParagraph(Deb822Schema):
         return deb822
 
     @classmethod
-    def deserialize(cls, deb822: T) -> "SourceParagraph":
-        inputs = cls._deserialize_fields(deb822)
+    def deserialize(cls, source: SOURCE) -> "SourceParagraph":
+        inputs = cls._deserialize_fields(source)
 
         vcs_type = None
         vcs_type_value = None
-        for key in deb822:
+        # See: https://github.com/python/mypy/issues/2220
+        for key in source:  # type: ignore[attr-defined]
             if key.lower().startswith("vcs-") and key.lower() != "vcs-browser":
-                vcs_type_value = deb822[key]
+                vcs_type_value = source[key]
                 vcs_type = key.split("-")[1]
 
         return SourceParagraph(

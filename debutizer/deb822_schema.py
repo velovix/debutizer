@@ -1,11 +1,13 @@
-from typing import Any, Dict, Type, TypeVar, cast
+from typing import Any, Dict, Mapping, Type, TypeVar, Union, cast, no_type_check
 
-from debian.deb822 import Deb822
+from debian.deb822 import Deb822, RestrictedWrapper
 
 from debutizer.deb822_utils import Field
 
 T = TypeVar("T", bound=Deb822)
 CLS = TypeVar("CLS", bound="Deb822Schema")
+
+SOURCE = Union[Deb822, RestrictedWrapper]
 
 
 class Deb822Schema:
@@ -25,18 +27,19 @@ class Deb822Schema:
         return cast(T, deb822)
 
     @classmethod
-    def _deserialize_fields(cls, deb822: T) -> Dict[str, Any]:
+    @no_type_check  # mypy has issues with iterators
+    def _deserialize_fields(cls, source: SOURCE) -> Dict[str, Any]:
         inputs = {}
 
         for attr_name, field in cls.FIELDS.items():
-            if field.name in deb822:
-                inputs[attr_name] = field.deserialize(deb822[field.name])
+            if field.name in source:
+                inputs[attr_name] = field.deserialize(source[field.name])
             else:
                 inputs[attr_name] = None
 
         return inputs
 
     @classmethod
-    def deserialize(cls: Type[CLS], deb822: T) -> CLS:
-        inputs = cls._deserialize_fields(deb822)
+    def deserialize(cls: Type[CLS], source: SOURCE) -> CLS:
+        inputs = cls._deserialize_fields(source)
         return cls(**inputs)
