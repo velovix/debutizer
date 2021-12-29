@@ -78,23 +78,21 @@ def create_source_package(env: Environment) -> SourcePackage:
         )
     )
 
-    source_package.copyright.set_header(
-        CopyrightHeader(
-            upstream_name="debutizer",
-            upstream_contact=["Tyler Compton <xaviosx@gmail.com>"],
-            source="https://github.com/velovix/debutizer",
-            license_="BSD-3-Clause",
-            copyright_="Copyright 2021 Tyler Compton",
-        )
+    source_package.copyright.header = CopyrightHeader(
+        upstream_name="debutizer",
+        upstream_contact=["Tyler Compton <xaviosx@gmail.com>"],
+        source="https://github.com/velovix/debutizer",
+        license_="BSD-3-Clause",
+        copyright_="Copyright 2021 Tyler Compton",
     )
-    source_package.copyright.add_files(
+    source_package.copyright.files.append(
         CopyrightFiles(
             files=["*", "debian/*"],
             copyright_="Copyright 2021 Tyler Compton",
             license_="BSD-3-Clause",
         )
     )
-    source_package.copyright.add_license(
+    source_package.copyright.licenses.append(
         CopyrightLicense(
             license_=Copyright.full_license_text("BSD-3-Clause"),
         )
