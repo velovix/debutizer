@@ -52,3 +52,58 @@ pip3 install --constraint constraints.txt .
 This will take care of installing Python dependencies through Pip, but system
 dependencies will have to be installed manually. Use `debutizer check` to see
 which, if any, system dependencies are missing.
+
+## Development
+
+If you find a bug or need a new feature from Debutizer, please feel free to
+create an issue! If you're feeling especially generous and would like to send
+a pull request, take a look at this section for how to get started.
+
+### Dev Dependencies
+
+Development dependencies can be installed using Pip with the `dev` extra
+included. This should be done in a virtualenv.
+
+```bash
+pip3 install --constraint constraints.txt ".[dev]"
+```
+
+This project uses a `constraints.txt` file to pin dependencies. Since Debutizer
+is often run as an APT package that uses distribution-supplied versions of our
+Python dependencies, this pinning is mostly done for the benefit of keeping
+development environments consistent.
+
+If you need to update the pinned version for a given dependency, you can run
+the following commands within your virtualenv.
+
+```bash
+pip3 update <dependency>
+pip3 freeze --exclude debutizer --exclude python-debian > constraints.txt
+```
+
+### Linting
+
+Debutizer makes use of a few linting tools to keep code style consistent and to
+reduce bugs. The CI will run these for you and fail if there are issues, but
+you may find it convenient to set up the pre-commit hooks as well.
+
+```bash
+pre-commit install
+```
+
+### Testing
+
+Debutizer uses PyTest for automated testing. Unit tests can be run with the
+following command:
+
+```bash
+pytest tests/unit
+```
+
+Unfortunately, because integration tests build packages with `pbuilder`,
+running integration tests requires `sudo`. Using `sudo` with a virtualenv is
+a bit tricky, but this unintuitive command will do it:
+
+```bash
+sudo $(which python) -m pytest tests
+```
