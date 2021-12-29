@@ -25,7 +25,7 @@ def run(
     if root and os.geteuid() != 0:
         if os.environ.get("DEBUTIZER_ACQUIRE_ROOT"):
             # Use a command (probably sudo) to get root permissions
-            root_command_str = os.environ.get("DEBUTIZER_ROOT_COMMAND", "sudo -E")
+            root_command_str = os.environ.get("DEBUTIZER_ROOT_COMMAND", "sudo")
             root_command = shlex.split(root_command_str)
             command_no_path = root_command + command_no_path
         else:
