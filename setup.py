@@ -46,6 +46,8 @@ setup(
             "types-requests",
             "build",
             "types-setuptools",
+            "sphinx",
+            "furo",
         ],
     },
     entry_points={

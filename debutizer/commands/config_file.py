@@ -39,7 +39,7 @@ class UploadTargetConfiguration(_ConfigurationSection):
         ...
 
 
-class S3Configuration(UploadTargetConfiguration):
+class S3UploadTargetConfiguration(UploadTargetConfiguration):
     TYPE = "s3"
 
     def __init__(
@@ -55,7 +55,7 @@ class S3Configuration(UploadTargetConfiguration):
         gpg_signing_key: Optional[str] = None,
         gpg_signing_password: Optional[str] = None,
     ):
-        super().__init__(S3Configuration.TYPE)
+        super().__init__(S3UploadTargetConfiguration.TYPE)
 
         if prefix is not None:
             # Normalize slashes in prefix
@@ -76,7 +76,7 @@ class S3Configuration(UploadTargetConfiguration):
         self.gpg_signing_password = gpg_signing_password
 
     @staticmethod
-    def from_dict(config: Dict[str, Any]) -> "S3Configuration":
+    def from_dict(config: Dict[str, Any]) -> "S3UploadTargetConfiguration":
         endpoint = _required(config, "endpoint", str)
         bucket = _required(config, "bucket", str)
         prefix = _optional(config, "prefix", str, None)
@@ -104,7 +104,7 @@ class S3Configuration(UploadTargetConfiguration):
         gpg_signing_key = os.environ.get("DEBUTIZER_GPG_SIGNING_KEY")
         gpg_signing_password = os.environ.get("DEBUTIZER_GPG_SIGNING_PASSWORD")
 
-        return S3Configuration(
+        return S3UploadTargetConfiguration(
             endpoint=endpoint,
             bucket=bucket,
             prefix=prefix,
@@ -133,7 +133,7 @@ class S3Configuration(UploadTargetConfiguration):
             )
 
 
-class PPAConfiguration(UploadTargetConfiguration):
+class PPAUploadTargetConfiguration(UploadTargetConfiguration):
     TYPE = "ppa"
 
     def __init__(
@@ -145,7 +145,7 @@ class PPAConfiguration(UploadTargetConfiguration):
         gpg_signing_password: Optional[str] = None,
         force: Optional[bool] = False,
     ):
-        super().__init__(PPAConfiguration.TYPE)
+        super().__init__(PPAUploadTargetConfiguration.TYPE)
 
         self.repo = repo
         self.sign = sign
@@ -155,11 +155,11 @@ class PPAConfiguration(UploadTargetConfiguration):
         self.force = force
 
     @staticmethod
-    def from_dict(config: Dict[str, Any]) -> "PPAConfiguration":
+    def from_dict(config: Dict[str, Any]) -> "PPAUploadTargetConfiguration":
         gpg_signing_key = os.environ.get("DEBUTIZER_GPG_SIGNING_KEY")
         gpg_signing_password = os.environ.get("DEBUTIZER_GPG_SIGNING_PASSWORD")
 
-        return PPAConfiguration(
+        return PPAUploadTargetConfiguration(
             repo=_required(config, "repo", str),
             sign=_optional(config, "sign", bool, True),
             gpg_key_id=_optional(config, "gpg_key_id", str, None),
@@ -175,14 +175,14 @@ class PPAConfiguration(UploadTargetConfiguration):
             )
 
 
-class PackageSource(_ConfigurationSection):
+class PackageSourceConfiguration(_ConfigurationSection):
     def __init__(self, entry: str, gpg_key_url: Optional[str] = None):
         self.entry = entry
         self.gpg_key_url = gpg_key_url
 
     @staticmethod
-    def from_dict(config: Dict[str, Any]) -> "PackageSource":
-        return PackageSource(
+    def from_dict(config: Dict[str, Any]) -> "PackageSourceConfiguration":
+        return PackageSourceConfiguration(
             entry=_required(config, "entry", str),
             gpg_key_url=_optional(config, "gpg_key_url", str, None),
         )
@@ -216,7 +216,7 @@ class Configuration:
         self,
         distributions: List[str],
         architectures: List[str],
-        package_sources: List[PackageSource],
+        package_sources: List[PackageSourceConfiguration],
         upstream: Optional[UpstreamConfiguration] = None,
         upload_target: Optional[UploadTargetConfiguration] = None,
     ):
@@ -245,7 +245,9 @@ class Configuration:
             package_sources = []
             package_source_dicts = _optional(config, "package_sources", list, [])
             for package_source_dict in package_source_dicts:
-                package_sources.append(PackageSource.from_dict(package_source_dict))
+                package_sources.append(
+                    PackageSourceConfiguration.from_dict(package_source_dict)
+                )
 
             upload_target_config = _optional(config, "upload_target", dict, None)
             if upload_target_config is not None and "type" not in upload_target_config:
@@ -258,10 +260,10 @@ class Configuration:
         upload_target: Optional[UploadTargetConfiguration]
         if upload_target_config is None:
             upload_target = None
-        elif upload_target_config["type"] == S3Configuration.TYPE:
-            upload_target = S3Configuration.from_dict(upload_target_config)
-        elif upload_target_config["type"] == PPAConfiguration.TYPE:
-            upload_target = PPAConfiguration.from_dict(upload_target_config)
+        elif upload_target_config["type"] == S3UploadTargetConfiguration.TYPE:
+            upload_target = S3UploadTargetConfiguration.from_dict(upload_target_config)
+        elif upload_target_config["type"] == PPAUploadTargetConfiguration.TYPE:
+            upload_target = PPAUploadTargetConfiguration.from_dict(upload_target_config)
         else:
             raise DebutizerYAMLError(
                 f"Unknown upload target type '{upload_target_config['type']}'"

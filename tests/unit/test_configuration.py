@@ -3,12 +3,12 @@ import pytest
 from debutizer.commands.config_file import (
     CredentialsYAMLError,
     DebutizerYAMLError,
-    S3Configuration,
+    S3UploadTargetConfiguration,
 )
 
 
 def test_s3_configuration_validity():
-    config = S3Configuration(
+    config = S3UploadTargetConfiguration(
         endpoint="my_endpoint",
         bucket="my_bucket",
         access_key="my_access_key",
