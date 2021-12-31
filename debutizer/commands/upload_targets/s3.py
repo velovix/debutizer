@@ -13,7 +13,7 @@ from urllib.parse import urlparse
 import requests
 
 from debutizer.commands.artifacts import find_artifacts
-from debutizer.commands.config_file import S3Configuration
+from debutizer.commands.config_file import S3UploadTargetConfiguration
 from debutizer.commands.repo_metadata import (
     add_packages_files,
     add_release_files,
@@ -29,7 +29,7 @@ from debutizer.subprocess_utils import run
 class S3UploadTarget(UploadTarget):
     """Uploads source and binary packages to an S3-compatible bucket"""
 
-    def __init__(self, config: S3Configuration):
+    def __init__(self, config: S3UploadTargetConfiguration):
         self._config = config
 
     def upload(self, artifacts_dir: Path) -> None:

@@ -9,7 +9,7 @@ from ..artifacts import (
     find_changes_files,
     find_debian_source_files,
 )
-from ..config_file import PPAConfiguration
+from ..config_file import PPAUploadTargetConfiguration
 from ..utils import configure_gpg, import_gpg_key
 from .abstract import UploadTarget
 
@@ -17,7 +17,7 @@ from .abstract import UploadTarget
 class PPAUploadTarget(UploadTarget):
     """Uploads source packages to a PPA"""
 
-    def __init__(self, ppa_config: PPAConfiguration):
+    def __init__(self, ppa_config: PPAUploadTargetConfiguration):
         self._config = ppa_config
 
     def upload(self, artifacts_dir: Path) -> None:

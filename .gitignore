@@ -17,3 +17,6 @@ dist/
 # Usage
 build/
 artifacts/
+
+# Documentation
+docs/_build

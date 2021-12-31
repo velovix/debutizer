@@ -3,7 +3,10 @@ import sys
 from typing import cast
 
 from debutizer.commands import Command
-from debutizer.commands.config_file import PPAConfiguration, S3Configuration
+from debutizer.commands.config_file import (
+    PPAUploadTargetConfiguration,
+    S3UploadTargetConfiguration,
+)
 from debutizer.commands.env_argparse import EnvArgumentParser
 from debutizer.commands.upload_targets import (
     PPAUploadTarget,
@@ -39,11 +42,11 @@ class UploadCommand(Command):
         config.upload_target.check_validity()
 
         upload_target: UploadTarget
-        if config.upload_target.type == PPAConfiguration.TYPE:
-            ppa_config = cast(PPAConfiguration, config.upload_target)
+        if config.upload_target.type == PPAUploadTargetConfiguration.TYPE:
+            ppa_config = cast(PPAUploadTargetConfiguration, config.upload_target)
             upload_target = PPAUploadTarget(ppa_config)
-        elif config.upload_target.type == S3Configuration.TYPE:
-            s3_config = cast(S3Configuration, config.upload_target)
+        elif config.upload_target.type == S3UploadTargetConfiguration.TYPE:
+            s3_config = cast(S3UploadTargetConfiguration, config.upload_target)
             upload_target = S3UploadTarget(s3_config)
         else:
             raise CommandError(

@@ -9,7 +9,11 @@ from ..package_py import PackagePy
 from ..print_utils import print_color, print_done, print_header, print_notify
 from ..registry import Registry
 from .command import Command
-from .config_file import Configuration, PackageSource, UpstreamConfiguration
+from .config_file import (
+    Configuration,
+    PackageSourceConfiguration,
+    UpstreamConfiguration,
+)
 from .env_argparse import EnvArgumentParser
 from .local_repo import LocalRepository
 from .repo_metadata import add_packages_files, add_release_files, add_sources_files
@@ -124,7 +128,7 @@ def _build_packages(
         if i > 0:
             # We can't add the local repo if this is the first package being built
             # because APT does not like empty repositories
-            package_source = PackageSource(
+            package_source = PackageSourceConfiguration(
                 entry=f"deb [trusted=yes] http://localhost:8080 {env.codename} main"
             )
             package_sources.append(package_source)
@@ -170,7 +174,7 @@ def _build_packages(
 
 def _make_upstream_source_entry(
     upstream: UpstreamConfiguration, distribution: str
-) -> PackageSource:
+) -> PackageSourceConfiguration:
     """Creates an APT source list entry based on the provided configuration"""
     parameters = ""
     if upstream.is_trusted:
@@ -178,7 +182,7 @@ def _make_upstream_source_entry(
 
     components_str = " ".join(upstream.components)
 
-    return PackageSource(
+    return PackageSourceConfiguration(
         entry=f"deb {parameters} {upstream.url} {distribution} {components_str}",
         gpg_key_url=upstream.gpg_key_url,
     )

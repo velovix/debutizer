@@ -28,7 +28,7 @@ from .artifacts import (
     find_debian_source_files,
     find_source_archives,
 )
-from .config_file import PackageSource
+from .config_file import PackageSourceConfiguration
 
 
 def find_package_dirs(package_dir: Path) -> List[Path]:
@@ -326,7 +326,7 @@ def make_chroot(distribution: str) -> Path:
 
 
 def set_chroot_package_sources(
-    distribution: str, package_sources: List[PackageSource]
+    distribution: str, package_sources: List[PackageSourceConfiguration]
 ) -> None:
     """Sets additional package sources for the chroot corresponding to the given
     distribution

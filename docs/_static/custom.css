@@ -1,0 +1,4 @@
+/* Turns off uppercase text for h4 */
+h4 {
+    text-transform: none;
+}
