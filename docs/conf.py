@@ -9,7 +9,7 @@ release = "0.12.1"
 
 # -- General configuration ---------------------------------------------------
 
-extensions = ["sphinx_toolbox.confval"]
+extensions = []
 
 templates_path = ["_templates"]
 

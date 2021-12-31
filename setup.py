@@ -47,7 +47,6 @@ setup(
             "build",
             "types-setuptools",
             "sphinx",
-            "sphinx-toolbox",
             "furo",
         ],
     },
