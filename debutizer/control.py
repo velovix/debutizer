@@ -9,12 +9,9 @@ from .source_paragraph import SourceParagraph
 
 
 class Control:
-    source: Optional[SourceParagraph]
-    binaries: List[BinaryParagraph]
-
     def __init__(self, package_dir: Path, package_name: str):
-        self.source = None
-        self.binaries = []
+        self.source: Optional[SourceParagraph] = None
+        self.binaries: List[BinaryParagraph] = []
         self._package_name = package_name
         self._package_dir = package_dir
 
@@ -27,9 +24,6 @@ class Control:
             )
 
         return self.source.source
-
-    def set_source(self, source: SourceParagraph) -> None:
-        self.source = source
 
     def add_binary(
         self, binary: BinaryParagraph, replace_if_exists: bool = False

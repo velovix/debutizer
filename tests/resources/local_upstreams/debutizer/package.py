@@ -27,30 +27,28 @@ def create_source_package(env: Environment) -> SourcePackage:
 
     source_package.source_format = "3.0 (quilt)"
 
-    source_package.control.set_source(
-        SourceParagraph(
-            source=source_package.name,
-            maintainer="Tyler Compton <xaviosx@gmail.com>",
-            section="utils",
-            priority="optional",
-            build_depends=PackageRelations.from_strings(
-                [
-                    "debhelper",
-                    "dh-python",
-                    "python3-all",
-                    "python3-pytest",
-                    "python3-setuptools",
-                    "python3-debian",
-                    "python3-xdg",
-                    "python3-requests",
-                    "python3-flask",
-                    "python3-yaml",
-                    "s3fs",
-                ]
-            ),
-            uploaders=["Tyler Compton <xaviosx@gmail.com>"],
-            homepage="https://github.com/velovix/debutizer",
-        )
+    source_package.control.source = SourceParagraph(
+        source=source_package.name,
+        maintainer="Tyler Compton <xaviosx@gmail.com>",
+        section="utils",
+        priority="optional",
+        build_depends=PackageRelations.from_strings(
+            [
+                "debhelper",
+                "dh-python",
+                "python3-all",
+                "python3-pytest",
+                "python3-setuptools",
+                "python3-debian",
+                "python3-xdg",
+                "python3-requests",
+                "python3-flask",
+                "python3-yaml",
+                "s3fs",
+            ]
+        ),
+        uploaders=["Tyler Compton <xaviosx@gmail.com>"],
+        homepage="https://github.com/velovix/debutizer",
     )
     source_package.control.add_binary(
         BinaryParagraph(
