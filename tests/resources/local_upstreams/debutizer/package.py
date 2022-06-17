@@ -19,7 +19,7 @@ from debutizer.version import Version
 
 def create_source_package(env: Environment) -> SourcePackage:
     upstream = LocalUpstream(
-        env=env, name="debutizer", version=Version.from_string("0.12.1"), path=Path(".")
+        env=env, name="debutizer", version=Version.from_string("0.13.0"), path=Path(".")
     )
     package_dir = upstream.fetch()
 
@@ -99,7 +99,7 @@ def create_source_package(env: Environment) -> SourcePackage:
 
     source_package.changelog.add(
         ChangeBlock(
-            version="0.12.1-1",
+            version="0.13.0-1",
             urgency="medium",
             changes=["* Some changelog entry"],
             author="Tyler Compton <xaviosx@gmail.com>",
