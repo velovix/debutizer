@@ -28,7 +28,7 @@ distributions
 * **Required:** Yes
 
 A list of distributions to target during build-time. Distributions are
-referenced by their codename, like "focal" or "sid". Any distribution
+referenced by their codename, like "jammy" or "sid". Any distribution
 that's supported by debootstrap can be used here, which is denoted by a
 file under ``/usr/share/debootstrap/scripts``. All remotely recent
 Ubuntu and Debian versions are supported.
@@ -148,9 +148,9 @@ A path prefix to apply to all uploaded resources.
 
 If, for example, this value is set to "ubuntu", object names in
 the bucket will be transformed from
-``/dists/focal/main/binary-amd64/libcool_1.0.0-1_amd64.deb``
+``/dists/jammy/main/binary-amd64/libcool_1.0.0-1_amd64.deb``
 to
-``/ubuntu/dists/focal/main/binary-amd64/libcool_1.0.0-1_amd64.deb``.
+``/ubuntu/dists/jammy/main/binary-amd64/libcool_1.0.0-1_amd64.deb``.
 
 sign
 ----
@@ -266,7 +266,7 @@ versions of CMake, the entry value would look like this:
 
 ..  code-block::
 
-    deb https://apt.kitware.com/ubuntu/ focal main
+    deb https://apt.kitware.com/ubuntu/ jammy main
 
 gpg_key_url
 -----------
@@ -289,7 +289,7 @@ Example
     distributions:
       - bionic
       - focal
-      - hirsute
+      - jammy
 
     upstream:
       url: http://apt.coolcompany.dev
@@ -299,7 +299,7 @@ Example
     package_sources:
       - entry: deb https://apt.repos.intel.com/openvino/2021 all main
         gpg_key_url: https://apt.repos.intel.com/openvino/2021/GPG-PUB-KEY-INTEL-OPENVINO-2021
-      - entry: deb https://apt.kitware.com/ubuntu/ focal main
+      - entry: deb https://apt.kitware.com/ubuntu/ jammy main
         gpg_key_url: https://apt.kitware.com/keys/kitware-archive-latest.asc
 
     upload_target:

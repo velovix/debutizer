@@ -11,7 +11,7 @@ from debutizer.source_package import SourcePackage
 def test_registering_duplicate_packages():
     registry = Registry()
     env = Environment(
-        codename="focal",
+        codename="jammy",
         architecture="amd64",
         package_root=Path("whatever"),
         build_root=Path("something"),

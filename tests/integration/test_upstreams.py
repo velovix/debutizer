@@ -32,7 +32,7 @@ def _build_packages(package_dir: Path):
             shell_on_failure=False,
         )
         config = Configuration(
-            distributions=["focal"],
+            distributions=["jammy"],
             architectures=["amd64"],
             package_sources=[],
         )

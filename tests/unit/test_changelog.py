@@ -38,7 +38,7 @@ def test_changelog_defaults():
     fields will be filled in by defaults given to the Changelog object
     """
     changelog = Changelog(
-        package_dir=Path(""), distribution="focal", package="libtoocool"
+        package_dir=Path(""), distribution="jammy", package="libtoocool"
     )
 
     # Add an entry with the distribution and package name defined, where defaults should
@@ -72,7 +72,7 @@ def test_changelog_defaults():
             date=datetime(2002, 12, 25, 8, 30),
         )
     )
-    assert changelog.blocks[0].distribution == "focal"
+    assert changelog.blocks[0].distribution == "jammy"
     assert changelog.blocks[0].package == "libtoocool"
 
 
