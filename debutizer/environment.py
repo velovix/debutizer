@@ -24,7 +24,7 @@ class Environment:
 
     @property
     def codename(self) -> str:
-        """The distribution codename, like 'focal'"""
+        """The distribution codename, like 'jammy'"""
         return self._codename
 
     @property
