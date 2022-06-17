@@ -289,7 +289,7 @@ Example
     distributions:
       - bionic
       - focal
-      - hirsute
+      - jammy
 
     upstream:
       url: http://apt.coolcompany.dev

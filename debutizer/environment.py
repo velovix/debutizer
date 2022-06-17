@@ -69,7 +69,7 @@ class Environment:
             return "11"
         elif self._codename in ["focal", "buster"]:
             return "12"
-        elif self._codename in ["groovy", "hirsute", "impish", "bullseye"]:
+        elif self._codename in ["groovy", "hirsute", "impish", "bullseye", "jammy"]:
             return "13"
         else:
             raise UnexpectedError(f"Unknown distribution: {self._codename}")
