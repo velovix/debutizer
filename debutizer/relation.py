@@ -3,7 +3,7 @@ from typing import Any, List, Optional, Union, cast
 
 from debian.deb822 import PkgRelation
 
-from debutizer._list_backed_container import ListBackedContainer
+from debutizer._containers import ListBackedContainer
 from debutizer.errors import CommandError
 
 

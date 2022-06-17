@@ -6,6 +6,7 @@ from .compat import Compat
 from .conffiles import ConfFiles
 from .control import Control
 from .copyright import Copyright
+from .dirs import Dirs
 from .environment import Environment
 from .errors import CommandError
 from .relation import Relation
@@ -36,6 +37,7 @@ class SourcePackage:
         self.compat = Compat(directory)
         self.source_format: Optional[str] = None
         self.conffiles = ConfFiles(directory)
+        self.dirs = Dirs(directory)
         self.load()
 
     @property
