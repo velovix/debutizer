@@ -50,8 +50,8 @@ class PackagePy:
             self.source_package = package_module.create_source_package(env)  # type: ignore
         except AttributeError:
             raise CommandError(
-                "The package.py file must define a global variable named "
-                "'source_package'"
+                "The package.py file must define a function named "
+                "'create_source_package'"
             )
         if not isinstance(self.source_package, SourcePackage):
             raise CommandError(

@@ -65,11 +65,16 @@ class Environment:
         :return: the debhelper compatibility version used by the current distribution
         """
 
-        if self._codename in ["bionic"]:
-            return "11"
-        elif self._codename in ["focal", "buster"]:
+        if self._codename in ["focal", "buster"]:
             return "12"
-        elif self._codename in ["groovy", "hirsute", "impish", "bullseye", "jammy"]:
+        elif self._codename in [
+            "groovy",
+            "hirsute",
+            "impish",
+            "bullseye",
+            "jammy",
+            "noble",
+        ]:
             return "13"
         else:
             raise UnexpectedError(f"Unknown distribution: {self._codename}")
