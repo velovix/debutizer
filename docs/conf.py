@@ -4,7 +4,7 @@ project = "Debutizer"
 copyright = "2021, Tyler Compton"
 author = "Tyler Compton"
 
-release = "0.13.0"
+release = "0.14.0"
 
 
 # -- General configuration ---------------------------------------------------
