@@ -287,7 +287,6 @@ Example
 ..  code-block:: yaml
 
     distributions:
-      - bionic
       - focal
       - jammy
 

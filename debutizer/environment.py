@@ -65,9 +65,7 @@ class Environment:
         :return: the debhelper compatibility version used by the current distribution
         """
 
-        if self._codename in ["bionic"]:
-            return "11"
-        elif self._codename in ["focal", "buster"]:
+        if self._codename in ["focal", "buster"]:
             return "12"
         elif self._codename in [
             "groovy",
